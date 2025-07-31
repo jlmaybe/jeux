@@ -162,7 +162,7 @@
     #bonusPanel {
       font-family: 'Press Start 2P', monospace;
       position: fixed;
-      top: 0px; /* Remplacez la valeur existante */
+      top: 100px; /* Remplacez la valeur existante */
       left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.82);
       display: flex;
@@ -583,6 +583,7 @@
       <li><span class="bonus-emoji">Espace</span> – Bouton panique</li>
       <li><span class="bonus-emoji">P</span> – Pause</li>
       <li><span class="bonus-emoji">S</span> – Son Marche/Arrêt</li>
+      <li><span class="bonus-emoji">z</span> – Variables</li>
       <ul>
       <li><span></span></li>
       <li><span></span></li>
@@ -733,6 +734,8 @@
     let shotHistory = [];
     let lastTargetBrick = null;
     let lastPaddleTarget = 0;
+    let paddleSizeEffect = null;
+    let paddleOriginalSize = paddleBaseW;
 
 let targetVelocity = 0;
 let adaptiveCompensation = 0;
@@ -2826,6 +2829,8 @@ function autopilotMove(dt) {
           b.caught = true;
           updateHUD();
 
+          bonuses = bonuses.filter(b => !b.caught);
+
           if (decrementEffect) {
             // Si le malus est actif, on applique la pénalité.
             playSound("mort");
@@ -3178,21 +3183,42 @@ function autopilotMove(dt) {
 
 
     function applyPowerup(p) {
+
+
       if (p.type === "long") {
-          paddleW = Math.min(320, paddleBaseW + 70);
-          timeoutManager.set('paddleLong', () => {
-              paddleW = Math.max(150, paddleW - 70);
+          // ✅ ANNULATION de l'effet précédent
+          if (paddleSizeEffect !== null) {
+              timeoutManager.clear('paddleSize');
+          }
+
+          paddleSizeEffect = "long";
+          paddleOriginalSize = paddleBaseW; // ✅ Toujours partir de la base
+          paddleW = Math.min(320, paddleOriginalSize + 70);
+
+          timeoutManager.set('paddleSize', () => {
+              paddleW = paddleOriginalSize; // ✅ Retour à la taille de base
+              paddleSizeEffect = null;
               playSound("raquettenormale");
-          }, 12000);
+          }, 30000);
       }
 
+
       if (p.type === "short") {
+          // ✅ ANNULATION de l'effet précédent
+          if (paddleSizeEffect !== null) {
+              timeoutManager.clear('paddleSize');
+          }
+
           playSound("mort");
-          paddleW = Math.max(50, paddleBaseW - 60);
-          timeoutManager.set('paddleShort', () => {
-              paddleW = Math.max(150, paddleW + 60);
+          paddleSizeEffect = "short";
+          paddleOriginalSize = paddleBaseW; // ✅ Toujours partir de la base
+          paddleW = Math.max(50, paddleOriginalSize - 60);
+
+          timeoutManager.set('paddleSize', () => {
+              paddleW = paddleOriginalSize; // ✅ Retour à la taille de base
+              paddleSizeEffect = null;
               playSound("raquettenormale");
-          }, 12000);
+          }, 30000);
       }
 
 
@@ -3210,19 +3236,30 @@ function autopilotMove(dt) {
       }
 
       if (p.type === "huge") {
-        paddleTimer = 10;
-        paddleTimerActive = true;
+          // ✅ ANNULATION de l'effet précédent
+          if (paddleSizeEffect !== null) {
+              timeoutManager.clear('paddleSize');
+          }
+          if (paddleHugeTimeout) {
+              clearTimeout(paddleHugeTimeout);
+              paddleHugeTimeout = null;
+          }
 
-        // Annuler l'ancien timer (déjà présent, bien !)
-        if (paddleHugeTimeout) clearTimeout(paddleHugeTimeout);
+          paddleSizeEffect = "huge";
+          paddleOriginalSize = paddleBaseW; // ✅ Toujours partir de la base
+          paddleTimer = 10;
+          paddleTimerActive = true;
 
-        paddleW = Math.min(CANVAS_W - 40, paddleW * 2.5);
-        paddleHugeTimeout = setTimeout(() => {
-          paddleW = paddleBaseW;
-          playSound("raquettenormale");
-          paddleTimerActive = false;
-          paddleHugeTimeout = null; // Nettoyer
-        }, 10000);
+          // ✅ CALCUL BASÉ SUR LA TAILLE DE BASE, pas la taille actuelle
+          paddleW = Math.min(CANVAS_W - 40, paddleOriginalSize * 2.5);
+
+          paddleHugeTimeout = setTimeout(() => {
+              paddleW = paddleOriginalSize; // ✅ Retour à la taille de base
+              paddleSizeEffect = null;
+              paddleTimerActive = false;
+              paddleHugeTimeout = null;
+              playSound("raquettenormale");
+          }, 15000);
 
         // Génération de particules (inchangé)
         for (let j = 0; j < 36; j++) {
