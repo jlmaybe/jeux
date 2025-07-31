@@ -576,10 +576,10 @@
         <li><span class="bonus-emoji">4️⃣</span> <b>x4 Score  </b> Quadruple les points pendant 30s</li>
         <li><span class="bonus-emoji">8️⃣</span> <b>x8 Score  </b> Multiplie par 8 les points pendant 30s</li>
         <li><span class="bonus-emoji">☠️</span>  <b>Malus     </b> Score en décrémentation pendant 30s</li>
-        <li><span class="bonus-emoji">🍪</span> <b>Cookies   </b> Bouton panique (espace)</li>
+        <li><span class="bonus-emoji">🍪</span> <b>Cookies   </b> Bouton panique (M)</li>
       </ul>
       <h2>ACTIONS</h2>
-      <li><span class="bonus-emoji">Espace</span> – Bouton panique</li>
+      <li><span class="bonus-emoji">M</span> – Bouton panique</li>
       <li><span class="bonus-emoji">P</span> – Pause</li>
       <li><span class="bonus-emoji">S</span> – Son Marche/Arrêt</li>
       <li><span class="bonus-emoji">z</span> – Variables</li>
@@ -759,6 +759,14 @@ let bossDefeated = false;
 let psyAnimId = null;
 let emailSent = false; // Pour éviter les envois multiples
 let gameSessionId = null; // ID unique de la session de jeu
+
+let gyroControls = {
+    active: false,
+    supported: false,
+    permission: false,
+    sensitivity: 1.5,
+    deadZone: 3
+};
 
 let frameCount = 0;
 let lastPerformanceCheck = 0;
@@ -2094,7 +2102,7 @@ function displayLeaderboard() {
 
     document.addEventListener('keydown',e=>{
 
-      if (e.code==="Space" && cookies > 0 && !autopilot) {
+      if (e.code==="M" && cookies > 0 && !autopilot) {
           panic = 60; PanicButon=true
           --cookies; updateHUD();
           playSound("pi");
@@ -4381,7 +4389,7 @@ function autopilotMove(dt) {
       • P : Pause
       • S : Son ON/OFF
       • Z : Debug
-      • Espace : Bouton panique (avec cookies)
+      • M : Bouton magique (avec cookies)
 
       Bon jeu ! 🚀
     `);
