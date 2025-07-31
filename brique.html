@@ -1,0 +1,4127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+
+  <title>p ELYSIUM</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+
+  <style>
+
+  /* ✅ OPTIMISATION POUR NOUVELLE FENÊTRE */
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    overflow-x: hidden; /* Empêche le scroll horizontal */
+    min-height: 100vh;
+  }
+
+  /* ✅ CONTENEUR PRINCIPAL CENTRÉ */
+  body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding-top: 20px;
+  }
+
+
+  /* ✅ TITRE ADAPTÉ POUR NOUVELLE FENÊTRE */
+  #title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 2.5em; /* ✅ RÉDUIT pour s'adapter */
+    letter-spacing: 0.1em;
+    text-shadow: 0 0 20px #0ff, 0 0 40px #ff0, 0 0 80px #f0f;
+    margin-top: 10px; /* ✅ RÉDUIT */
+    font-weight: bold;
+    filter: brightness(1.4);
+    text-align: center;
+    width: 100%;
+    position: relative; /* ✅ CHANGÉ de absolute à relative */
+    top: 0;
+    pointer-events: none;
+    user-select: none;
+    z-index: 20;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+
+  /* ✅ HUD ADAPTÉ */
+  #hud {
+    position: relative; /* ✅ CHANGÉ de absolute à relative */
+    left: 0;
+    top: 20px; /* ✅ RÉDUIT */
+    transform: none; /* ✅ SUPPRIMÉ translateX */
+    width: 100%;
+    max-width: 1220px;
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    color: #fff;
+    pointer-events: none;
+    z-index: 10;
+    user-select: none;
+    background: linear-gradient(260deg, #0ff 0%, #f0f 50%, #ff0 100%);
+    box-shadow: 0 0 20px #0ff, 0 0 40px #f0f;
+    border-radius: 10px;
+    padding: 8px 0 6px 0;
+    margin-bottom: 20px; /* ✅ AJOUT espacement */
+  }
+
+
+    #score, #vies, #niveau, #mult {
+      font-family: 'Press Start 2P', monospace;
+      font-size:1.1em; margin:0 30px; display:inline-block;
+      text-shadow:0 0 9px #0ff, 0 0 9px #f0f;
+      text-align: right;
+      vertical-align:top;
+      color: #fff;
+      letter-spacing: 2px;
+      transition: filter 0.2s, font-size 0.15s, color 0.15s;
+    }
+    #score.flash, #mult.flash {
+      font-family: 'Press Start 2P', monospace;
+      filter: brightness(2.5) drop-shadow(0 0 10px #ff0);
+      font-size:1.3em;
+      color: #ff0;
+    }
+
+
+    #bonus-anim {
+      font-family: 'Press Start 2P', monospace;
+      position:absolute; left:50%; top:50%; font-size:20px;
+      pointer-events:none; opacity:0; transform:translate(-50%,-50%) scale(1.2);
+      text-shadow:0 0 32px #fff, 0 0 64px #f0f, 0 0 128px #0ff;
+      transition:opacity 0.4s, transform 0.4s;
+      z-index:100;
+    }
+    #decrement-timer {
+
+      position: absolute;
+      left: 0; right: 0;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1em;
+      color: #ff4444;
+      text-shadow: 0 0 12px #fff, 0 0 24px #f00;
+      z-index: 50;
+      pointer-events: none;
+      user-select: none;
+      display: none;
+      background: rgba(0,0,0,0.7);
+      padding: 4px 10px;
+      border-radius: 8px;
+      text-align: center;
+      top: 0;
+    }
+
+    /* ✅ CANVAS CENTRÉ NATURELLEMENT */
+  #gameCanvas {
+    display: block;
+    margin: 20px auto; /* ✅ CHANGÉ : margin centré */
+    background: #111;
+    box-shadow: 0 0 40px #0ff, 0 0 80px #f0f;
+    border-radius: 12px;
+    position: relative;
+    top: 0; /* ✅ SUPPRIMÉ le décalage */
+  }
+
+  /* ✅ ADAPTATION RESPONSIVE POUR NOUVELLE FENÊTRE */
+  @media (max-width: 1200px) {
+    #statsPanel {
+      display: none; /* Masquer sur petites fenêtres */
+    }
+
+    #title {
+      font-size: 2em;
+    }
+
+    #gameCanvas {
+      transform: scale(0.9); /* Réduire légèrement le jeu */
+    }
+  }
+
+  /* ✅ PANNEAU DE STATS REPOSITIONNÉ */
+  #statsPanel {
+    position: fixed;
+    right: 20px;
+    top: 50%; /* ✅ CENTRÉ VERTICALEMENT */
+    transform: translateY(-50%);
+    width: 280px; /* ✅ LÉGÈREMENT RÉDUIT */
+    height: 80vh; /* ✅ ADAPTATIF À LA HAUTEUR DE FENÊTRE */
+    background: #111;
+    box-shadow: 0 0 40px #0ff, 0 0 80px #f0f;
+    border-radius: 12px;
+    z-index: 5;
+    overflow-y: auto;
+  }
+
+    #bonusPanel {
+      font-family: 'Press Start 2P', monospace;
+      position: fixed;
+      top: 0px; /* Remplacez la valeur existante */
+      left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.82);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .bonus-panel-content {
+      background: rgba(30,40,60,0.99);
+      transform: translateY(-200px);
+      color: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+      padding: 38px 36px 26px 36px;
+      font-family: 'Press Start 2P', monospace;
+      text-align: left;
+      max-width: 600px;
+      min-width: 600px;
+      font-size: 0.8em;
+    }
+
+    /* Animation de clignotement générique et réutilisable */
+    .blinking-effect {
+      animation: blink-animation 1s step-end infinite;
+    }
+    @keyframes blink-animation {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .bonus-panel-content h2 {
+      text-align: center;
+      color: #FFD700;
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 1.1em;
+      letter-spacing: 2px;
+      text-shadow: 1px 2px 0 #222;
+    }
+
+    .bonus-panel-content h3 {
+      text-align: center;
+      color: #FFE000;
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 0.5em;
+      letter-spacing: 2px;
+      text-shadow: 1px 5px 0 #122;
+    }
+
+
+    .bonus-panel-content h1 {
+      text-align: center;
+      color: #FFD700;
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 2.1em;
+      letter-spacing: 2px;
+      text-shadow: 1px 2px 0 #222;
+    }
+    .bonus-panel-content ul {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 24px;
+    }
+    .bonus-panel-content li {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      font-size: 0.95em;
+    }
+    .bonus-emoji {
+      font-size: 1.3em;
+      margin-right: 14px;
+      filter: drop-shadow(0 0 6px #0ff);
+    }
+    #closeBonusPanel {
+      display: block;
+      margin: 0 auto;
+      margin-top: 10px;
+      padding: 12px 36px;
+      background: linear-gradient(90deg, #FFD700 45%, #FF6F00 100%);
+      color: #222;
+      border: none;
+      border-radius: 9px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1em;
+      letter-spacing: 2px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+      transition: background 0.2s, transform 0.1s;
+    }
+    #closeBonusPanel:hover {
+      background: linear-gradient(90deg, #FFEC80 45%, #FF9F00 100%);
+      transform: scale(1.06);
+    }
+    /* Panneau de fin */
+    #endPanel {
+      display: none;
+      position: fixed;
+      top: -300px; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.94);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-family: 'Press Start 2P', monospace;
+    }
+    #endPanel .score-final {
+      color:#FFD700;
+      font-size:2.6em;
+      text-shadow:0 0 30px #ff0,0 0 60px #f0f;
+      margin-bottom:20px;
+      text-align:center;
+    }
+    #endPanel .stat {
+      color:#fff;
+      font-size:1.1em;
+      margin-bottom:16px;
+      text-align:center;
+    }
+    #endPanel .best-score {
+      color:#FFD700;
+      font-size:1.1em;
+      margin-bottom:18px;
+      text-align:center;
+    }
+    #endPanel button {
+      padding:12px 38px;
+      font-size:1.1em;
+      border-radius:9px;
+      background:linear-gradient(90deg,#FFD700 45%,#FF6F00 100%);
+      border:none;
+      color:#222;
+      font-family:'Press Start 2P',monospace;
+      margin-top:16px;
+      cursor:pointer;
+    }
+    #endPanel button:hover {
+      background: linear-gradient(90deg, #FFEC80 45%, #FF9F00 100%);
+      transform: scale(1.06);
+    }
+
+    #endPanel {
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.94);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-family: 'Press Start 2P', monospace;
+      display: none;
+      overflow: hidden;
+    }
+
+    #psyCanvas {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    #autopilot-status {
+      display: none; /* Caché par défaut */
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.1em; /* Même taille que le score */
+      margin-left: 25px; /* Espace par rapport au score */
+
+      color: #0ff; /* Couleur cyan, pour un look "high-tech" */
+      text-shadow: 0 0 8px #0ff, 0 0 16px #0ff, 0 0 24px #fff;
+
+      /* Animation de clignotement */
+      animation: blink-effect 1s step-end infinite;
+    }
+
+    /* Définition de l'animation de clignotement */
+    @keyframes blink-effect {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    #psyOverlay {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ✅ NOUVEAU : Adaptation pour écrans plus petits */
+    @media (max-width: 1400px) {
+      #statsPanel {
+        right: 10px;
+        width: 280px;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      #statsPanel {
+        display: none; /* Masquer sur très petits écrans */
+      }
+    }
+
+
+    .stats-panel-content {
+      padding: 20px 15px;
+      font-family: 'Press Start 2P', monospace;
+      color: #fff;
+      font-size: 0.7em;
+    }
+
+    .stats-panel-content h3 {
+      text-align: center;
+      color: #FFD700;
+      margin: 0 0 20px 0;
+      font-size: 1.1em;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px #FFD700;
+    }
+
+    .stats-section {
+      margin-bottom: 20px;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+      padding-bottom: 15px;
+    }
+
+    .stats-section:last-child {
+      border-bottom: none;
+    }
+
+    .stats-section h4 {
+      color: #0ff;
+      margin: 0 0 10px 0;
+      font-size: 0.8em;
+      text-shadow: 0 0 8px #0ff;
+      letter-spacing: 1px;
+    }
+
+    .stats-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+      font-size: 0.75em;
+    }
+
+    .stats-item-label {
+      color: #fff;
+      flex: 1;
+    }
+
+    .stats-item-value {
+      color: #ff0;
+      font-weight: bold;
+      text-shadow: 0 0 6px #ff0;
+    }
+
+    .stats-emoji {
+      font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', monospace;
+      margin-right: 8px;
+      filter: drop-shadow(0 0 4px #0ff);
+    }
+
+    /* Indicateur de danger pour les skulls */
+    .danger-indicator {
+      color: #f44 !important;
+      animation: dangerBlink 1s infinite;
+    }
+
+    @keyframes dangerBlink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.3; }
+    }
+
+    /* Indicateur positif pour les multiplicateurs */
+    .positive-indicator {
+      color: #0f0 !important;
+      text-shadow: 0 0 8px #0f0 !important;
+    }
+
+    .flashy-score {
+      color: #ff0; /* Jaune vif par défaut */
+      color: #FFD700;
+      text-shadow: 0 0 10px #0ff, 0 0 20px #f0f, 0 0 40px #ff0, 0 0 80px #f0f;
+      font-weight: bold;
+      animation: flashyColor 0.5s infinite alternate;
+    }
+
+    @keyframes flashyColor {
+      0%   { color: #ff0; text-shadow: 0 0 10px #0ff, 0 0 40px #f0f; }
+      25%  { color: #0ff; text-shadow: 0 0 10px #ff0, 0 0 40px #f0f; }
+      50%  { color: #f0f; text-shadow: 0 0 10px #ff0, 0 0 40px #0ff; }
+      75%  { color: #ff00cc; text-shadow: 0 0 10px #ff0, 0 0 40px #0ff; }
+      100% { color: #ff0; text-shadow: 0 0 10px #0ff, 0 0 40px #f0f; }
+    }
+    /* Style du bandeau d'alerte pour l'autopilote */
+    #autopilot-banner {
+      display: none; /* Caché par défaut */
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      padding: 18px 30px;
+
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1em; /* Grande taille pour être bien visible */
+      color: #FFD700; /* Couleur or, classique */
+
+      background: rgba(20, 10, 40, 0.65); /* Fond plus transparent (0.85 -> 0.65) */
+        border: 4px solid rgba(255, 0, 255, 0.7); /* Bordure plus transparente */
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(255, 0, 255, 0.7), /* Ombres externes plus douces */
+
+      text-align: center;
+      text-shadow: 0 0 10px #ff0, 0 0 20px #f0f;
+      white-space: nowrap; /* Empêche le texte de passer à la ligne */
+      z-index: 1500; /* S'assure qu'il est au-dessus du jeu */
+
+      user-select: none; /* Empêche la sélection du texte */
+      pointer-events: none; /* Permet aux clics de passer à travers */
+    }
+
+    /* Animation de "flash" pour attirer l'attention */
+    #autopilot-banner.flash {
+      animation: banner-flash 0.3s ease-in-out;
+    }
+
+    @keyframes banner-flash {
+      0%   { transform: translate(-50%, -50%) scale(1.05); filter: brightness(1.5); }
+      100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+    }
+
+  </style>
+</head>
+
+
+<body>
+  <div id="title">BRICK BLITZ ELYSIUM</div>
+  <div id="hud">
+    <span id="vies">VIES : 3</span>
+    <span id="cookies">cookies : 0</span>
+    <span id="niveau">NIVEAU:1</span>
+    <span id="mult">x1</span>
+    <span id="score">000000000</span>
+    <span id="autopilot-status">AUTOPILOT</span>
+
+  </div>
+  <div id="bonus-anim"></div>
+  <div id="decrement-timer"></div>
+  <canvas id="gameCanvas" width="875" height="900"></canvas>
+
+
+  <!-- Panneau de statistiques en temps réel -->
+  <div id="statsPanel">
+    <div class="stats-panel-content">
+      <h3>STATISTIQUES</h3>
+
+      <div class="stats-section">
+        <h4>BRIQUES</h4>
+        <div id="bricksStats"></div>
+      </div>
+
+      <div class="stats-section">
+        <h4>BONUS</h4>
+        <div id="bonusesStats"></div>
+      </div>
+
+      <div class="stats-section">
+        <h4>POWER-UPS</h4>
+        <div id="powerupsStats"></div>
+      </div>
+
+      <div class="stats-section">
+        <h4>ÉTAT DU JEU</h4>
+        <div id="gameStateStats"></div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <div id="autopilot-banner"></div>
+  <!-- Panneau d'explication des bonus -->
+  <div id="bonusPanel">
+    <div class="bonus-panel-content">
+      <li><span></span></li>
+      <h2>BONUS</h2>
+      <li><span></span></li>
+      <ul>
+        <li><span class="bonus-emoji">🍒</span> <b>+500 pts  </b> Petit bonus de score</li>
+        <li><span class="bonus-emoji">🍓</span> <b>+1000 pts </b> Bonus de score</li>
+        <li><span class="bonus-emoji">🛸</span> <b>+2000 pts </b> Super bonus</li>
+        <li><span class="bonus-emoji">🍑</span> <b>+5000 pts </b> Méga bonus</li>
+        <li><span class="bonus-emoji">🌸</span> <b>+500 pts  </b> Bonus fleuri</li>
+        <li><span class="bonus-emoji">💝</span> <b>+8000 pts </b> Bonus de score</li>
+        <li><span class="bonus-emoji">🍉</span> <b>+2000 pts </b> Super bonus</li>
+        <li><span class="bonus-emoji">💊</span> <b>+15000 pts </b> Méga bonus</li>
+        <li><span class="bonus-emoji">🐲</span> <b>+1500 pts  </b> Bonus fleuri</li>
+        <li><span class="bonus-emoji">🍇</span> <b>+500 pts  </b> Raisin surprise</li>
+        <li><span class="bonus-emoji">🍌</span> <b>+500 pts  </b> Banane dorée</li>
+        <h2>POWER-UPS</h2>
+        <li><span class="bonus-emoji">🏳️</span> <b>Raquette longue</b></li>
+        <li><span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b></li>
+        <li><span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
+        <li><span class="bonus-emoji">1️⃣</span> <b>x2 Score  </b> Double les points pendant 30s</li>
+        <li><span class="bonus-emoji">2️⃣</span> <b>x3 Score  </b> Triple les points pendant 30s</li>
+        <li><span class="bonus-emoji">4️⃣</span> <b>x4 Score  </b> Quadruple les points pendant 30s</li>
+        <li><span class="bonus-emoji">8️⃣</span> <b>x8 Score  </b> Multiplie par 8 les points pendant 30s</li>
+        <li><span class="bonus-emoji">☠️</span>  <b>Malus     </b> Score en décrémentation pendant 30s</li>
+        <li><span class="bonus-emoji">🍪</span> <b>Cookies   </b> Bouton panique (espace)</li>
+      </ul>
+      <h2>ACTIONS</h2>
+      <li><span class="bonus-emoji">Espace</span> – Bouton panique</li>
+      <li><span class="bonus-emoji">P</span> – Pause</li>
+      <li><span class="bonus-emoji">S</span> – Son Marche/Arrêt</li>
+      <ul>
+      <li><span></span></li>
+      <li><span></span></li>
+      <li><span></span></li>
+      <button id="closeBonusPanel">OK</button>
+      <li><span></span></li>
+      <li><span></span></li>
+      <li><span></span></li>
+      <h3>(c) jean-luc faisans 2025</h3>
+    </div>
+  </div>
+
+
+  <!-- Panneau de fin de partie -->
+  <div id="endPanel">
+    <canvas id="psyCanvas"></canvas>
+    <div id="psyOverlay">
+      <div class="score-final" id="TITRE"></div>
+      <div class="score-final" id="finalScore"></div>
+
+      <!-- ✅ NOUVEAU : Formulaire de saisie du nom -->
+      <div id="playerNameSection" style="display: none;">
+        <div style="color: #fff; font-size: 1.2em; margin: 20px 0; text-align: center;">
+          🏆 NOUVEAU RECORD ! 🏆
+        </div>
+        <div style="color: #FFD700; font-size: 1em; margin-bottom: 15px; text-align: center;">
+          Entrez votre nom :
+        </div>
+        <input type="text" id="playerNameInput" maxlength="12"
+               style="padding: 10px; font-size: 1.1em; font-family: 'Press Start 2P', monospace;
+                      text-align: center; background: #222; color: #fff; border: 2px solid #0ff;
+                      border-radius: 5px; margin-bottom: 15px; width: 200px;"
+               placeholder="JOUEUR">
+        <br>
+        <button id="saveScoreBtn" style="padding: 10px 20px; font-size: 1em;
+                font-family: 'Press Start 2P', monospace; background: linear-gradient(90deg, #FFD700 45%, #FF6F00 100%);
+                color: #222; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">
+          SAUVER
+        </button>
+        <button id="skipSaveBtn" style="padding: 10px 20px; font-size: 1em;
+                font-family: 'Press Start 2P', monospace; background: #666;
+                color: #fff; border: none; border-radius: 5px; cursor: pointer;">
+          PASSER
+        </button>
+      </div>
+
+      <!-- ✅ NOUVEAU : Tableau des meilleurs scores -->
+      <div id="leaderboardSection" style="display: none; margin-top: 20px; max-height: 500px; overflow-y: auto;">
+        <div style="color: #FFD700; font-size: 1.2em; margin-bottom: 15px; text-align: center;">
+          🥇 TOP 10 🥇
+        </div>
+          <br>
+        <div id="leaderboardList"></div>
+        <br>  <br>
+      </div>
+
+
+
+      <div class="stat" id="levelsPassed"></div>
+      <div class="stat" id="bricksHit"></div>
+      <div class="stat" id="timePlayed"></div>
+      <div class="stat" id="powerupDetails"></div>
+      <div class="best-score" id="bestScore"></div>
+      <button onclick="closeEndPanel()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    // === CONSTANTES GLOBALES ===
+
+    const COLORS = ["#0ff", "#f0f", "#ff0", "#0f0", "#fff"];
+    const BRICK_GRADIENTS = [
+      ["#0ff", "#0cf"],
+      ["#f0f", "#c0f"],
+      ["#ff0", "#fc0"],
+      ["#0f0", "#0c8"],
+      ["#fff", "#aaa"]
+    ];
+    const SPECIAL_ICONS = ["🏳️‍⚧️","🏴‍☠️","1️⃣","2️⃣","4️⃣","8️⃣","❤️‍🔥"];
+    const BONUS_ICONS = [
+      {emoji:"🍒", points:500, color:"#f06"},
+      {emoji:"🍓", points:1000, color:"#f44"},
+      {emoji:"🛸", points:2000, color:"#0ff"},
+      {emoji:"🍑", points:5000, color:"#fa8"},
+      {emoji:"🌸", points:500, color:"#f9f"},
+      {emoji:"💝", points:8000, color:"#f44"},
+      {emoji:"🍉", points:2000, color:"#0ff"},
+      {emoji:"💊", points:15000, color:"#fa8"},
+      {emoji:"🐲", points:15000, color:"#f9f"},
+      {emoji:"🍇", points:2000, color:"#94f"},
+      {emoji:"🍪", points:0, color:"#A67B5B", type:"cookie"},
+      {emoji:"🍌", points:500, color:"#ff4"},
+    ];
+
+    const FONT = "Press Start 2P, monospace";
+    const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Press Start 2P', monospace";
+    const CANVAS_W = 875, CANVAS_H = 900;
+
+    // === VARIABLES D'ÉTAT DU JEU ===
+
+    // Ligne corrigée
+    let vies = 4, niveau = 1, score = 0, displayScore = 0, maxVies = 99;
+    let mult = 1, multTimer = 0, multMax = 40, lastMult = 1;
+    let bricks = [], particles = [], powerups = [], bonuses = [], animations = [];
+    brickCols = 14;
+    let wallOffset = 60;
+    let brickW = 61, brickH = 28; brickGap = 2;
+    let paddleW = 150, paddleH = 18, paddleY = CANVAS_H-60;
+    let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 13;
+
+    let ballSpeed0 = 15; // IMPORTANT : avant son utilisation
+    let LancementAutoPilote = 200;
+    let brickRows = 5; //et autour de la ligne 700
+
+    let ball = null, ballSpeed = ballSpeed0, ballR = 13;
+    let ballDX = 0, ballDY = 0;
+    let leftDown = false, rightDown = false;
+    let lastFrame = 0, gameOver = false, pause = false;
+    let bonusAnimTimeout = null;
+    let paddleHugeTimeout = null;
+    let decrementTimer = 0;
+    let decrementActive = false;
+    let decrementEffect = false;
+    let levelsPassed = 0;
+    let paddleAcceleration = 0;
+    const maxPaddleAcceleration = 15;   // Accélération maximale (ajuste selon le feeling)
+    const paddleAccelerationStep = 1.02; // Vitesse d'accélération (ajuste selon le feeling)
+    let paddleBaseW = 150; // Taille de base de la raquette
+    let decrementStartTime = 0;
+    let gameStarted = false;
+    let autopilot = false;
+    let aimingError = 0;      // AJOUT : Mémorise l'erreur de placement du coup précédent.
+    let desiredPaddleX = 0;   // AJOUT : Stocke la position cible calculée par l'IA.
+    let AutopilotBanner = false
+    let panic = false
+    let PanicButon = false
+    let cookies = 0;
+    let wallOffsetPlus =0;
+    let megaspeed=1
+    let gameLoopId = null; // Ajouter en haut du fichier
+    let longTimeout = null;
+    let shortTimeout = null;
+    let impactTimeout = null;
+    let paddleVelocity = 0;
+    let Debug = false;
+    let wheelVelocity = 0;
+    let skulls = [];
+    let shotHistory = [];
+    let lastTargetBrick = null;
+    let lastPaddleTarget = 0;
+
+let targetVelocity = 0;
+let adaptiveCompensation = 0;
+let compensationStep = 5;
+
+let isBossLevel = false;
+let boss = null;
+let bossPhase = 1;
+let bossMaxHP = 100;
+let bossHP = 100;
+let bossInvulnerable = false;
+let bossAttackTimer = 0;
+let bossMovementTimer = 0;
+let bossDefeated = false;
+let psyAnimId = null;
+
+let frameCount = 0;
+let lastPerformanceCheck = 0;
+
+let baseGameSpeed = 12;
+let currentGameSpeed = 15;
+let levelSpeedBonus = 0;
+let brickSpeedBonus = 0;
+let speedIncreasePerBrick = 0.008; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
+let speedIncreasePerLevel = 0.6;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
+let autopilotSpeedMultiplier = 1.08; // ✅ RÉDUIT de 1.15 à 1.08 (seulement 8% plus rapide)
+
+let bricksHit = 0;
+let powerupsCaptured = {
+  "long": 0,
+  "short": 0,
+  "mult1": 0,
+  "mult2": 0,
+  "mult4": 0,
+  "mult8": 0,
+  "huge": 0,
+  "skull": 0
+};
+
+let bonusesCaptured = {
+  "🍒": 0,   // +500 pts
+  "🍓": 0,   // +1000 pts
+  "🛸": 0,   // +2000 pts
+  "🍑": 0,   // +5000 pts
+  "🌸": 0,   // +500 pts
+  "💝": 0,   // +8000 pts
+  "🍉": 0,   // +2000 pts
+  "💊": 0,   // +15000 pts
+  "🐲": 0,   // +15000 pts
+  "🍇": 0,   // +2000 pts
+  "🍪": 0,   // Cookies
+  "🍌": 0    // +500 pts
+};
+
+let startTime = null;
+let elapsedTime = 0;
+
+
+// Variables manquantes pour le système de qualité
+let particleCountMax = 80; // Pour ajuster la qualité
+
+
+    // === GESTIONNAIRE CENTRALISÉ DES TIMEOUTS ===
+    const timeoutManager = {
+        timeouts: new Map(),
+
+        set(key, callback, delay) {
+            this.clear(key);
+            const id = setTimeout(() => {
+                callback();
+                this.timeouts.delete(key);
+            }, delay);
+            this.timeouts.set(key, id);
+        },
+
+        clear(key) {
+            if (this.timeouts.has(key)) {
+                clearTimeout(this.timeouts.get(key));
+                this.timeouts.delete(key);
+            }
+        },
+
+        clearAll() {
+            for (let id of this.timeouts.values()) {
+                clearTimeout(id);
+            }
+            this.timeouts.clear();
+        }
+    };
+
+    const countdownRange = 10; // Le compte à rebours commence 5 briques AVANT l'activation.
+    const TimerBonus = 15
+
+    // === NOUVELLES VARIABLES STATISTIQUES ===
+    bricksHit = 0;
+    powerupsCaptured = {
+      "long": 0,
+      "short": 0,
+      "mult1": 0,
+      "mult2": 0,
+      "mult4": 0,
+      "mult8": 0,
+      "huge": 0,
+      "skull": 0
+    };
+    startTime = null;
+    elapsedTime = 0;
+
+    // === ACCÈS DOM ===
+
+    const canvas = document.getElementById('gameCanvas');
+    const elAutopilotBanner = document.getElementById('autopilot-banner');
+    const ctx = canvas.getContext('2d');
+    const elScore = document.getElementById('score');
+    const elVies = document.getElementById('vies');
+    const elNiveau = document.getElementById('niveau');
+    const elBonusAnim = document.getElementById('bonus-anim');
+    const elMult = document.getElementById('mult');
+    const elDec = document.getElementById('decrement-timer');
+    const elAutopilotStatus = document.getElementById('autopilot-status');
+
+    // === AUDIO : Effets sonores simples arcade ===
+
+    const audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+
+    function clearAllAnimations() {
+      // Arrêter la boucle principale
+      if (gameLoopId) {
+        cancelAnimationFrame(gameLoopId);
+        gameLoopId = null;
+      }
+
+      // Arrêter l'animation psychédélique
+      if (psyAnimId) {
+        cancelAnimationFrame(psyAnimId);
+        psyAnimId = null;
+      }
+
+      console.log("Toutes les animations ont été nettoyées");
+    }
+
+
+    function closeEndPanel() {
+      console.log("Fermeture du panneau de fin");
+
+      // ✅ NOUVEAU : Reset des sections de score
+      document.getElementById('playerNameSection').style.display = 'none';
+      document.getElementById('leaderboardSection').style.display = 'none';
+      document.getElementById('playerNameInput').value = '';
+
+      document.getElementById('endPanel').style.display = "none";
+      document.getElementById('statsPanel').style.display = 'block'; // ✅ AJOUT
+
+      stopPsychedelicBg();
+
+      // ✅ SÉQUENCE SIMPLIFIÉE
+      resetGame(); // Ceci va mettre gameStarted = true et pause = false
+
+      console.log("Redémarrage du jeu - États:", {
+        gameStarted: gameStarted,
+        pause: pause,
+        gameOver: gameOver
+      });
+    }
+
+    function updateStatsPanel() {
+      // ✅ VÉRIFICATIONS ESSENTIELLES SEULEMENT
+      const bricksStatsEl = document.getElementById('bricksStats');
+      const bonusesStatsEl = document.getElementById('bonusesStats');
+      const powerupsStatsEl = document.getElementById('powerupsStats');
+      const gameStateStatsEl = document.getElementById('gameStateStats');
+
+      // Si les éléments n'existent pas, on sort sans faire de bruit
+      if (!bricksStatsEl || !bonusesStatsEl || !powerupsStatsEl ||
+          !gameStateStatsEl) {
+        return;
+      }
+
+      // ✅ INITIALISATION SIMPLE DES VARIABLES
+      const safeBricks = Array.isArray(bricks) ? bricks : [];
+      const safePowerups = Array.isArray(powerups) ? powerups : [];
+      const safeSkulls = Array.isArray(skulls) ? skulls : [];
+      const safeParticles = Array.isArray(particles) ? particles : [];
+      const safeAnimations = Array.isArray(animations) ? animations : [];
+
+      // === STATISTIQUES DES BRIQUES (inchangé) ===
+      const aliveBricks = safeBricks.filter(b => b && b.alive);
+      const specialBricks = aliveBricks.filter(b => b && b.special);
+
+      bricksStatsEl.innerHTML = `
+        <div class="stats-item">
+          <span class="stats-item-label">🧱 Restantes:</span>
+          <span class="stats-item-value">${aliveBricks.length}/${safeBricks.length}</span>
+        </div>
+        <div class="stats-item">
+          <span class="stats-item-label">✨ Spéciales:</span>
+          <span class="stats-item-value">${specialBricks.length}</span>
+        </div>
+        <div class="stats-item">
+          <span class="stats-item-label">💥 Cassées:</span>
+          <span class="stats-item-value">${bricksHit || 0}</span>
+        </div>
+      `;
+
+      // === STATISTIQUES DES BONUS COLLECTÉS (NOUVEAU) ===
+      let bonusesHtml = '';
+      let totalBonuses = 0;
+      let totalBonusPoints = 0;
+
+      // ✅ CALCUL DES TOTAUX
+      for (let emoji in bonusesCaptured) {
+        totalBonuses += bonusesCaptured[emoji];
+
+        // Calcul des points selon l'emoji
+        let points = 0;
+        switch(emoji) {
+          case "🍒": case "🌸": case "🍌": points = 500; break;
+          case "🍓": points = 1000; break;
+          case "🛸": case "🍉": case "🍇": points = 2000; break;
+          case "🍑": points = 5000; break;
+          case "💝": points = 8000; break;
+          case "💊": case "🐲": points = 15000; break;
+          case "🍪": points = 0; break; // Cookies ne donnent pas de points
+        }
+        totalBonusPoints += bonusesCaptured[emoji] * points;
+
+        // Affichage si collecté
+        if (bonusesCaptured[emoji] > 0) {
+          bonusesHtml += `
+            <div class="stats-item">
+              <span class="stats-item-label"><span class="stats-emoji">${emoji}</span>x${bonusesCaptured[emoji]}</span>
+              <span class="stats-item-value">${points > 0 ? points + 'pts' : 'cookie'}</span>
+            </div>
+          `;
+        }
+      }
+
+      // En-tête avec totaux
+      let bonusesHeader = `
+        <div class="stats-item">
+          <span class="stats-item-label">📊 Total:</span>
+          <span class="stats-item-value positive-indicator">${totalBonuses}</span>
+        </div>
+        <div class="stats-item">
+          <span class="stats-item-label">💰 Points:</span>
+          <span class="stats-item-value positive-indicator">${totalBonusPoints.toLocaleString()}</span>
+        </div>
+      `;
+
+      if (bonusesHtml === '') {
+        bonusesHtml = '<div class="stats-item"><span class="stats-item-label">Aucun bonus collecté</span></div>';
+      }
+
+      bonusesStatsEl.innerHTML = bonusesHeader + bonusesHtml;
+
+      // === STATISTIQUES DES POWER-UPS COLLECTÉS (NOUVEAU) ===
+      let powerupsHtml = '';
+      let totalPowerups = 0;
+
+      // ✅ CALCUL DES TOTAUX POWER-UPS
+      const powerupNames = {
+        "long": "🏳️ Raquette longue",
+        "short": "🏴‍☠️ Raquette courte",
+        "mult1": "1️⃣ Multiplicateur x2",
+        "mult2": "2️⃣ Multiplicateur x3",
+        "mult4": "4️⃣ Multiplicateur x4",
+        "mult8": "8️⃣ Multiplicateur x8",
+        "huge": "❤️‍🔥 Raquette géante",
+        "skull": "☠️ Malus"
+      };
+
+      for (let type in powerupsCaptured) {
+        totalPowerups += powerupsCaptured[type];
+
+        if (powerupsCaptured[type] > 0) {
+          let name = powerupNames[type] || type;
+          let colorClass = type === "skull" ? "danger-indicator" : "";
+
+          powerupsHtml += `
+            <div class="stats-item ${colorClass}">
+              <span class="stats-item-label">${name}</span>
+              <span class="stats-item-value">x${powerupsCaptured[type]}</span>
+            </div>
+          `;
+        }
+      }
+
+      // En-tête avec total
+      let powerupsHeader = `
+        <div class="stats-item">
+          <span class="stats-item-label">📊 Total:</span>
+          <span class="stats-item-value positive-indicator">${totalPowerups}</span>
+        </div>
+      `;
+
+      if (powerupsHtml === '') {
+        powerupsHtml = '<div class="stats-item"><span class="stats-item-label">Aucun power-up collecté</span></div>';
+      }
+
+      powerupsStatsEl.innerHTML = powerupsHeader + powerupsHtml;
+
+      // === STATISTIQUES DES DANGERS ACTIFS (COURANTS) ===
+      let dangersHtml = '';
+      if (safeSkulls.length === 0) {
+        dangersHtml = '<div class="stats-item"><span class="stats-item-label">Aucun danger</span></div>';
+      } else {
+        safeSkulls.forEach((skull) => {
+          if (skull) {
+            const icon = skull.icon || '☠️';
+            const yPos = skull.y !== undefined ? Math.floor(skull.y) : '?';
+
+            dangersHtml += `
+              <div class="stats-item danger-indicator">
+                <span class="stats-item-label"><span class="stats-emoji">${icon}</span>SKULL</span>
+                <span class="stats-item-value">Y:${yPos}</span>
+              </div>
+            `;
+          }
+        });
+      }
+
+//      dangersStatsEl.innerHTML = dangersHtml;
+
+      // === ÉTAT DU JEU ===
+      const autopilotStatus = autopilot || false;
+      const ballSpeedValue = Math.floor(ballSpeed || 0);
+      const multValue = mult || 1;
+
+      let gameStateHtml = `
+        <div class="stats-item">
+          <span class="stats-item-label">🎯 Autopilote:</span>
+          <span class="stats-item-value ${autopilotStatus ? 'positive-indicator' : ''}">${autopilotStatus ? 'OUI' : 'NON'}</span>
+        </div>
+        <div class="stats-item">
+          <span class="stats-item-label">⚡ Vitesse balle:</span>
+          <span class="stats-item-value">${ballSpeedValue}</span>
+        </div>
+        <div class="stats-item">
+          <span class="stats-item-label">🚀 Multiplicateur:</span>
+          <span class="stats-item-value ${multValue > 1 ? 'positive-indicator' : ''}">x${multValue}</span>
+        </div>
+      `;
+
+      // ✅ AJOUTS CONDITIONNELS SIMPLES
+      if (mult > 1 && multTimer > 0) {
+        gameStateHtml += `
+          <div class="stats-item">
+            <span class="stats-item-label">⏱️ Timer mult:</span>
+            <span class="stats-item-value positive-indicator">${Math.ceil(multTimer)}s</span>
+          </div>
+        `;
+      }
+
+      if (decrementActive && decrementTimer && decrementStartTime) {
+        const timeLeft = Math.max(0, decrementTimer - (performance.now() - decrementStartTime) / 1000);
+        gameStateHtml += `
+          <div class="stats-item">
+            <span class="stats-item-label">☠️ Malus:</span>
+            <span class="stats-item-value danger-indicator">${Math.ceil(timeLeft)}s</span>
+          </div>
+        `;
+      }
+
+      if (cookies && cookies > 0) {
+        gameStateHtml += `
+          <div class="stats-item">
+            <span class="stats-item-label">🍪 Cookies:</span>
+            <span class="stats-item-value positive-indicator">${cookies}</span>
+          </div>
+        `;
+      }
+
+      // Info boss si actif
+      if (isBossLevel && boss && boss.alive && bossHP !== undefined && bossMaxHP !== undefined) {
+        gameStateHtml += `
+          <div class="stats-item">
+            <span class="stats-item-label">☠️ Boss HP:</span>
+            <span class="stats-item-value danger-indicator">${bossHP}/${bossMaxHP}</span>
+          </div>
+        `;
+      }
+
+      gameStateStatsEl.innerHTML = gameStateHtml;
+    }
+
+
+    // ✅ NOUVEAU SYSTÈME DE SCORES MULTIPLES
+    function getBestScore() {
+      return parseInt(localStorage.getItem("akranoid_best_score") || "0");
+    }
+    function setBestScore(val) {
+      localStorage.setItem("akranoid_best_score", val);
+    }
+
+    function getLeaderboard() {
+        try {
+            let data = localStorage.getItem("arkanoid_leaderboard");
+            return data ? JSON.parse(data) : [];
+        } catch (e) {
+            console.warn("Erreur lecture leaderboard:", e);
+            return [];
+        }
+    }
+
+    function saveLeaderboard(leaderboard) {
+    try {
+        localStorage.setItem("arkanoid_leaderboard", JSON.stringify(leaderboard));
+        return true;
+    } catch (e) {
+        console.error("Erreur sauvegarde leaderboard:", e);
+        return false;
+    }
+}
+
+function addScoreToLeaderboard(playerName, score) {
+    let leaderboard = getLeaderboard();
+
+    // Ajouter le nouveau score
+    leaderboard.push({
+        name: playerName.substring(0, 12).toUpperCase(), // Limite à 12 caractères
+        score: score,
+        date: new Date().toLocaleDateString(),
+        level: niveau,
+        timestamp: Date.now()
+    });
+
+    // Trier par score décroissant
+    leaderboard.sort((a, b) => b.score - a.score);
+
+    // Garder seulement les 10 meilleurs
+    leaderboard = leaderboard.slice(0, 10);
+
+    saveLeaderboard(leaderboard);
+    return leaderboard;
+}
+
+function isNewRecord(score) {
+    let leaderboard = getLeaderboard();
+    // C'est un record si le classement a moins de 10 entrées OU si le score est meilleur que le 10ème
+    return leaderboard.length < 10 || score > (leaderboard[9]?.score || 0);
+}
+
+function getBestScore() {
+    let leaderboard = getLeaderboard();
+    return leaderboard.length > 0 ? leaderboard[0].score : 0;
+}
+
+// ✅ FONCTION D'AFFICHAGE DU CLASSEMENT
+function displayLeaderboard() {
+    let leaderboard = getLeaderboard();
+    let leaderboardList = document.getElementById('leaderboardList');
+
+    if (!leaderboardList) return;
+
+    if (leaderboard.length === 0) {
+        leaderboardList.innerHTML = '<div style="color: #888; text-align: center;">Aucun score enregistré</div>';
+        return;
+    }
+
+    let html = '<table style="width: 100%; font-family: \'Press Start 2P\', monospace; font-size: 0.8em;">';
+
+    leaderboard.forEach((entry, index) => {
+        let rankColor = index === 0 ? '#FFD700' : index === 1 ? '#C0C0C0' : index === 2 ? '#CD7F32' : '#fff';
+        let rankIcon = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+
+        html += `
+        <tr style="border-bottom: 1px solid #333;">
+            <td style="padding: 8px 4px; color: ${rankColor}; width: 15%;">${rankIcon}</td>
+            <td style="padding: 8px 4px; color: #fff; width: 40%;">${entry.name}</td>
+            <td style="padding: 8px 4px; color: ${rankColor}; width: 30%; text-align: right;">${entry.score.toLocaleString()}</td>
+            <td style="padding: 8px 4px; color: #888; width: 15%; text-align: center; font-size: 0.7em;">${entry.date}</td>
+        </tr>`;
+    });
+
+    html += '</table>';
+    leaderboardList.innerHTML = html;
+}
+
+    function closeEndPanel2() {
+        console.log("Fermeture du panneau de fin"); // Débogage
+        document.getElementById('endPanel').style.display = "none";
+        clearAllAnimations();
+        stopPsychedelicBg();
+
+        // Réinitialiser avant de relancer
+        // resetGame();
+        gameStarted = true; // Changez à true si nécessaire pour activer la boucle
+        pause = false;
+        resetGame();
+        // console.log("États réinitialisés - gameStarted:", gameStarted);
+        // Relancer la boucle
+        if (gameLoopId) cancelAnimationFrame(gameLoopId); // Arrêter toute boucle précédente
+        gameLoopId = requestAnimationFrame(gameLoop);
+        // console.log("Boucle relancée");
+    }
+
+    function gameLoop(ts) {
+
+
+      if (!lastFrame) lastFrame = ts;
+      let elapsed_ms = ts - lastFrame;
+      let dt = Math.max(0.4, Math.min(2.0, elapsed_ms / 16.7));
+
+      if (!gameStarted) {
+          gameLoopId = requestAnimationFrame(gameLoop);
+          return;
+      }
+
+      // ✅ CALIBRATION SIMPLE ET EFFICACE
+          frameCount++;
+          if (frameCount === 60) { // Test après 60 frames seulement
+              let avgFrameTime = (performance.now() - lastPerformanceCheck) / 60;
+              let estimatedFPS = 1000 / avgFrameTime;
+
+              // Ajustement automatique simple
+              if (estimatedFPS < 30) ballSpeed0 = 7;
+              else if (estimatedFPS < 45) ballSpeed0 = 8;
+              else if (estimatedFPS < 55) ballSpeed0 = 10;
+              else ballSpeed0 = 15;
+
+              ballSpeed = ballSpeed0; // Applique immédiatement
+              console.log(`FPS: ${estimatedFPS.toFixed(1)}, vitesse ajustée: ${ballSpeed0}`);
+          } else if (frameCount === 1) {
+              lastPerformanceCheck = performance.now();
+          }
+
+      if (Debug === true) {
+        showDebugPopup();
+      }
+
+// -------------------------------------------------------------
+// IA Perplexity – mod jeu – 18-07-2025
+// Applique le coefficient megaspeed quand l’autopilote est actif
+// -------------------------------------------------------------
+// ✅ SYSTÈME SIMPLIFIÉ - La vitesse est gérée directement dans la balle
+// Plus besoin de timescale, la vitesse est dans ballDX/ballDY
+
+
+      lastFrame = ts;
+
+      if (!pause && !gameOver) {
+        update(dt, elapsed_ms);
+      }
+
+      render();
+
+      // Stocker l'ID pour pouvoir l'annuler
+      gameLoopId = requestAnimationFrame(gameLoop);
+    }
+
+    function clearAllTimersEndLevel() {
+        // === NETTOYAGE DES TIMEOUTS ACTIFS ===
+
+        // Arrêter l'animation des bonus
+        if (bonusAnimTimeout) {
+            clearTimeout(bonusAnimTimeout);
+            bonusAnimTimeout = null;
+        }
+
+        // Arrêter le timeout de la raquette géante
+        if (paddleHugeTimeout) {
+            clearTimeout(paddleHugeTimeout);
+            paddleHugeTimeout = null;
+        }
+
+        // === REMISE À ZÉRO DES COMPTEURS DE TIMER ===
+
+        // Compteur du multiplicateur de score
+        multTimer = 0;
+
+        // Compteur du timer de décrémentation (malus)
+        decrementTimer = 0;
+
+        // Compteur du timer de la raquette
+        paddleTimer = 0;
+
+        // Réinitialiser l'état des flags de timer
+        paddleTimerActive = false;
+        decrementActive = false;
+        decrementEffect = false;
+
+        // === NETTOYAGE DES EFFETS VISUELS ===
+
+        // Masquer le panneau de décrémentation
+        elDec.style.display = "none";
+
+        // Réinitialiser l'affichage du multiplicateur
+        updateMultDisplay(mult);
+
+        // Réinitialiser l'état des bonus/malus
+        mult = 1;
+
+        // === NETTOYAGE DES ANIMATIONS ===
+
+        // Réinitialiser l'animation des bonus
+        elBonusAnim.style.opacity = 0;
+        elBonusAnim.style.transform = "translate(-50%,-50%) scale(1.2)";
+
+//        console.log("Tous les timers ont été nettoyés en fin de niveau");
+    }
+
+
+
+    function playSound(type) {
+      let o = audioCtx.createOscillator();
+      let g = audioCtx.createGain();
+      o.type = (type==="bonus")?"triangle":"square";
+      let now = audioCtx.currentTime;
+
+      if(type === "mort") {
+        o.frequency.setValueAtTime(180, now);
+        o.frequency.linearRampToValueAtTime(90, now + 0.18);
+        g.gain.setValueAtTime(0.22, now);
+        g.gain.linearRampToValueAtTime(0, now + 0.21);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(now); o.stop(now + 0.22);
+        return;
+      }
+
+
+      if(type === "startGame") {
+        // Petit jingle montant, très arcade, sur 1 seconde
+        let notes = [523, 659, 784, 1046, 1318]; // Do, Mi, Sol, Do+, Mi+
+        notes.forEach((freq, i) => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, now + i*0.18);
+          gain.gain.setValueAtTime(0.18, now + i*0.18);
+          gain.gain.linearRampToValueAtTime(0, now + i*0.18 + 0.15);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now + i*0.18);
+          osc.stop(now + i*0.18 + 0.17);
+        });
+        return;
+      }
+
+
+      //insatisfaisant
+      if(type === "coins") {
+        // VERSION MINIMALISTE - 3 pièces seulement
+        const coinFreqs = [950, 1100, 850]; // 3 fréquences fixes et naturelles
+
+        coinFreqs.forEach((freq, i) => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, now + i * 0.04);
+          osc.frequency.exponentialRampToValueAtTime(freq * 0.7, now + i * 0.04 + 0.1);
+
+          gain.gain.setValueAtTime(0, now + i * 0.04);
+          gain.gain.linearRampToValueAtTime(0.06 - i * 0.01, now + i * 0.04 + 0.003);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.04 + 0.1);
+
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now + i * 0.04);
+          osc.stop(now + i * 0.04 + 0.12);
+        });
+        return;
+      }
+
+
+
+      if(type === "autopilot_on") {
+              // Jingle de mise en marche de l'autopilote : 3 notes rapides et ascendantes.
+              let notes = [440, 587, 784,1046,640, 787, 984,1246]; // La, Ré, Sol
+              notes.forEach((freq, i) => {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = "triangle"; // Un son plus doux et "high-tech"
+                osc.frequency.setValueAtTime(freq, now + i * 0.2);
+                gain.gain.setValueAtTime(0.15, now + i * 0.1);
+                gain.gain.linearRampToValueAtTime(0, now + i * 0.1 + 0.15);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start(now + i * 0.1);
+                osc.stop(now + i * 0.1 + 0.16);
+              });
+      return;
+      }
+
+
+
+      if(type === "raquettenormale") {
+        // Un petit jingle montant, très arcade
+        let notes = [660, 880, 1320];
+        notes.forEach((freq, i) => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+          osc.type = "square";
+          osc.frequency.setValueAtTime(freq, now + i*0.07);
+          gain.gain.setValueAtTime(0.18, now + i*0.07);
+          gain.gain.linearRampToValueAtTime(0, now + i*0.07 + 0.08);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now + i*0.07);
+          osc.stop(now + i*0.07 + 0.08);
+        });
+        return;
+      }
+
+
+      if(type === "AutopilotBanner") {
+        // Un petit jingle montant, très arcade
+        let notes = [560, 780, 1220, 780];
+        notes.forEach((freq, i) => {
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+          osc.type = "square";
+          osc.frequency.setValueAtTime(freq, now + i*0.07);
+          gain.gain.setValueAtTime(0.18, now + i*0.07);
+          gain.gain.linearRampToValueAtTime(0, now + i*0.07 + 0.08);
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now + i*0.07);
+          osc.stop(now + i*0.07 + 0.08);
+        });
+        return;
+      }
+
+
+
+      // pi inutilisé
+      if(type === "pi") {
+          const coins = [
+            { freq: 1200, delay: 0 },
+            { freq: 950, delay: 0.06 },
+            { freq: 800, delay: 0.13 },
+          ];
+          coins.forEach((coin) => {
+            let o = audioCtx.createOscillator();
+            let g = audioCtx.createGain();
+            o.type = "triangle";
+            o.frequency.setValueAtTime(coin.freq, now + coin.delay);
+            o.frequency.linearRampToValueAtTime(10, now + coin.delay + 0.8);
+            g.gain.setValueAtTime(0.7, now + coin.delay);
+            g.gain.linearRampToValueAtTime(0, now + coin.delay + 0.1);
+            o.connect(g).connect(audioCtx.destination);
+            o.start(now + coin.delay);
+            o.stop(now + coin.delay + 0.2);
+          });
+          return;
+        }
+
+        if(type === "boss_hit") {
+            // Son d'impact sur le boss
+            let notes = [200, 150, 100];
+            notes.forEach((freq, i) => {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = "sawtooth";
+                osc.frequency.setValueAtTime(freq, now + i * 0.05);
+                gain.gain.setValueAtTime(0.2, now + i * 0.05);
+                gain.gain.linearRampToValueAtTime(0, now + i * 0.05 + 0.15);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start(now + i * 0.05);
+                osc.stop(now + i * 0.05 + 0.16);
+            });
+            return;
+        }
+
+        if(type === "boss_death") {
+            // Mélodie épique de victoire
+            let notes = [262, 330, 392, 523, 659, 784, 1047];
+            notes.forEach((freq, i) => {
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.type = "triangle";
+                osc.frequency.setValueAtTime(freq, now + i * 0.2);
+                gain.gain.setValueAtTime(0.25, now + i * 0.2);
+                gain.gain.linearRampToValueAtTime(0, now + i * 0.2 + 0.4);
+                osc.connect(gain).connect(audioCtx.destination);
+                osc.start(now + i * 0.2);
+                osc.stop(now + i * 0.2 + 0.42);
+            });
+            return;
+        }
+
+
+      if(type==="impact") {
+        o.frequency.setValueAtTime(420,now);
+        o.frequency.linearRampToValueAtTime(220,now+0.08);
+        g.gain.setValueAtTime(0.13,now);
+        g.gain.linearRampToValueAtTime(0,now+0.09);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(now); o.stop(now+0.1);
+      } else if(type==="paddle") {
+        o.frequency.setValueAtTime(120,now);
+        o.frequency.linearRampToValueAtTime(340,now+0.07);
+        g.gain.setValueAtTime(0.12,now);
+        g.gain.linearRampToValueAtTime(0,now+0.1);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(now); o.stop(now+0.12);
+      } else if(type==="powerup") {
+        o.frequency.setValueAtTime(260,now);
+        o.frequency.linearRampToValueAtTime(660,now+0.18);
+        g.gain.setValueAtTime(0.16,now);
+        g.gain.linearRampToValueAtTime(0,now+0.19);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(now); o.stop(now+0.2);
+      } else if(type==="bonus") {
+        o.frequency.setValueAtTime(220,now);
+        o.frequency.linearRampToValueAtTime(1220,now+0.30);
+        g.gain.setValueAtTime(0.22,now);
+        g.gain.linearRampToValueAtTime(0,now+0.33);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(now); o.stop(now+0.35);
+      } else if(type==="life") {
+        o.frequency.setValueAtTime(660,now);
+        o.frequency.linearRampToValueAtTime(220,now+0.22);
+        g.gain.setValueAtTime(0.18,now);
+        g.gain.linearRampToValueAtTime(0,now+0.25);
+        o.connect(g).connect(audioCtx.destination);
+        o.start(now); o.stop(now+0.26);
+      } else if(type==="life2") {
+      o.frequency.setValueAtTime(960,now);
+      o.frequency.linearRampToValueAtTime(420,now+0.22);
+      g.gain.setValueAtTime(0.18,now);
+      g.gain.linearRampToValueAtTime(0,now+0.25);
+      o.connect(g).connect(audioCtx.destination);
+      o.start(now); o.stop(now+0.26);
+    }
+    }
+
+    function showSpeedControl() {
+        const control = document.getElementById('speedControl');
+        if (control) {
+            control.value = ballSpeed0;
+            control.style.display = 'block';
+            control.oninput = (e) => {
+                ballSpeed0 = parseInt(e.target.value);
+                ballSpeed = ballSpeed0;
+            };
+        }
+    }
+
+    // === INITIALISATION DU JEU ===
+    function resetGame() {
+      playSound("startGame");
+
+      vies = 4; niveau = 1; score = 0; mult = 1; multTimer = 0; lastMult = 1;
+      displayScore = 0;
+      paddleW = paddleBaseW; paddleX = (CANVAS_W-paddleW)/2;
+      ballSpeed = ballSpeed0; gameOver = false;
+      wallOffset = 90; brickRows = 5;levelsPassed = 0;
+
+      compensationStep = 5;
+      shotHistory = [];
+      lastTargetBrick = null;
+
+            clearAllTimersEndLevel();
+      createBricks();
+      resetBall();
+
+      // ✅ ORDRE CORRIGÉ : État du jeu à la fin
+      pause = false;
+      gameStarted = true;
+
+      paddleW = paddleBaseW;
+      particles = []; powerups = []; bonuses = []; animations = [];
+      paddleTimer = 0; paddleTimerActive = false;
+      decrementTimer = 0; decrementActive = false; decrementEffect = false;
+      elDec.style.display = "none";
+      updateHUD();
+      updateMultDisplay(mult);
+
+      // Statistiques
+      bricksHit = 0;
+      for(let k in bonusesCaptured) bonusesCaptured[k]=0;
+      for(let k in powerupsCaptured) powerupsCaptured[k]=0;
+
+      startTime = Date.now();
+      elapsedTime = 0;
+      document.getElementById('endPanel').style.display = "none";
+
+    }
+
+    // ✅ NOUVELLE FONCTION : Démarrage contrôlé du jeu
+    function startGame() {
+        console.log("Démarrage du jeu après clic sur OK");
+
+        try {
+            // 1. Réinitialiser complètement
+            resetGame();
+
+            // 2. S'assurer que la boucle n'est pas déjà lancée
+            if (gameLoopId) {
+                cancelAnimationFrame(gameLoopId);
+                gameLoopId = null;
+            }
+
+            // 3. Initialiser le panneau de stats
+            try {
+                updateStatsPanel();
+                console.log("Panneau de stats initialisé");
+            } catch (statsError) {
+                console.warn("Erreur panneau de stats:", statsError);
+            }
+
+            // 4. Lancer la boucle de jeu
+            console.log("Lancement de la boucle de jeu");
+            gameLoopId = requestAnimationFrame(gameLoop);
+
+            console.log("Jeu démarré avec succès - États:", {
+                gameStarted: gameStarted,
+                pause: pause,
+                gameOver: gameOver
+            });
+
+        } catch (error) {
+            console.error("Erreur de démarrage:", error);
+
+            // Fallback robuste
+            setTimeout(() => {
+                console.log("Tentative de récupération...");
+                gameStarted = true;
+                pause = false;
+                gameOver = false;
+                if (!gameLoopId) {
+                    gameLoopId = requestAnimationFrame(gameLoop);
+                }
+            }, 1000);
+        }
+    }
+
+
+    function isBossLevelCheck() {
+        return niveau % 5 === 0; // Boss tous les 5 niveaux : 5, 10, 15, 20, etc.
+    }
+
+
+
+    function createBoss() {
+        isBossLevel = true;
+        bossDefeated = false;
+
+        // Stats du boss évoluent avec le niveau
+        bossMaxHP = 50 + Math.floor(niveau / 5) * 25;
+        bossHP = bossMaxHP;
+        bossPhase = 1;
+        bossInvulnerable = false;
+        bossAttackTimer = 0;
+        bossMovementTimer = 0;
+
+        // Position initiale du boss
+        boss = {
+            x: CANVAS_W / 2 - 60,
+            y: 140,
+            w: 170,
+            h: 80,
+            targetX: CANVAS_W / 2 - 60,
+            speed: 8 + niveau * 0.5,
+            direction: 1,
+            lastAttack: 0,
+            attackCooldown: Math.max(1500, 2500 - niveau * 40),
+            alive: true,
+            hitFlash: 0,
+            entrancePhase: true,
+            entranceY: -100
+        };
+
+        // Créer quelques briques protectrices
+        createBossShield();
+    }
+
+
+    function createBossShield() {
+        bricks = [];
+
+        // ✅ FORMATION DÉFENSIVE RENFORCÉE
+        const formations = [
+            // Mur de protection principal (plus large)
+            {x: boss.x - 120, y: boss.y + 80},
+            {x: boss.x - 60, y: boss.y + 80},
+            {x: boss.x, y: boss.y + 80},
+            {x: boss.x + 60, y: boss.y + 80},
+            {x: boss.x + 120, y: boss.y + 80},
+            {x: boss.x + 180, y: boss.y + 80},
+
+            // Deuxième ligne de protection
+            {x: boss.x - 90, y: boss.y + 120},
+            {x: boss.x - 30, y: boss.y + 120},
+            {x: boss.x + 30, y: boss.y + 120},
+            {x: boss.x + 90, y: boss.y + 120},
+            {x: boss.x + 150, y: boss.y + 120},
+
+            // Troisième ligne (briques spéciales)
+            {x: boss.x - 60, y: boss.y + 160},
+            {x: boss.x + 30, y: boss.y + 160},
+            {x: boss.x + 120, y: boss.y + 160},
+
+            // Tours de défense latérales
+            {x: boss.x - 150, y: boss.y + 40},
+            {x: boss.x - 150, y: boss.y + 100},
+            {x: boss.x + boss.w + 80, y: boss.y + 40},
+            {x: boss.x + boss.w + 80, y: boss.y + 100}
+        ];
+
+        formations.forEach((pos, idx) => {
+            if (pos.x >= 0 && pos.x + brickW <= CANVAS_W) {
+                let specialChance = 0.4; // 40% de chance d'avoir un special
+                let isSpecial = Math.random() < specialChance;
+                let special = null;
+
+                if (isSpecial) {
+                    // ✅ PLUS DE MULTIPLICATEURS DANS LES BRIQUES BOSS
+                    let specials = ["1️⃣", "2️⃣", "4️⃣", "8️⃣", "🏳️", "❤️‍🔥"];
+                    if (Math.random() < 0.3) specials.push("☠️"); // Quelques skulls
+                    special = specials[Math.floor(Math.random() * specials.length)];
+                }
+
+                bricks.push({
+                    x: pos.x,
+                    y: pos.y,
+                    w: brickW,
+                    h: brickH,
+                    finalX: pos.x,
+                    finalY: pos.y,
+                    colorIdx: (idx < 6) ? 4 : (idx < 11) ? 3 : 2, // Dégradé de couleurs
+                    special: special,
+                    alive: true,
+                    animFrame: 36,
+                    animAngle: 0,
+                    animating: false,
+                    isBossShield: true
+                });
+            }
+        });
+    }
+
+
+
+    function createBricks() {
+      bricks = [];
+      isBossLevel = false;
+      let specials = [];
+      let AutopilotBanner = false
+      let nbSpecials = 10;
+      while(specials.length < nbSpecials) {
+        let idx = Math.floor(Math.random()*brickRows*brickCols);
+        if(!specials.includes(idx)) specials.push(idx);
+      }
+      let skullsIdx = [];
+      while(skullsIdx.length < 2) {
+        let idx = Math.floor(Math.random()*brickRows*brickCols);
+        if(!skullsIdx.includes(idx)) skullsIdx.push(idx);
+      }
+      for(let r=0; r<brickRows; r++) {
+        for(let c=0; c<brickCols; c++) {
+          let idx = r*brickCols+c;
+          let special = null;
+          if(skullsIdx.includes(idx)) special = "☠️";
+          else if(specials.includes(idx)) special = SPECIAL_ICONS[Math.floor(Math.random()*SPECIAL_ICONS.length)];
+          let colorIdx = r%BRICK_GRADIENTS.length;
+          // Emplacement final
+          let finalX = c*(brickW+brickGap)+brickGap+((CANVAS_W-brickCols*(brickW+brickGap))/2);
+          let finalY = wallOffset+r*(brickH+brickGap);
+          // Apparition depuis le centre, avec angle unique pour chaque brique
+          let angle = Math.random() * 3 * Math.PI;
+          bricks.push({
+            x: CANVAS_W/2,
+            y: CANVAS_H/2,
+            w: brickW, h: brickH,
+            finalX, finalY,
+            colorIdx, special, alive:true,
+            animFrame: 0,
+            animAngle: angle,
+            animating: true
+          });
+        }
+      }
+    }
+
+
+
+    function drawPaddle(ctx,x,y,w,h,r=10){
+      const p = new Path2D();
+      p.moveTo(x+r, y);
+      p.lineTo(x+w-r, y);
+      p.arc(x+w-r, y+h/2, r, -Math.PI/2,  Math.PI/2);
+      p.lineTo(x+r, y+h);
+      p.arc(x+r,   y+h/2, r,  Math.PI/2, -Math.PI/2);
+      ctx.fillStyle = '#fff';
+      ctx.shadowColor = '#0ff';
+      ctx.shadowBlur  = 20;
+      ctx.fill(p);
+    }
+
+
+
+    function resetBall() {
+
+      setTimeout(() => {   }, 500);
+      ball = {x:CANVAS_W/2, y:paddleY-30, r:ballR};
+      // ✅ CONSERVATION DE LA VITESSE PROGRESSIVE
+
+//      updateBallSpeed(); // Recalcule la vitesse actuelle
+
+      // ✅ PROGRESSION TRÈS GRADUELLE par niveau
+      baseGameSpeed = Math.min(15, 12 + (niveau - 1) * 0.1);
+      ballSpeed = baseGameSpeed;
+
+      let angle = (Math.random()*0.6+0.2)*Math.PI;
+      ballDX = Math.cos(angle)*currentGameSpeed*(Math.random()<0.5?-1:1);
+      ballDY = -Math.abs(Math.sin(angle)*currentGameSpeed);
+      gameStarted = true; // Flag obligatoire
+    }
+
+    function updateHUD() {
+      elScore.textContent = score.toString().padStart(9, "0");
+      elVies.textContent = "VIES:"+vies;
+      elNiveau.textContent = "NIVEAU:"+niveau;
+      elMult.textContent = "x" + mult;
+
+      // ✅ APPEL DIRECT ET SIMPLE
+      if (document.getElementById('statsPanel')) {
+        updateStatsPanel();
+      }
+
+      const elCookies = document.getElementById('cookies');
+      if (elCookies) {
+          if (cookies > 0) {
+            elCookies.textContent = "COOKIES:" + cookies;
+            elCookies.style.display = 'inline-block';
+          } else {
+            elCookies.style.display = 'none';
+          }
+        }
+    }
+
+
+
+    function updateMultDisplay(newMult) {
+
+      elMult.textContent = "x" + newMult;
+      // Logique de clignotement
+      if (newMult > 1) {
+        elMult.classList.add("blinking-effect"); // On ajoute la classe pour le faire clignoter
+      } else {
+        elMult.classList.remove("blinking-effect"); // On la retire s'il revient à x1
+      }
+
+      // L'ancien système de "flash" lors du changement est conservé
+      //if (newMult !== lastMult) {
+      //  elMult.classList.add("flash");
+      //  setTimeout(() => elMult.classList.remove("flash"), 250);
+      //  lastMult = newMult;
+      //}
+
+    }
+
+    // === CONTRÔLES CLAVIER & SOURIS ===
+
+    document.addEventListener('keydown',e=>{
+
+      if (e.code==="Space" && cookies > 0 && !autopilot) {
+          panic = 60; PanicButon=true
+          --cookies; updateHUD();
+          playSound("pi");
+      }
+
+      // ✅ TOUCHE DEBUG : Z (simple et sans conflit)
+      if(e.key==="z" || e.key==="Z") {
+          e.preventDefault();
+          if (Debug === true) {
+              Debug = false;
+            } else {
+              Debug=true;
+              showDebugPopup();
+          return;
+      }
+    }
+
+      // ✅ GESTION DES TOUCHES DE MOUVEMENT
+      if(e.code==="ArrowLeft"||e.key==="q"||e.key==="Q") leftDown=true;
+      if(e.code==="ArrowRight"||e.key==="d"||e.key==="D") rightDown=true;
+
+      // ✅ GESTION DU SON ET DE LA PAUSE
+      if(e.key==="s" || e.key==="S") {
+        // Toggle du son (si tu as une fonction pour ça)
+      }
+
+      if(e.key==="p" || e.key==="P") {
+        pause = !pause; // Toggle de la pause
+      }
+    });
+
+
+    canvas.addEventListener('mousemove', e => {
+      let rect = canvas.getBoundingClientRect();
+      let mx = e.clientX - rect.left;
+
+      // Empêche la souris de prendre le contrôle si l'autopilote est actif
+      if (!autopilot) {
+        paddleX = Math.max(
+          0,
+          Math.min(CANVAS_W - paddleW, mx - paddleW / 2)
+        );
+      }
+    });
+
+    // ✅ NOUVEAU : Contrôle par molette de souris
+canvas.addEventListener('wheel', e => {
+  e.preventDefault(); // Empêche le scroll de la page
+
+  // Ne pas contrôler si l'autopilote est actif
+  if (autopilot) return;
+
+  // Sensibilité du mouvement (ajustable selon tes préférences)
+  const sensitivity = 20;
+
+  // Calcul du déplacement basé sur la direction de la molette
+  let deltaMove = 0;
+
+  if (e.deltaY > 0) {
+    // Molette vers le bas = mouvement vers la droite
+    deltaMove = sensitivity;
+  } else if (e.deltaY < 0) {
+    // Molette vers le haut = mouvement vers la gauche
+    deltaMove = -sensitivity;
+  }
+
+  // Application du mouvement avec contraintes
+  paddleX = Math.max(
+    0,
+    Math.min(CANVAS_W - paddleW, paddleX + deltaMove)
+  );
+});
+
+function autopilotMove(dt) {
+    if (!ball) return;
+
+    let finalTargetX;
+    let moveSpeed = 400; // Vitesse de base
+
+    // === 1. PRIORITÉ ABSOLUE : ÉVITER LES SKULLS ===
+    let dangerousSkull = null;
+    let minDanger = Infinity;
+
+    skulls.forEach(skull => {
+        if (skull.y < paddleY && skull.y > CANVAS_H * 0.4) {
+            let timeToImpact = (paddleY - skull.y) / skull.speed;
+            if (timeToImpact < minDanger && timeToImpact > 0.3) {
+                minDanger = timeToImpact;
+                dangerousSkull = skull;
+            }
+        }
+    });
+
+    if (dangerousSkull) {
+        // ÉVITEMENT IMMÉDIAT ET SÉCURISÉ
+        let skullCenter = dangerousSkull.x;
+        let currentCenter = paddleX + paddleW/2;
+        let safeDistance = paddleW * 0.8;
+
+        if (skullCenter - safeDistance > paddleW/2) {
+            // Aller à gauche du skull
+            finalTargetX = skullCenter - safeDistance - paddleW/2;
+        } else if (skullCenter + safeDistance < CANVAS_W - paddleW/2) {
+            // Aller à droite du skull
+            finalTargetX = skullCenter + safeDistance - paddleW/2;
+        } else {
+            // Si pas de place, aller au plus proche bord
+            finalTargetX = (currentCenter < CANVAS_W/2) ? 0 : CANVAS_W - paddleW;
+        }
+
+        moveSpeed = 600; // Plus rapide pour l'évitement
+
+    // === 2. DÉFENSE : Si la balle descend vers nous ===
+    } else if (ballDY > 0 && ball.y > CANVAS_H * 0.6) {
+        let timeToImpact = (paddleY - ball.y) / ballDY;
+        let impactX = ball.x + ballDX * timeToImpact;
+
+        // Correction pour les rebonds sur les murs
+        while (impactX < 0 || impactX > CANVAS_W) {
+            if (impactX < 0) impactX = -impactX;
+            if (impactX > CANVAS_W) impactX = CANVAS_W - (impactX - CANVAS_W);
+        }
+
+        finalTargetX = impactX - paddleW/2;
+        moveSpeed = 450; // Vitesse défensive
+
+        // === 3. PHASE OFFENSIVE ULTRA-RAPIDE ===
+        } else if (ballDY < 0 && ball.y < CANVAS_H * 0.8) {
+            let targetBrick = null;
+            let bestScore = -1;
+
+            // ✅ STRATÉGIE SIMPLIFIÉE ET RAPIDE
+            bricks.forEach(brick => {
+                if (!brick.alive) return;
+
+                // Calcul direct de distance + accessibilité
+                let distance = Math.abs(brick.x + brick.w/2 - ball.x) + Math.abs(brick.y - ball.y);
+                let accessibilityBonus = 0;
+
+                // Bonus pour les briques du bas (plus accessibles)
+                if (brick.y > wallOffset + brickH * 3) accessibilityBonus = 500;
+                else if (brick.y > wallOffset + brickH * 2) accessibilityBonus = 300;
+                else if (brick.y > wallOffset + brickH) accessibilityBonus = 200;
+
+                // Bonus pour les briques isolées
+                let isolationBonus = 0;
+                let neighbors = bricks.filter(b => b.alive &&
+                    Math.abs(b.x - brick.x) < brickW * 2 &&
+                    Math.abs(b.y - brick.y) < brickH * 2).length;
+                if (neighbors <= 2) isolationBonus = 300;
+
+                let totalScore = 2000 - distance + accessibilityBonus + isolationBonus;
+
+                if (totalScore > bestScore) {
+                    bestScore = totalScore;
+                    targetBrick = brick;
+                }
+            });
+
+            if (targetBrick) {
+                // ✅ POSITIONNEMENT ULTRA-DIRECT
+                let targetX = targetBrick.x + targetBrick.w/2;
+
+                // Calcul simple de l'angle requis
+                let deltaX = targetX - ball.x;
+                let deltaY = targetBrick.y - ball.y;
+                let requiredAngle = Math.atan2(deltaX, -deltaY);
+
+                // Position de raquette pour créer cet angle
+                let paddleOffset = Math.sin(requiredAngle) * paddleW * 0.4;
+                finalTargetX = ball.x - paddleW/2 + paddleOffset;
+
+                moveSpeed = 500; // ✅ VITESSE AUGMENTÉE
+
+            } else {
+                // Fallback : viser le centre des briques restantes
+                let avgX = 0, count = 0;
+                bricks.forEach(b => {
+                    if (b.alive) { avgX += b.x + b.w/2; count++; }
+                });
+                if (count > 0) {
+                    finalTargetX = (avgX / count) - paddleW/2;
+                    moveSpeed = 400;
+                } else {
+                    finalTargetX = (CANVAS_W - paddleW) / 2;
+                    moveSpeed = 300;
+                }
+            }
+            // === 4. COLLECTE INTELLIGENTE (MULTIPLICATEURS PRIORITAIRES) ===
+            } else {
+                let bestTarget = null;
+                let bestPriority = -1;
+
+                // ✅ 1. PRIORITÉ ABSOLUE : MULTIPLICATEURS
+                powerups.forEach(p => {
+                    if (p.y > CANVAS_H * 0.3 && p.y < paddleY - 20) {
+                        let priority = 0;
+                        let distance = Math.abs(p.x - (paddleX + paddleW/2));
+
+                        // ✅ PRIORISATION DES MULTIPLICATEURS
+                        if (p.type === "mult8") priority = 1000; // x8 = priorité max
+                        else if (p.type === "mult4") priority = 800; // x4 = très prioritaire
+                        else if (p.type === "mult2") priority = 600; // x2 = prioritaire
+                        else if (p.type === "mult1") priority = 400; // x1 = moyennement prioritaire
+                        else if (p.type === "long") priority = 300;  // Raquette longue
+                        else if (p.type === "huge") priority = 350;  // Raquette géante
+                        else if (p.type !== "skull") priority = 200; // Autres powerups
+
+                        // Bonus de proximité
+                        priority += Math.max(0, 200 - distance);
+
+                        if (priority > bestPriority && distance < CANVAS_W * 0.5) {
+                            bestPriority = priority;
+                            bestTarget = p;
+                        }
+                    }
+                });
+
+                // ✅ 2. BONUS SECONDAIRES (si pas de multiplicateur)
+                if (!bestTarget) {
+                    bonuses.forEach(b => {
+                        if (b.y > CANVAS_H * 0.3 && b.y < paddleY - 20) {
+                            let distance = Math.abs(b.x - (paddleX + paddleW/2));
+                            let priority = 150 - distance * 0.5;
+
+                            if (priority > bestPriority && distance < CANVAS_W * 0.4) {
+                                bestPriority = priority;
+                                bestTarget = b;
+                            }
+                        }
+                    });
+                }
+
+                if (bestTarget) {
+                    finalTargetX = bestTarget.x - paddleW/2;
+                    moveSpeed = 450; // ✅ VITESSE AUGMENTÉE pour collecte
+                } else {
+                    // Position centrale par défaut
+                    finalTargetX = (CANVAS_W - paddleW) / 2;
+                    moveSpeed = 250;
+                }
+            }
+
+
+    // === 4. CONTRAINTES DE SÉCURITÉ ===
+    finalTargetX = Math.max(0, Math.min(CANVAS_W - paddleW, finalTargetX));
+
+    // === 5. MOUVEMENT SIMPLE ET DIRECT ===
+    let currentX = paddleX;
+    let deltaX = finalTargetX - currentX;
+    let distance = Math.abs(deltaX);
+
+    if (distance > 3) {
+        let direction = deltaX > 0 ? 1 : -1;
+        let actualSpeed = Math.min(distance / dt, moveSpeed * dt * megaspeed * 1.5); // ✅ VITESSE x1.5
+
+        paddleX += direction * actualSpeed;
+    }
+
+    paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX));
+
+    // === 6. CONTRÔLE DE VITESSE SPÉCIFIQUE AUTOPILOTE ===
+    if (Math.sqrt(ballDX * ballDX + ballDY * ballDY) > 23) {
+        // Si la balle est trop rapide, on la ralentit légèrement
+        let currentSpeed = Math.sqrt(ballDX * ballDX + ballDY * ballDY);
+        let targetSpeed = 20 + niveau * 0.3;
+        let ratio = targetSpeed / currentSpeed;
+        ballDX *= ratio;
+        ballDY *= ratio;
+    }
+
+
+}
+
+    /**
+     * Calcule le point d'impact précis pour la défense (fonction conservée car elle est parfaite).
+     */
+    function calculateDefensiveinterceptionPoint() {
+      if (ballDY < 0) return ball.x;
+      const timeToImpact = (paddleY - ball.y) / ballDY;
+      let impactX = ball.x + ballDX * timeToImpact;
+      while (impactX < 0 || impactX > CANVAS_W) {
+        if (impactX < 0) impactX = -impactX;
+        if (impactX > CANVAS_W) impactX = CANVAS_W - (impactX - CANVAS_W);
+      }
+      return impactX;
+    }
+
+    function calculateTrajectory(ball, dx, dy, brick, maxBounces) {
+        let testX = ball.x;
+        let testY = ball.y;
+        let testDX = dx;
+        let testDY = dy;
+        let bounces = 0;
+        let time = 0;
+
+        // Simulation de trajectoire
+        for (let i = 0; i < 200 && time < 300; i++) {
+            let nextX = testX + testDX;
+            let nextY = testY + testDY;
+            time++;
+
+            // Vérification collision avec la brique cible
+            if (nextY >= brick.y && nextY <= brick.y + brick.h &&
+                nextX >= brick.x && nextX <= brick.x + brick.w) {
+
+                // Calculer la position de raquette requise
+                let ballReturnTime = (paddleY - nextY) / Math.abs(testDY);
+                let ballReturnX = nextX + testDX * ballReturnTime;
+
+                // Gérer les rebonds sur le retour
+                while (ballReturnX < 0 || ballReturnX > CANVAS_W) {
+                    if (ballReturnX < 0) ballReturnX = -ballReturnX;
+                    if (ballReturnX > CANVAS_W) ballReturnX = CANVAS_W - (ballReturnX - CANVAS_W);
+                }
+
+                return {
+                    canHit: true,
+                    impactX: nextX,
+                    impactY: nextY,
+                    requiredPaddleX: ballReturnX - paddleW/2,
+                    timeToHit: time,
+                    bounces: bounces
+                };
+            }
+
+            // Gestion des rebonds sur les murs
+            if (nextX <= 0 || nextX >= CANVAS_W) {
+                testDX = -testDX;
+                bounces++;
+                if (bounces > maxBounces) break;
+            }
+            if (nextY <= 0) {
+                testDY = -testDY;
+                bounces++;
+                if (bounces > maxBounces) break;
+            }
+
+            testX = nextX;
+            testY = nextY;
+        }
+
+        return { canHit: false };
+    }
+
+    // ✅ FONCTION UTILITAIRE : Trouver la brique la plus accessible
+    function findMostAccessibleBrick() {
+        let closestBrick = null;
+        let minDistance = Infinity;
+
+        bricks.forEach(brick => {
+            if (!brick.alive) return;
+
+            let distance = Math.sqrt(
+                Math.pow(brick.x + brick.w/2 - ball.x, 2) +
+                Math.pow(brick.y + brick.h/2 - ball.y, 2)
+            );
+
+            // Bonus pour les briques du bas (plus faciles à atteindre)
+            if (brick.y > wallOffset + brickH * 2) {
+                distance *= 0.8;
+            }
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestBrick = brick;
+            }
+        });
+
+        return closestBrick;
+    }
+
+    // ✅ FONCTION CENTRALE DE GESTION DE LA VITESSE
+    function calculateGameSpeed() {
+        // Vitesse de base + bonus niveau + bonus briques cassées
+        let progressiveSpeed = baseGameSpeed +
+                              (niveau - 1) * speedIncreasePerLevel +
+                              bricksHit * speedIncreasePerBrick;
+
+        // Application du multiplicateur autopilote si actif
+        if (autopilot) {
+            currentGameSpeed = progressiveSpeed * autopilotSpeedMultiplier;
+        } else {
+            currentGameSpeed = progressiveSpeed;
+        }
+
+        // ✅ LIMITATIONS PLUS STRICTES selon le mode
+        if (autopilot) {
+            currentGameSpeed = Math.min(currentGameSpeed, 14 + niveau * 0.1); // Limite autopilote
+        } else {
+            currentGameSpeed = Math.min(currentGameSpeed, 16 + niveau * 0.3); // Limite normale
+        }
+
+        return currentGameSpeed;
+    }
+
+    // ✅ FONCTION DE MISE À JOUR DE LA VITESSE DE LA BALLE
+    function updateBallSpeed() {
+        let newSpeed = calculateGameSpeed();
+
+        // Conservation de la direction actuelle
+        let currentSpeed = Math.sqrt(ballDX * ballDX + ballDY * ballDY);
+        if (currentSpeed > 0) {
+            let ratio = newSpeed / currentSpeed;
+            ballDX *= ratio;
+            ballDY *= ratio;
+        }
+
+        ballSpeed = newSpeed;
+
+        // ✅ SÉCURITÉ ABSOLUE : Plafond de vitesse global
+        let absoluteMaxSpeed = 15 + niveau * 0.15; // Progression très lente
+        if (ballSpeed > absoluteMaxSpeed) {
+            ballSpeed = absoluteMaxSpeed;
+            console.log(`Vitesse limitée à ${absoluteMaxSpeed.toFixed(1)} au niveau ${niveau}`);
+        }
+
+        // ✅ Application immédiate de la limitation
+        let currentBallSpeed = Math.sqrt(ballDX * ballDX + ballDY * ballDY);
+        if (currentBallSpeed > ballSpeed) {
+            let ratio = ballSpeed / currentBallSpeed;
+            ballDX *= ratio;
+            ballDY *= ratio;
+        }
+
+
+
+    }
+
+    // === LOGIQUE DE MISE À JOUR DU JEU ===
+
+    function update(dt, elapsed_ms) {
+
+      // --- GESTION AUTOPILOTE & BANDEAU (VERSION CORRIGÉE) ---
+      let briquesRestantes = bricks.filter(b => b.alive).length;
+
+      // 1. Logique du bandeau d'avertissement (SIMPLIFIÉE)
+      if (!autopilot && !isBossLevel &&
+          briquesRestantes > 0 && briquesRestantes <= LancementAutoPilote + countdownRange &&
+          briquesRestantes > LancementAutoPilote) {
+
+          let bricksToActivation = briquesRestantes - LancementAutoPilote;
+          elAutopilotBanner.textContent = `AUTOPILOT DANS ${bricksToActivation}`;
+
+          if (elAutopilotBanner.style.display !== 'block') {
+              playSound("AutopilotBanner");
+              elAutopilotBanner.style.display = 'block';
+          }
+
+          elAutopilotBanner.classList.remove('flash');
+          void elAutopilotBanner.offsetWidth;
+          elAutopilotBanner.classList.add('flash');
+
+      } else {
+          if (elAutopilotBanner.style.display !== 'none') {
+              elAutopilotBanner.style.display = 'none';
+          }
+      }
+
+      // 2. Activation de l'autopilote (LOGIQUE CORRIGÉE)
+      if (briquesRestantes <= LancementAutoPilote && !autopilot && !isBossLevel) {
+          autopilot = true;
+          leftDown = rightDown = false;
+
+          // ✅ TRANSITION FLUIDE VERS LA VITESSE AUTOPILOTE
+          updateBallSpeed(); // Applique immédiatement le multiplicateur autopilote
+          playSound("autopilot_on");
+      }
+
+      // 3. Désactivation pour les boss (SÉCURISÉE)
+      if (isBossLevel && autopilot) {
+          autopilot = false;
+          updateBallSpeed(); // Retire le multiplicateur autopilote
+          leftDown = rightDown = false;
+          playSound("raquettenormale");
+
+          // Affichage du message boss
+          elAutopilotBanner.textContent = "⚠️ BOSS FIGHT - CONTRÔLE MANUEL ⚠️";
+          elAutopilotBanner.style.display = 'block';
+          elAutopilotBanner.style.color = '#ff0000';
+
+          setTimeout(() => {
+              if (elAutopilotBanner.style.display !== 'none') {
+                  elAutopilotBanner.style.display = 'none';
+              }
+          }, 3000);
+      }
+
+      // 4. Retour au manuel si trop de briques (NOUVEAU NIVEAU)
+      if (briquesRestantes > LancementAutoPilote && autopilot && !isBossLevel) {
+          autopilot = false;
+          megaspeed = 1;
+      }
+
+      // GESTION DU MODE PANIC (CORRIGÉE)
+      if (panic > 0) {
+          panic--;
+          if (!autopilot) {
+              autopilot = true;
+              leftDown = rightDown = false;
+          }
+      } else if (PanicButon) {
+          autopilot = false;
+          PanicButon = false;
+      }
+
+      // AFFICHAGE DU STATUS AUTOPILOT (CORRIGÉ)
+      if (autopilot) {
+        elAutopilotStatus.style.display = 'inline-block';
+        elAutopilotStatus.classList.add('blinking-effect');
+       } else {
+        elAutopilotStatus.style.display = 'none';
+        elAutopilotStatus.classList.remove('blinking-effect');
+      }
+
+      // APPEL DE L'AUTOPILOTE (CONDITION CORRIGÉE)
+      if (autopilot && !isBossLevel) { // ✅ AJOUT : !isBossLevel
+          autopilotMove(dt);
+      } else {
+          // Contrôle manuel
+          if (leftDown && !rightDown) {
+              paddleAcceleration = Math.min(paddleAcceleration + paddleAccelerationStep, maxPaddleAcceleration);
+              paddleX = Math.max(0, paddleX - (paddleSpeed + paddleAcceleration) * dt);
+          } else if (rightDown && !leftDown) {
+              paddleAcceleration = Math.min(paddleAcceleration + paddleAccelerationStep, maxPaddleAcceleration);
+              paddleX = Math.min(CANVAS_W - paddleW, paddleX + (paddleSpeed + paddleAcceleration) * dt);
+          } else {
+              paddleAcceleration = 0;
+          }
+      }
+
+
+      if (decrementActive) {
+        // Temps écoulé en secondes réelles
+        let elapsed = (performance.now() - decrementStartTime) / 1000;
+        let timeLeft = Math.max(0, decrementTimer - elapsed);
+
+        if (timeLeft <= 0) {
+          decrementActive = false;
+          decrementEffect = false;
+          elDec.style.display = "none";
+          playSound("raquettenormale");
+        } else {
+          elDec.textContent = "☠️ SCORE - (" + Math.ceil(timeLeft) + "s)";
+          elDec.style.display = "block";
+          elDec.style.position = "absolute";
+          elDec.style.left = (canvas.offsetLeft + paddleX + paddleW/2 - elDec.offsetWidth/2) + "px";
+          elDec.style.top = (canvas.offsetTop + paddleY - 32) + "px";
+          elDec.style.background = "rgba(0,0,0,0)";
+          elDec.style.color = "#fff";
+          elDec.style.borderRadius = "8px";
+          elDec.style.padding = "6px 10px";
+          elDec.style.boxShadow = "0 2px 8px rgba(0,0,0,0)";
+          elDec.style.backdropFilter = "blur(2px)";
+          elDec.style.fontFamily = "'Press Start 2P', 'VT323', monospace";
+          elDec.style.fontSize = "10px";
+          elDec.style.pointerEvents = "none";
+          elDec.style.zIndex = 1;
+        }
+      }
+
+
+      let prevX = ball.x, prevY = ball.y;
+      let nextX = ball.x + ballDX * dt, nextY = ball.y + ballDY * dt;
+      ball.x=nextX; ball.y=nextY;
+
+      // Collisions murs
+      if(ball.x-ball.r<0) {ball.x=ball.r; ballDX=Math.abs(ballDX); playSound("impact");}
+      if(ball.x+ball.r>CANVAS_W) {ball.x=CANVAS_W-ball.r; ballDX=-Math.abs(ballDX); playSound("impact");}
+      if(ball.y-ball.r<0) {ball.y=ball.r; ballDY=Math.abs(ballDY); playSound("impact");}
+      if(Math.abs(ballDX)<2) ballDX=(Math.random()<0.5?-1:1)*2;
+
+      // --- Collision raquette (VERSION HAUTE VITESSE SÉCURISÉE) ---
+      if (ballDY > 0) { // La balle doit descendre
+          // ✅ DÉTECTION PRÉDICTIVE pour éviter les traversées
+          let nextBallY = ball.y + ballDY * dt;
+          let nextBallX = ball.x + ballDX * dt;
+
+          // Vérification collision avec la position prédite
+          if (nextBallY + ball.r >= paddleY &&
+              ball.y + ball.r <= paddleY + paddleH &&
+              nextBallX + ball.r >= paddleX &&
+              nextBallX - ball.r <= paddleX + paddleW) {
+
+              // ✅ REPOSITIONNEMENT SÉCURISÉ avant le rebond
+              ball.y = paddleY - ball.r - 1; // Marge de sécurité
+              ball.x = nextBallX; // Conserve le mouvement horizontal
+
+              // ✅ CALCUL DE L'ANGLE DE REBOND (inchangé - fonctionne bien)
+              let impactPoint = (ball.x - (paddleX + paddleW / 2)) / (paddleW / 2);
+              impactPoint = Math.max(-1, Math.min(1, impactPoint));
+              const maxBounceAngle = 5 * Math.PI / 12;
+              const newAngle = impactPoint * maxBounceAngle;
+
+              // ✅ VITESSE LIMITÉE pour éviter les bugs
+              let speed = Math.sqrt(ballDX * ballDX + ballDY * ballDY);
+              let maxSpeed = autopilot ? (baseGameSpeed * 2) : (baseGameSpeed * 2.5);
+              speed = Math.min(speed, maxSpeed);
+
+              ballDX = speed * Math.sin(newAngle);
+              ballDY = -speed * Math.cos(newAngle);
+
+              playSound("paddle");
+          }
+      }
+
+
+      // === MISE À JOUR DU BOSS (VERSION STABILISÉE) ===
+      if (isBossLevel && boss && boss.alive) {
+          // ✅ GESTION DE L'ENTRÉE SÉCURISÉE
+          if (boss.entrancePhase) {
+              boss.y += 1; // Vitesse d'entrée réduite
+              if (boss.y >= 140) {
+                  boss.entrancePhase = false;
+                  boss.y = 140;
+              }
+          } else {
+              // ✅ MOUVEMENT HORIZONTAL STABLE
+              let moveSpeed = (5 + niveau * 0.2) * dt; // Vitesse très réduite
+              boss.x += boss.direction * moveSpeed;
+
+              // ✅ REBONDS SÉCURISÉS
+              if (boss.x <= 0) {
+                  boss.x = 0;
+                  boss.direction = 1;
+              } else if (boss.x + boss.w >= CANVAS_W) {
+                  boss.x = CANVAS_W - boss.w;
+                  boss.direction = -1;
+              }
+
+              // ✅ ATTAQUES CONTRÔLÉES
+              bossAttackTimer += elapsed_ms;
+              if (bossAttackTimer > boss.attackCooldown) {
+                  bossAttack();
+                  bossAttackTimer = 0;
+              }
+          }
+      }
+
+
+      // === COLLISION AVEC LE BOSS (VERSION SÉCURISÉE) ===
+      if (isBossLevel && boss && boss.alive && !bossInvulnerable) {
+          // ✅ COLLISION DETECTION AMÉLIORÉE
+          let ballRight = ball.x + ball.r;
+          let ballLeft = ball.x - ball.r;
+          let ballBottom = ball.y + ball.r;
+          let ballTop = ball.y - ball.r;
+
+          let bossRight = boss.x + boss.w;
+          let bossBottom = boss.y + boss.h;
+
+          if (ballRight > boss.x && ballLeft < bossRight &&
+              ballBottom > boss.y && ballTop < bossBottom) {
+
+              // ✅ CALCUL SÉCURISÉ DU REBOND
+              let overlapX = Math.min(ballRight - boss.x, bossRight - ballLeft);
+              let overlapY = Math.min(ballBottom - boss.y, bossBottom - ballTop);
+
+              if (overlapX < overlapY) {
+                  // Collision horizontale
+                  ballDX = ball.x < boss.x + boss.w/2 ? -Math.abs(ballDX) : Math.abs(ballDX);
+                  ball.x = ball.x < boss.x + boss.w/2 ? boss.x - ball.r : boss.x + boss.w + ball.r;
+              } else {
+                  // Collision verticale
+                  ballDY = ball.y < boss.y + boss.h/2 ? -Math.abs(ballDY) : Math.abs(ballDY);
+                  ball.y = ball.y < boss.y + boss.h/2 ? boss.y - ball.r : boss.y + boss.h + ball.r;
+              }
+
+              // ✅ DÉGÂTS ET EFFETS (SÉCURISÉS)
+              bossHP = Math.max(0, bossHP - 10);
+              boss.hitFlash = 10;
+              playSound("boss_hit");
+
+              // ✅ INVULNÉRABILITÉ TEMPORAIRE SÉCURISÉE
+              bossInvulnerable = true;
+              timeoutManager.set('bossInvulnerable', () => {
+                  bossInvulnerable = false;
+              }, 500);
+
+              // ✅ PARTICULES D'IMPACT
+              for (let j = 0; j < 15; j++) {
+                  let angle = Math.random() * 2 * Math.PI;
+                  let velocity = 3 + Math.random() * 4;
+                  particles.push({
+                      x: ball.x, y: ball.y,
+                      dx: Math.cos(angle) * velocity,
+                      dy: Math.sin(angle) * velocity,
+                      life: 20, color: "#ff0"
+                  });
+              }
+
+              // ✅ VÉRIFICATION DE DÉFAITE DU BOSS
+              if (bossHP <= 0) {
+                  boss.alive = false;
+                  bossDefeated = true;
+                  playSound("boss_death");
+
+                  // Récompenses
+
+                  score += 20000 * niveau;
+                  cookies += 3;
+                  vies += 1;
+
+                  // ✅ NOUVEAU : Animation du gain qui monte vers le score
+                  showScoreBonusAnim(boss.x + boss.w/2, boss.y + boss.h/2, 20000 * niveau);
+
+                  updateHUD();
+
+                  // Animation de victoire
+                  for (let i = 0; i < 30; i++) {
+                      timeoutManager.set(`bossVictory${i}`, () => {
+                          particles.push({
+                              x: boss.x + Math.random() * boss.w,
+                              y: boss.y + Math.random() * boss.h,
+                              dx: (Math.random() - 0.5) * 8,
+                              dy: (Math.random() - 0.5) * 8,
+                              life: 40,
+                              color: COLORS[Math.floor(Math.random() * COLORS.length)]
+                          });
+                      }, i * 30);
+                  }
+              }
+          }
+      }
+
+
+      // Collision briques
+      for(let i=0;i<bricks.length;i++) {
+        let b=bricks[i];
+        if(!b.alive) continue;
+        if(ball.x+ball.r>b.x && ball.x-ball.r<b.x+b.w && ball.y+ball.r>b.y && ball.y-ball.r<b.y+b.h) {
+          b.alive=false;
+
+          if (autopilot && lastTargetBrick === b) {
+              // Succès ! On mémorise cette stratégie
+              shotHistory.push({
+                  targetBrick: b,
+                  paddlePosition: paddleX,
+                  ballPosition: {x: ball.x, y: ball.y},
+                  hit: true,
+                  timestamp: performance.now()
+              });
+
+              // Nettoyer l'historique (garder seulement les 10 derniers)
+              if (shotHistory.length > 10) {
+                  shotHistory.shift();
+              }
+          } else if (autopilot && lastTargetBrick && lastTargetBrick.alive) {
+              // Raté ! On mémorise l'échec pour ajuster
+              shotHistory.push({
+                  targetBrick: lastTargetBrick,
+                  paddlePosition: paddleX,
+                  ballPosition: {x: ball.x, y: ball.y},
+                  hit: false,
+                  timestamp: performance.now()
+              });
+          }
+
+          // Reset des variables de ciblage
+          lastTargetBrick = null;
+          lastPaddleTarget = 0;
+
+
+          bricksHit++; // Incrémentation ici
+          playSound("impact");
+          // --- Collision briques (vérification de l'appel) ---
+          // Collision briques (vers ligne 1000)
+
+        if (decrementEffect) {
+          // Si le malus est actif, on applique la pénalité.
+          let penalty = 100;
+          score -= penalty;
+          showScoreDecrementAnim(b.x + b.w / 2, b.y + b.h / 2, penalty);
+        } else {
+          // Le gain de points normal...
+          let brickPoints = 100 * mult;
+          score += brickPoints;
+          updateStatsPanel();
+
+          // ✅ NOUVEAU : Son de pièces pour les hauts scores
+          if (brickPoints >= 200) {  // 200+ points (multiplicateur x2 minimum)
+            playSound("coins");
+          } else {
+            playSound("impact");  // Son normal pour les briques de base
+          }
+
+          showScoreBonusAnim(b.x + b.w / 2, b.y + b.h / 2, brickPoints);
+        }
+
+          for(let j=0;j<16;j++) {
+            let a=Math.random()*2*Math.PI, v=2+Math.random()*3;
+            particles.push({x:ball.x,y:ball.y,dx:Math.cos(a)*v,dy:Math.sin(a)*v,life:16,color:COLORS[b.colorIdx%COLORS.length]});
+          }
+          if(b.special) {
+            if(b.special === "☠️") {
+              spawnSkull(b);
+            } else {
+              spawnPowerup(b);
+            }
+          }
+
+          bricksHit++; // Incrément pour calcul de vitesse
+          updateBallSpeed(); // Mise à jour progressive de la vitesse
+
+          // Conservation de la direction pour le rebond
+          let dir = Math.atan2(ballDY, ballDX);
+          ballDX = Math.cos(dir) * currentGameSpeed;
+          ballDY = Math.sin(dir) * currentGameSpeed;
+
+          if(Math.abs(ball.x-(b.x+b.w/2))>Math.abs(ball.y-(b.y+b.h/2))) ballDX*=-1;
+          else ballDY*=-1;
+          break;
+        }
+      }
+
+      // --- Boucle de collecte des power-ups (CORRIGÉE DÉFINITIVEMENT) ---
+      powerups.forEach(p => {
+          // ✅ NOUVEAU : Validation de sécurité pour éviter les crashes
+          if (!p || typeof p.y === 'undefined') {
+              p.caught = true; // Marquer pour suppression
+              return;
+          }
+
+          // ✅ MOUVEMENT SÉCURISÉ POUR TOUS LES PROJECTILES
+          if (p.type === "boss_projectile") {
+              // Mouvement vertical standard
+              p.y += p.speed * dt;
+
+              // Mouvement horizontal pour les projectiles en éventail
+              if (p.dx && typeof p.dx === 'number') {
+                  p.x += p.dx * dt * 0.5; // Vitesse réduite pour l'horizontal
+              }
+
+              // ✅ HOMING SÉCURISÉ ET PRÉVISIBLE
+              if (p.homing && p.y < paddleY + 100 && p.y > 50) {
+                  let targetX = paddleX + paddleW / 2;
+                  let deltaX = targetX - p.x;
+
+                  // Vitesse de correction très réduite pour éviter les oscillations
+                  let correctionSpeed = Math.min(Math.abs(deltaX) * 0.02, 30 * dt);
+                  let direction = deltaX > 0 ? 1 : -1;
+
+                  p.x += direction * correctionSpeed;
+              }
+          } else {
+              // Mouvement normal pour les autres powerups
+              p.y += p.speed * dt;
+          }
+
+          // ✅ DISPARITION AVEC MARGE ÉTENDUE
+          if (p.y > CANVAS_H + 100 || p.x < -100 || p.x > CANVAS_W + 100) {
+              p.caught = true;
+              return;
+          }
+
+          // ✅ COLLISION AMÉLIORÉE ET SÉCURISÉE
+          if (p.y + 10 >= paddleY && p.y - 10 <= paddleY + paddleH &&
+              p.x + 10 >= paddleX && p.x - 10 <= paddleX + paddleW) {
+
+              p.caught = true;
+
+              // ✅ GESTION DES PROJECTILES DE BOSS (CORRIGÉE)
+              if (p.type === "boss_projectile") {
+                  // Dégâts au joueur
+                  vies = Math.max(0, vies - 1);
+                  playSound("mort");
+
+                  // Effet visuel de dégâts
+                  for (let j = 0; j < 15; j++) {
+                      let a = Math.random() * 2 * Math.PI, v = 4 + Math.random() * 6;
+                      particles.push({
+                          x: p.x, y: p.y,
+                          dx: Math.cos(a) * v, dy: Math.sin(a) * v,
+                          life: 20, color: "#f00"
+                      });
+                  }
+
+                  // ✅ NOUVEAU : Effet de flash rouge sur la raquette
+                  timeoutManager.set('paddleDamageFlash', () => {
+                    // Rien à faire, juste pour créer un délai visuel
+                  }, 200);
+
+                  updateHUD();
+
+                  // Vérifier game over
+                  if (vies <= 0) {
+                      gameOver = true;
+                      setTimeout(() => showEndPanel(), 400);
+                  }
+
+                  return; // ✅ IMPORTANT : sortir immédiatement
+              }
+
+              // ✅ GESTION DES POWERUPS NORMAUX (inchangée)
+              if (decrementEffect) {
+                  playSound("mort");
+                  let penalty = 1000;
+                  score -= penalty;
+                  showScoreDecrementAnim(p.x, p.y, penalty);
+              } else {
+                  playSound("powerup");
+                  handleIconImpact({
+                      icon: p.icon,
+                      x: p.x,
+                      y: p.y,
+                      size: 20,
+                      color: p.color || "#fff",
+                      type: p.type
+                  });
+              }
+          }
+      });
+
+      // ✅ FILTRAGE SÉCURISÉ
+      powerups = powerups.filter(p => p && !p.caught);
+
+
+
+      // --- Boucle de collecte des bonus (CORRIGÉE DÉFINITIVEMENT) ---
+      bonuses.forEach(b => {
+        b.y += b.speed * dt;
+
+        if (b.y > CANVAS_H) b.caught = true;
+
+        if (b.y > paddleY && b.x > paddleX && b.x < paddleX + paddleW && b.y < paddleY + paddleH) {
+
+          if (b.type === "cookie") {
+                cookies++; // On ajoute un cookie
+                playSound("life2");
+          }
+
+          // ✅ AJOUT : Comptage des bonus collectés
+          if (bonusesCaptured[b.emoji] !== undefined) {
+            bonusesCaptured[b.emoji]++;
+          }
+
+          b.caught = true;
+          updateHUD();
+
+          if (decrementEffect) {
+            // Si le malus est actif, on applique la pénalité.
+            playSound("mort");
+            let penalty = b.points;
+
+            // ** LA CORRECTION EST ICI : "sscore" a été remplacé par "score" **
+            score -= penalty;
+
+            showScoreDecrementAnim(b.x, b.y, penalty);
+
+          } else {
+              // Sinon, on gagne les points normalement (multiplicateur inclus).
+              playSound("bonus");
+              let finalPoints = b.points * mult;
+
+              // ✅ CORRECTION : Ajouter les points immédiatement
+              score += finalPoints;
+
+              // Animation visuelle (sans délai pour les points)
+              showScoreBonusAnim(b.x, b.y, finalPoints);
+
+              // Effet visuel seulement
+              handleIconImpact({
+                icon: "+" + finalPoints,
+                x: b.x,
+                y: b.y,
+                size: 20,
+                color: b.color,
+                points: 0 // ✅ Points déjà ajoutés, pas de double comptage
+              });
+          }
+        }
+      });
+      bonuses = bonuses.filter(b => !b.caught);
+
+
+
+      // Skulls (☠️)
+      skulls.forEach(s=>{
+        s.y+=s.speed*dt;
+        if(s.y>CANVAS_H) s.caught=true;
+        if(s.y>paddleY && s.x>paddleX && s.x<paddleX+paddleW && s.y<paddleY+paddleH) {
+          s.caught=true;
+          playSound("mort");
+          handleIconImpact({
+            icon: s.icon,
+            x: s.x,
+            y: s.y,
+            size: 20,
+            color: "#fff",
+            type: "skull"
+          });
+          startDecrement();
+        }
+      });
+      skulls = skulls.filter(s=>!s.caught);
+
+      animations.forEach(a => {
+        let t = 1 - a.frames/36;
+//        let cx = a.x + (CANVAS_W-600 - a.x)*t + Math.sin(t*3)*22;
+//        let cy = a.y + (60 - a.y)*t - Math.sin(t*Math.PI)*18;
+
+        let cx = a.x + (a.targetX - a.x) * t;
+        let cy = a.y + (a.targetY - a.y) * t;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(Math.sin(t*5)*0.4);
+        ctx.font = a.size + "px "+EMOJI_FONT;
+        ctx.globalAlpha = 0.9 - t*0.5;
+        ctx.shadowColor = a.color;
+        ctx.shadowBlur = 10 + 10*Math.abs(Math.sin(t*6));
+        ctx.fillStyle = a.color;
+        ctx.fillText(a.icon, 0, 0);
+        ctx.shadowBlur=0;
+        if (a.frames < 10) {
+          for(let k=0;k<8;k++) {
+            ctx.save();
+            ctx.globalAlpha = 0.18 + 0.12*Math.sin(performance.now()/80 + k);
+            ctx.beginPath();
+            ctx.arc(a.targetX + Math.cos(k*Math.PI/4)*18, a.targetY + Math.sin(k*Math.PI/4)*18, 3, 0, 2*Math.PI);
+            ctx.fillStyle = COLORS[k%COLORS.length];
+            ctx.shadowColor = COLORS[k%COLORS.length];
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+        if (a.frames < 10) {
+          for(let k=0;k<2;k++) {
+            ctx.save();
+            ctx.globalAlpha = 0.22 + 0.12*Math.sin(performance.now()/80 + k);
+            ctx.beginPath();
+            ctx.arc(a.targetX, a.targetY, 22+6*k+a.frames*1.2, 0, 2*Math.PI);
+            ctx.strokeStyle = k%2===0 ? "#ff0" : "#fff";
+            ctx.lineWidth = 1.5+k;
+            ctx.shadowColor = k%2===0 ? "#ff0" : "#fff";
+            ctx.shadowBlur = 8;
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+        ctx.restore();
+        a.frames--;
+      });
+      animations = animations.filter(a => a.frames > 0);
+
+      if (mult > 1) {
+        // On décrémente le minuteur en utilisant les secondes réelles.
+        multTimer -= elapsed_ms / 1000;
+
+        if (multTimer <= 0) {
+          mult = 1;
+          multTimer = 0;
+        }
+      }
+      updateMultDisplay(mult);
+
+      particles.forEach(p=>{
+        p.x+=p.dx; p.y+=p.dy; p.life--;
+      });
+      particles = particles.filter(p=>p.life>0);
+
+      // NOUVEAU MOTEUR D'ANIMATION DU SCORE (Gère correctement les nombres négatifs)
+      const scoreDifference = score - displayScore;
+
+      // On anime le score s'il y a un écart significatif (l'animation fluide est conservée)
+      if (Math.abs(scoreDifference) > 0.5) {
+        displayScore += scoreDifference * 0.08; // Vitesse de l'animation
+        elScore.classList.add("flash");
+      } else {
+        // Si l'animation est terminée, on s'assure que la valeur est exacte et on arrête le flash.
+        displayScore = score;
+        elScore.classList.remove("flash");
+      }
+
+      // --- NOUVELLE LOGIQUE D'AFFICHAGE ROBUSTE (LA CORRECTION FINALE) ---
+      let scoreToDisplay = Math.round(displayScore);
+
+      if (scoreToDisplay >= 0) {
+        // Si le score est POSITIF ou nul, on utilise la méthode classique.
+        elScore.textContent = scoreToDisplay.toString().padStart(9, "0");
+      } else {
+        // Si le score est NÉGATIF :
+        // 1. On prend la valeur absolue du score (ex: -5000 -> 5000).
+        let positiveValue = Math.abs(scoreToDisplay);
+
+        // 2. On la formate sur 8 caractères pour laisser de la place au signe "-".
+        let paddedScore = positiveValue.toString().padStart(8, "0");
+
+        // 3. On ajoute manuellement le signe "-" au début.
+        elScore.textContent = "-" + paddedScore;
+      }
+
+
+      if(ball.y-ball.r>CANVAS_H) {
+        vies--;
+        playSound("life");
+
+        ballSpeed = ballSpeed0;
+
+        if(vies<=0) {
+          gameOver=true;
+          elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+          setTimeout(()=>showEndPanel(),400);
+        }
+        else resetBall();
+        updateHUD();
+      }
+
+      // === CONDITION DE VICTOIRE ÉQUILIBRÉE ===
+      let levelComplete = false;
+
+      if (isBossLevel) {
+          // BOSS : Vérifications complètes et sécurisées
+          levelComplete = boss &&
+                         !boss.alive &&
+                         bossDefeated &&
+                         bricks.every(b => !b.alive) &&
+                         bossHP <= 0; // ✅ AJOUT : Vérification santé
+      } else {
+          // NIVEAU NORMAL : Juste les briques
+          levelComplete = bricks.every(b => !b.alive);
+      }
+
+      if (levelComplete) {
+          // ✅ 1. SAUVEGARDE DE L'ÉTAT ACTUEL
+          let wasIsBossLevel = isBossLevel;
+
+          // ✅ 2. PROGRESSION DU NIVEAU
+          niveau++;
+          levelsPassed++;
+          vies = Math.min(maxVies, vies + 1);
+
+          // ✅ 3. GESTION DES OFFSETS (ORDRE CORRIGÉ)
+          wallOffset += 5;
+          wallOffsetPlus += 5;
+
+          if (wallOffsetPlus >= 10) {
+              brickRows = Math.min(12, brickRows + 1);
+              wallOffsetPlus = 0;
+          }
+
+          // ✅ 4. NETTOYAGE COMPLET (AVANT LA CRÉATION)
+          if (wasIsBossLevel) {
+              // Nettoyage spécifique boss
+              timeoutManager.clear('bossInvulnerable');
+              for (let i = 0; i < 50; i++) {
+                  timeoutManager.clear(`bossVictory${i}`);
+              }
+
+              // Reset des variables boss
+              isBossLevel = false;
+              boss = null;
+              bossDefeated = false;
+              bossHP = 0;
+              bossInvulnerable = false;
+              bossAttackTimer = 0;
+              bossMovementTimer = 0;
+          }
+
+          // Nettoyage général
+          clearAllTimersEndLevel();
+
+          // ✅ 5. CRÉATION DU PROCHAIN NIVEAU (LOGIQUE CORRIGÉE)
+          if (niveau % 5 === 0) { // ✅ Boss tous les 5 niveaux : 5, 10, 15, 20, etc.
+            createBoss();
+          } else {
+            createBricks();
+          }
+
+          // ✅ 6. FINALISATION
+          resetBall();
+          // ✅ PROGRESSION DE VITESSE PAR NIVEAU (au lieu de += 1.1)
+
+          updateHUD();
+
+          // ✅ 7. BONUS (PROBABILITÉ ÉQUILIBRÉE)
+          if (Math.random() < 0.60) {
+              spawnBonus();
+          }
+      }
+
+      // ✅ 8. BONUS CONTINU (FRÉQUENCE RÉDUITE POUR ÉVITER LE SPAM)
+      if (Math.random() < 0.002 && bonuses.length < 2) { // 0.003 -> 0.002
+          spawnBonus();
+      }
+    }
+
+
+    // ✅ SYSTÈME D'INTERPOLATION POUR UNE FLUIDITÉ PARFAITE
+    function smoothMovement(object, targetX, targetY, smoothingFactor = 0.15) {
+        if (!object.smooth) {
+            object.smooth = { lastX: object.x, lastY: object.y };
+        }
+
+        // Interpolation linéaire vers la cible
+        object.x = object.smooth.lastX + (targetX - object.smooth.lastX) * smoothingFactor;
+        object.y = object.smooth.lastY + (targetY - object.smooth.lastY) * smoothingFactor;
+
+        // Mise à jour des positions précédentes
+        object.smooth.lastX = object.x;
+        object.smooth.lastY = object.y;
+    }
+
+
+
+    // --- Fonctions utilitaires pour powerups, bonus, effets, etc. ---
+
+    function spawnPowerup(b) {
+      let x=b.x+b.w/2, y=b.y+b.h/2;
+      let icon=b.special, type=null;
+      let color="#fff";
+      if(icon==="🏳️") type="long";  // ✅ CORRIGÉ
+      if(icon==="🏴‍☠️") type="short";
+      if(icon==="1️⃣") type="mult1";  // ✅ CORRIGÉ
+      if(icon==="2️⃣") type="mult2";
+      if(icon==="4️⃣") type="mult4";
+      if(icon==="8️⃣") type="mult8";
+      if(icon==="🔟") type="mult10";
+      if(icon==="❤️‍🔥") type="huge";
+      powerups.push({
+        x, y, icon, type, color, speed:6+Math.random()*2, caught:false, drop:true
+      });
+    }
+
+    function spawnSkull(b) {
+      let x=b.x+b.w/2, y=b.y+b.h/2;
+      skulls.push({
+        x, y, icon:"☠️", speed:7+Math.random()*2, caught:false
+      });
+    }
+
+
+    function startDecrement() {
+      decrementTimer = 30; // durée en secondes
+      decrementActive = true;
+      decrementEffect = true;
+      decrementStartTime = performance.now(); // horodatage précis
+      elDec.textContent = "☠️ SCORE - (30s)";
+      elDec.style.display = "block";
+    }
+
+
+    /**
+     * Affiche une animation de perte de score à l'écran.
+     * VERSION CORRIGÉE : Ne contient plus d'erreurs de syntaxe et vise le compteur de score.
+     */
+    function showScoreDecrementAnim(x, y, points) {
+      // --- Cible de l'animation de perte de points ---
+      // On récupère la position du compteur de score pour que l'animation s'y dirige.
+      const scoreEl = document.getElementById('score');
+      const rect = scoreEl.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      const targetX = rect.left + rect.width / 2 - canvasRect.left;
+      const targetY = rect.top + rect.height / 2 - canvasRect.top;
+
+      animations.push({
+        icon: "-" + points, // Affiche le montant correct de la pénalité
+        x: x,
+        y: y,
+        size: 24,         // Un peu plus grand pour être bien visible
+        targetX: targetX, // Cible le compteur de score (corrigé)
+        targetY: targetY, // Cible le compteur de score (corrigé)
+        frames: 30,       // Une animation légèrement plus longue
+        color: "#ff4444"  // Couleur rouge distinctive pour les malus
+      });
+    }
+
+
+
+
+    function showScoreBonusAnim(x, y, pts) {
+      const scoreEl = document.getElementById('score');
+      const rect = scoreEl.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+      const targetX = rect.left + rect.width / 2 - canvasRect.left;
+      const targetY = rect.top + rect.height / 2 - canvasRect.top;
+      animations.push({
+        icon: "+" + pts,
+        x: x,
+        y: y,
+        size: 20,
+        targetX: targetX,
+        targetY: targetY,
+        frames: 26,
+        color: "#ff0"
+      });
+    }
+
+
+    function applyPowerup(p) {
+      if (p.type === "long") {
+          paddleW = Math.min(320, paddleBaseW + 70);
+          timeoutManager.set('paddleLong', () => {
+              paddleW = Math.max(150, paddleW - 70);
+              playSound("raquettenormale");
+          }, 12000);
+      }
+
+      if (p.type === "short") {
+          playSound("mort");
+          paddleW = Math.max(50, paddleBaseW - 60);
+          timeoutManager.set('paddleShort', () => {
+              paddleW = Math.max(150, paddleW + 60);
+              playSound("raquettenormale");
+          }, 12000);
+      }
+
+
+
+      if (p.type && p.type.startsWith("mult")) {
+        let val = parseInt(p.type.replace("mult", ""));
+        mult = Math.min(mult + val, multMax);
+        multTimer = 30; // Si géré par un interval ailleurs, assurez-vous de le clearer si needed
+      }
+
+      if (p.type === "cookie") { // Correction : b.type -> p.type (assuming typo)
+        cookies++;
+        updateHUD();
+        playSound("life2");
+      }
+
+      if (p.type === "huge") {
+        paddleTimer = 10;
+        paddleTimerActive = true;
+
+        // Annuler l'ancien timer (déjà présent, bien !)
+        if (paddleHugeTimeout) clearTimeout(paddleHugeTimeout);
+
+        paddleW = Math.min(CANVAS_W - 40, paddleW * 2.5);
+        paddleHugeTimeout = setTimeout(() => {
+          paddleW = paddleBaseW;
+          playSound("raquettenormale");
+          paddleTimerActive = false;
+          paddleHugeTimeout = null; // Nettoyer
+        }, 10000);
+
+        // Génération de particules (inchangé)
+        for (let j = 0; j < 36; j++) {
+          let a = Math.random() * 2 * Math.PI, v = 5 + Math.random() * 8;
+          particles.push({x: paddleX + paddleW / 2, y: paddleY, dx: Math.cos(a) * v, dy: Math.sin(a) * v, life: 30, color: "#f55"});
+        }
+      }
+
+    }
+
+
+    function spawnBonus() {
+      let b = BONUS_ICONS[Math.floor(Math.random()*BONUS_ICONS.length)];
+      bonuses.push({
+        x: Math.random()*(CANVAS_W-120)+60,
+        y: wallOffset+30,
+        emoji: b.emoji,
+        points: b.points,
+        color: b.color,
+        type: b.type, // <-- LA LIGNE MANQUANTE EST ICI
+        speed: 7+Math.random()*2,
+        caught: false
+      });
+    }
+
+
+    function handleIconImpact(obj) {
+      try {
+        // Récupérer l'élément score avec check d'existence
+        const scoreEl = document.getElementById('score');
+        if (!scoreEl) {
+          console.warn("Élément 'score' non trouvé – animation ignorée");
+          return; // Sortir tôt pour éviter erreurs
+        }
+
+        const rect = scoreEl.getBoundingClientRect();
+        const canvasRect = canvas.getBoundingClientRect();
+
+        // Calculer la position cible relative au canvas
+        const targetX = rect.left + rect.width / 2 - canvasRect.left;
+        const targetY = rect.top + rect.height / 2 - canvasRect.top;
+
+        // Incrémenter le compteur avec check
+        if (!powerupsCaptured[obj.type]) powerupsCaptured[obj.type] = 0;
+        powerupsCaptured[obj.type]++;
+
+        // Créer l'animation
+        let anim = {
+          icon: obj.icon,
+          x: obj.x,
+          y: obj.y,
+          size: obj.size,
+          targetX: targetX,
+          targetY: targetY,
+          frames: 36,
+          color: obj.color || "#fff"
+        };
+        animations.push(anim);
+
+        // Gérer le délai avec un timeout annulable si needed (stocké globalement si plusieurs impacts)
+        if (impactTimeout) clearTimeout(impactTimeout);
+        // ✅ CORRECTION : Timeout séparé pour chaque impact
+        let timeoutKey = `impact_${Date.now()}_${Math.random()}`;
+        timeoutManager.set(timeoutKey, () => {
+          if (obj.points && obj.points > 0) {
+            score += obj.points;
+          }
+          if (obj.type && obj.type !== "skull") {
+            applyPowerup(obj);
+          }
+        }, 400);
+
+      } catch (error) {
+        console.error("Erreur dans handleIconImpact :", error);
+        // Continuer sans crash pour ne pas bloquer le jeu
+      }
+    }
+
+
+    // === SCORE FINAL, TEMPS, STATS, MEILLEUR SCORE ===
+
+    function getBestScore() {
+      return parseInt(localStorage.getItem("akranoid_best_score") || "0");
+    }
+    function setBestScore(val) {
+      localStorage.setItem("akranoid_best_score", val);
+    }
+
+    function startPsychedelicBg() {
+      const canvas = document.getElementById('psyCanvas');
+      if (!canvas) return;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const ctx = canvas.getContext('2d');
+      let t = 0;
+
+      function draw() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        let w = canvas.width, h = canvas.height;
+        let cx = w/2, cy = h/2;
+        for (let i=0; i<18; i++) {
+          let angle = (t*0.03) + i*Math.PI/9;
+          let r = 180 + 80*Math.sin(t*0.02+i);
+          let x = cx + Math.cos(angle)*r;
+          let y = cy + Math.sin(angle)*r;
+          let size = 110 + 10*Math.sin(t*0.07+i*1.3);
+          let color = `hsl(${(t*4+i*20)%360},95%,60%)`;
+          ctx.save();
+          ctx.globalAlpha = 0.21 + 0.18*Math.sin(t*0.09+i);
+          ctx.translate(x, y);
+          ctx.rotate(angle + Math.sin(t*0.04+i)*1.2);
+          ctx.beginPath();
+          ctx.arc(0, 0, size, 0, 2*Math.PI);
+          ctx.fillStyle = color;
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 40;
+          ctx.fill();
+          ctx.restore();
+        }
+        t++;
+        psyAnimId = requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+
+    function stopPsychedelicBg() {
+        if (typeof psyAnimId !== 'undefined' && psyAnimId) {
+            cancelAnimationFrame(psyAnimId);
+            psyAnimId = null;
+        }
+        const canvas = document.getElementById('psyCanvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    function bossAttack() {
+        if (!boss || !boss.alive || bossInvulnerable) return;
+
+        let attackType = Math.random();
+
+        if (bossPhase === 1) {
+            // Phase 1 : Attaques simples
+            if (attackType < 0.7) {
+                bossFireProjectile();
+            } else {
+                bossSpawnEnemyBricks();
+            }
+        } else if (bossPhase === 2) {
+            // Phase 2 : Attaques plus variées
+            if (attackType < 0.4) {
+                bossFireProjectile();
+            } else if (attackType < 0.7) {
+                bossSpawnEnemyBricks();
+            } else {
+                bossFireSpread();
+            }
+        } else {
+            // Phase 3 : Attaques dévastatrices
+            if (attackType < 0.3) {
+                bossFireProjectile();
+            } else if (attackType < 0.5) {
+                bossFireSpread();
+            } else if (attackType < 0.8) {
+                bossRainAttack();
+            } else {
+                bossSpawnSkulls();
+            }
+        }
+    }
+
+    function bossFireProjectile() {
+        // ✅ VALIDATION STRICTE
+        if (!boss || !boss.alive || bossInvulnerable) return;
+
+        // ✅ PROJECTILE AVEC MOUVEMENT ALÉATOIRE
+        let randomAngle = (Math.random() - 0.5) * 0.4; // Variation d'angle ±0.2 radians
+        let speedVariation = 8 + Math.random() * 12; // ✅ VITESSE RÉDUITE : entre 8 et 20
+
+        powerups.push({
+            x: boss.x + boss.w/2,
+            y: boss.y + boss.h + 10,
+            icon: "💥",
+            type: "boss_projectile",
+            color: "#f00",
+            speed: speedVariation,
+            caught: false,
+            drop: true,
+            homing: false,
+            dx: Math.sin(randomAngle) * speedVariation * 0.3,  // ✅ NOUVEAU : Dérive horizontale aléatoire
+            dy: Math.cos(randomAngle) * speedVariation,        // ✅ NOUVEAU : Vitesse verticale variable
+            wobble: Math.random() * 2,                         // ✅ NOUVEAU : Facteur d'oscillation
+            wobbleSpeed: 0.1 + Math.random() * 0.1,            // ✅ NOUVEAU : Vitesse d'oscillation
+            age: 0                                             // ✅ NOUVEAU : Âge du projectile pour animations
+        });
+        playSound("impact");
+    }
+
+
+
+    function bossFireSpread() {
+        // ✅ VALIDATION STRICTE
+        if (!boss || !boss.alive || bossInvulnerable) return;
+
+        // ✅ TIR EN ÉVENTAIL SIMPLIFIÉ
+        for (let i = -1; i <= 1; i++) {
+            powerups.push({
+                x: boss.x + boss.w/2 + i * 25,
+                y: boss.y + boss.h + 10,
+                icon: "⭐",
+                type: "boss_projectile",
+                color: "#fa0",
+                speed: 35,
+                caught: false,
+                drop: true,
+                homing: false,
+                dx: i * 25, // Direction horizontale simple
+                dy: 35     // Direction verticale simple
+            });
+        }
+        playSound("powerup");
+    }
+
+    function bossRainAttack() {
+        // Pluie de projectiles
+        for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+                powerups.push({
+                    x: Math.random() * (CANVAS_W - 40) + 20,
+                    y: -20,
+                    icon: "💀",
+                    type: "boss_projectile",
+                    color: "#f0f",
+                    speed: 10 + niveau * 0.8,
+                    caught: false,
+                    drop: true
+                });
+            }, i * 100);
+        }
+        playSound("mort");
+    }
+
+    function bossSpawnEnemyBricks() {
+        // Crée des briques ennemies qui bougent
+        let newBrickX = boss.x + (Math.random() - 0.5) * 200;
+        newBrickX = Math.max(0, Math.min(CANVAS_W - brickW, newBrickX));
+
+        bricks.push({
+            x: newBrickX,
+            y: boss.y + boss.h + 20,
+            w: brickW,
+            h: brickH,
+            finalX: newBrickX,
+            finalY: boss.y + boss.h + 20,
+            colorIdx: 0,
+            special: Math.random() < 0.4 ? "☠️" : null,
+            alive: true,
+            animFrame: 36,
+            animAngle: 0,
+            animating: false,
+            isBossMinion: true,
+            moveSpeed: 30,
+            moveDirection: Math.random() < 0.5 ? -1 : 1
+        });
+    }
+
+    function bossSpawnSkulls() {
+        // Phase 3 : Spawn direct de skulls
+        for (let i = 0; i < 3; i++) {
+            skulls.push({
+                x: Math.random() * (CANVAS_W - 40) + 20,
+                y: boss.y + boss.h,
+                icon: "☠️",
+                speed: 100 + Math.random() * 50,
+                caught: false
+            });
+        }
+        playSound("mort");
+    }
+
+
+    function showEndPanel() {
+        // Animation psychédélique
+        document.getElementById('TITRE').innerHTML = "--- GAME OVER ---<br><br>";
+        const finalScoreEl = document.getElementById('finalScore');
+        finalScoreEl.textContent = "SCORE : " + score.toLocaleString();
+        finalScoreEl.classList.add('flashy-score');
+
+        // Statistiques du jeu
+        document.getElementById('bricksHit').textContent = "Briques touchées : " + bricksHit;
+        document.getElementById('levelsPassed').textContent = "Tableaux passés : " + levelsPassed;
+        let min = Math.floor(elapsedTime/60), sec = elapsedTime%60;
+        document.getElementById('timePlayed').textContent = "Temps de jeu : " + min + "m " + sec + "s";
+
+        let details = Object.entries(powerupsCaptured)
+            .map(([k, v]) => v > 0 ? k + " : " + v : null)
+            .filter(Boolean)
+            .join("<br>");
+        document.getElementById('powerupDetails').innerHTML = "Power-ups capturés :<br><br>" + (details || "Aucun");
+
+        // ✅ NOUVEAU : Gestion des records
+        let playerNameSection = document.getElementById('playerNameSection');
+        let leaderboardSection = document.getElementById('leaderboardSection');
+        let saveScoreBtn = document.getElementById('saveScoreBtn');
+        let skipSaveBtn = document.getElementById('skipSaveBtn');
+        let playerNameInput = document.getElementById('playerNameInput');
+
+        // Vérifier si c'est un nouveau record
+        if (isNewRecord(score)) {
+            // ✅ NOUVEAU RECORD : Demander le nom
+            playerNameSection.style.display = 'block';
+            leaderboardSection.style.display = 'none';
+
+            // Focus sur l'input
+            setTimeout(() => {
+                playerNameInput.focus();
+                playerNameInput.select();
+            }, 500);
+
+            // ✅ GESTION DE LA SAISIE
+            let scoreSaved = false;
+
+            // Fonction de sauvegarde
+            function saveScore() {
+                if (scoreSaved) return;
+                scoreSaved = true;
+
+                let playerName = playerNameInput.value.trim() || "JOUEUR";
+                addScoreToLeaderboard(playerName, score);
+
+                // Masquer la saisie et afficher le classement
+                playerNameSection.style.display = 'none';
+                leaderboardSection.style.display = 'block';
+                displayLeaderboard();
+
+                playSound("bonus"); // Son de confirmation
+            }
+
+            // ✅ ÉVÉNEMENTS
+            saveScoreBtn.onclick = saveScore;
+            skipSaveBtn.onclick = () => {
+                if (scoreSaved) return;
+                scoreSaved = true;
+                playerNameSection.style.display = 'none';
+                leaderboardSection.style.display = 'block';
+                displayLeaderboard();
+            };
+
+            // Sauver avec Entrée
+            playerNameInput.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    saveScore();
+                }
+            };
+
+        } else {
+            // ✅ PAS DE RECORD : Afficher directement le classement
+            playerNameSection.style.display = 'none';
+            leaderboardSection.style.display = 'block';
+            displayLeaderboard();
+        }
+
+        // Affichage du meilleur score
+        document.getElementById('bestScore').textContent = "Meilleur score : " + getBestScore().toLocaleString();
+
+        // Afficher le panneau
+        document.getElementById('endPanel').style.display = "flex";
+        startPsychedelicBg();
+    }
+
+
+    function render() {
+      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+
+      // Rendu des briques
+      bricks.forEach(b => {
+        if (!b.alive) return;
+
+        // Animation d’arrivée
+        if (b.animating && b.animFrame < 36) {
+          let t = b.animFrame / 36;
+          // Mouvement hélicoïdal vers la position finale
+          b.x = CANVAS_W / 2 + (b.finalX - CANVAS_W / 2) * t + Math.cos(b.animAngle + t * 6) * (1 - t) * 60;
+          b.y = CANVAS_H / 2 + (b.finalY - CANVAS_H / 2) * t + Math.sin(b.animAngle + t * 6) * (1 - t) * 60;
+          b.animFrame++;
+          if (b.animFrame >= 36) {
+            b.x = b.finalX;
+            b.y = b.finalY;
+            b.animating = false;
+          }
+        }
+
+        // Gradient pour la brique
+        let grad = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
+        let g = BRICK_GRADIENTS[b.colorIdx % BRICK_GRADIENTS.length];
+        grad.addColorStop(0, g[0]);
+        grad.addColorStop(1, g[1]);
+        ctx.fillStyle = grad;
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+
+        // Effet de surbrillance
+        ctx.save();
+        ctx.globalAlpha = 0.42;
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(b.x, b.y, b.w, b.h);
+        ctx.restore();
+
+        // Élément spécial (ex. : emoji)
+        if (b.special) {
+          ctx.font = "24px " + EMOJI_FONT;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#fff";
+          ctx.fillText(b.special, b.x + b.w / 2, b.y + b.h / 2 + 2);
+          ctx.strokeStyle = "#0ff";
+          ctx.lineWidth = 2;
+          ctx.strokeText(b.special, b.x + b.w / 2, b.y + b.h / 2 + 2);
+        }
+      });
+
+      // Rendu des particules
+      particles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.life / 30;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // ✅ RENDU DES POWER-UPS AVEC TAILLES DIFFÉRENCIÉES
+      powerups.forEach(p => {
+        if (p.drop && !p.caught) {
+          // ✅ NOUVEAU : Taille variable selon le type de projectile
+          let fontSize = 50; // Taille par défaut pour les powerups normaux
+          let shadowBlur = 18;
+          let shadowColor = "#fff";
+
+          // ✅ PROJECTILES DE BOSS : Plus gros et plus impressionnants
+          if (p.type === "boss_projectile") {
+            fontSize = 80; // ✅ 60% plus gros que les powerups normaux
+            shadowBlur = 25; // Halo plus intense
+            shadowColor = p.color || "#f00"; // Couleur du halo = couleur du projectile
+          }
+
+          ctx.font = fontSize + "px " + EMOJI_FONT;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.shadowColor = shadowColor;
+          ctx.shadowBlur = shadowBlur;
+          ctx.fillStyle = p.color || "#fff";
+          ctx.fillText(p.icon, p.x, p.y);
+          ctx.shadowBlur = 0;
+        }
+      });
+
+
+      // Rendu des bonus
+      bonuses.forEach(b => {
+        if (!b.caught) {
+          ctx.font = "50px " + EMOJI_FONT;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.shadowColor = b.color;
+          ctx.shadowBlur = 20;
+          ctx.fillStyle = b.color;
+          ctx.fillText(b.emoji, b.x, b.y);
+          ctx.shadowBlur = 0;
+        }
+      });
+
+      // Rendu des skulls
+      skulls.forEach(s => {
+        if (!s.caught) {
+          ctx.font = "50px " + EMOJI_FONT;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.shadowColor = "#fff";
+          ctx.shadowBlur = 18;
+          ctx.fillStyle = "#fff";
+          ctx.fillText(s.icon, s.x, s.y);
+          ctx.shadowBlur = 0;
+        }
+      });
+
+      // === RENDU DU BOSS ===
+      if (isBossLevel && boss && boss.alive) {
+          ctx.save();
+
+          // Animation d'entrée fluide
+          if (boss.entrancePhase) {
+              boss.entranceY += 1.2;
+              boss.y = boss.entranceY;
+              if (boss.y >= 140) {
+                  boss.entrancePhase = false;
+                  boss.y = 140;
+              }
+          }
+
+          // Calcul du ratio de santé
+          let healthRatio = Math.max(0, bossHP / bossMaxHP);
+          let skullSize = Math.max(80, boss.w * 0.8);
+
+          // Couleur et effets selon l'état du boss
+          if (boss.hitFlash > 0) {
+              ctx.shadowColor = "#f00";
+              ctx.shadowBlur = 35;
+              ctx.fillStyle = "#fff";
+              boss.hitFlash--;
+          } else if (bossInvulnerable) {
+              ctx.shadowColor = "#0ff";
+              ctx.shadowBlur = 30;
+              ctx.fillStyle = "#0ff";
+          } else if (healthRatio <= 0.3) {
+              ctx.shadowColor = "#f00";
+              ctx.shadowBlur = 25;
+              ctx.fillStyle = "#f44";
+          } else if (healthRatio <= 0.6) {
+              ctx.shadowColor = "#f80";
+              ctx.shadowBlur = 20;
+              ctx.fillStyle = "#fa0";
+          } else {
+              ctx.shadowColor = "#ff0";
+              ctx.shadowBlur = 18;
+              ctx.fillStyle = "#fff";
+          }
+
+          // Rendu de la tête de mort
+          ctx.font = skullSize + "px " + EMOJI_FONT;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          let centerX = boss.x + boss.w / 2;
+          let centerY = boss.y + boss.h / 2;
+
+          // Effet de tremblement si boss faible
+          if (healthRatio <= 0.3) {
+              centerX += (Math.random() - 0.5) * 4;
+              centerY += (Math.random() - 0.5) * 4;
+          }
+
+          // Animation de pulsation
+          let pulseScale = 1 + Math.sin(performance.now() / (200 - bossPhase * 50)) * 0.1;
+          ctx.save();
+          ctx.translate(centerX, centerY);
+          ctx.scale(pulseScale, pulseScale);
+
+          // Rendu avec contour
+          ctx.strokeStyle = "#000";
+          ctx.lineWidth = 3;
+          ctx.strokeText("☠️", 0, 0);
+          ctx.fillText("☠️", 0, 0);
+
+          ctx.restore();
+          ctx.restore();
+      }
+
+
+
+      // --- Boucle de rendu des animations (corrigée) ---
+      animations.forEach(a => {
+        let t = 1 - a.frames / 36;
+
+        // Calcul de la position de l'animation
+        let cx = a.x + (a.targetX - a.x) * t;
+        let cy = a.y + (a.targetY - a.y) * t;
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(Math.sin(t * 5) * 0.4);
+
+        // ** LA CORRECTION EST ICI : CHOISIR LA BONNE POLICE D'ÉCRITURE **
+        // On vérifie si l'icône est du texte (commence par '+' ou '-') ou un emoji.
+        let isTextAnimation = a.icon.toString().startsWith('+') || a.icon.toString().startsWith('-');
+
+        // On applique la police du jeu pour le texte, et la police emoji pour les icônes.
+        ctx.font = a.size + "px " + (isTextAnimation ? FONT : EMOJI_FONT);
+
+        // Le reste du code de rendu est conservé, il est correct.
+        ctx.globalAlpha = 0.9 - t * 0.5;
+        ctx.shadowColor = a.color;
+        ctx.shadowBlur = 10 + 10 * Math.abs(Math.sin(t * 6));
+        ctx.fillStyle = a.color;
+        ctx.fillText(a.icon, 0, 0);
+        ctx.shadowBlur = 0;
+
+
+
+
+
+        // Effets visuels supplémentaires (inchangés)
+        if (a.frames < 10) {
+          for (let k = 0; k < 8; k++) {
+            ctx.save();
+            ctx.globalAlpha = 0.18 + 0.12 * Math.sin(performance.now() / 80 + k);
+            ctx.beginPath();
+            ctx.arc(a.targetX + Math.cos(k * Math.PI / 4) * 18, a.targetY + Math.sin(k * Math.PI / 4) * 18, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = COLORS[k % COLORS.length];
+            ctx.shadowColor = COLORS[k % COLORS.length];
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.restore();
+          }
+          if (a.frames < 10) {
+            for (let k = 0; k < 2; k++) {
+              ctx.save();
+              ctx.globalAlpha = 0.22 + 0.12 * Math.sin(performance.now() / 80 + k);
+              ctx.beginPath();
+              ctx.arc(a.targetX, a.targetY, 22 + 6 * k + a.frames * 1.2, 0, 2 * Math.PI);
+              ctx.strokeStyle = k % 2 === 0 ? "#ff0" : "#fff";
+              ctx.lineWidth = 1.5 + k;
+              ctx.shadowColor = k % 2 === 0 ? "#ff0" : "#fff";
+              ctx.shadowBlur = 8;
+              ctx.stroke();
+              ctx.restore();
+            }
+          }
+        }
+
+
+       ctx.restore();
+        a.frames--;
+      });
+      animations = animations.filter(a => a.frames > 0);
+
+      // --- Rendu de la raquette avec halo (corrigé) ---
+      ctx.save();
+      // 1. On définit la couleur et l'intensité du halo (ombre portée).
+      ctx.shadowColor = "#0ff"; // Un halo cyan pour un look néon.
+      ctx.shadowBlur = 20;      // Plus cette valeur est élevée, plus le halo est diffus.
+
+      // 2. On définit la couleur fixe de la raquette.
+      ctx.fillStyle = "#fff";   // Une raquette blanche pour un contraste maximal.
+
+      // 3. On dessine la raquette.
+      ctx.fillRect(paddleX, paddleY, paddleW, paddleH);
+      ctx.restore(); // On réinitialise le contexte pour que le halo n'affecte pas les autres éléments.
+
+      // --- Rendu de la balle (maintenu séparément) ---
+      ctx.save();
+      ctx.shadowColor = "#f0f";
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = "#ff0";
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.restore();
+
+      if (gameOver) {
+        // Désormais, le panneau de fin s'affiche via showEndPanel()
+      }
+    }
+
+    // === LANCEMENT DU JEU ===
+
+    // Panneau d'explication des bonus
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM chargé - Initialisation du jeu");
+
+        // ✅ NOUVEAU : Afficher le panneau de bonus au démarrage
+        document.getElementById('bonusPanel').style.display = 'flex';
+
+        // ✅ NOUVEAU : Masquer le panneau de stats au démarrage
+        const statsPanel = document.getElementById('statsPanel');
+        if (statsPanel) statsPanel.style.display = 'none';
+
+        // ✅ GESTION DU BOUTON OK (MODIFIÉE)
+        document.getElementById('closeBonusPanel').onclick = function() {
+            document.getElementById('bonusPanel').style.display = 'none';
+            const statsPanel = document.getElementById('statsPanel');
+            if (statsPanel) statsPanel.style.display = 'block';
+            playBonusPanelJingle();
+
+            // ✅ NOUVEAU : Lancer le jeu seulement maintenant
+            startGame();
+            pause = false;
+        };
+
+        // ✅ SUPPRIMÉ : Plus de démarrage automatique du jeu
+        // Les lignes suivantes sont commentées ou supprimées :
+        // resetGame();
+        // gameLoopId = requestAnimationFrame(gameLoop);
+    });
+
+
+
+    function diagnosticGame() {
+        console.log("=== DIAGNOSTIC DU JEU ===");
+        console.log("gameStarted:", gameStarted);
+        console.log("pause:", pause);
+        console.log("gameOver:", gameOver);
+        console.log("ball existe:", !!ball);
+        console.log("canvas existe:", !!canvas);
+        console.log("gameLoopId:", gameLoopId);
+        console.log("Elements DOM:");
+        console.log("- statsPanel:", !!document.getElementById('statsPanel'));
+        console.log("- bricksStats:", !!document.getElementById('bricksStats'));
+        console.log("- bonusPanel:", !!document.getElementById('bonusPanel'));
+
+        // Auto-correction des problèmes détectés
+        if (!gameStarted || pause || gameOver) {
+            console.log("🔧 Correction automatique des états...");
+            gameStarted = true;
+            pause = false;
+            gameOver = false;
+
+            if (!gameLoopId) {
+                gameLoopId = requestAnimationFrame(gameLoop);
+                console.log("🔧 Boucle de jeu relancée");
+            }
+        }
+
+        console.log("=== FIN DIAGNOSTIC ===");
+    }
+
+    // ✅ FONCTION AUDIO (EN DEHORS DE DOMContentLoaded)
+    function playBonusPanelJingle() {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = [
+            {freq: 523, duration: 0.18}, // Do
+            {freq: 659, duration: 0.18}, // Mi
+            {freq: 784, duration: 0.18}, // Sol
+            {freq: 988, duration: 0.18}, // Si
+            {freq: 1046, duration: 0.18}, // Do+
+            {freq: 784, duration: 0.18}, // Sol
+            {freq: 659, duration: 0.18}, // Mi
+            {freq: 523, duration: 0.26}  // Do (longue)
+        ];
+
+        let time = ctx.currentTime;
+        notes.forEach((note, i) => {
+            let osc = ctx.createOscillator();
+            let gain = ctx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(note.freq, time);
+            gain.gain.setValueAtTime(0.16, time);
+            gain.gain.linearRampToValueAtTime(0, time + note.duration);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(time);
+            osc.stop(time + note.duration);
+            time += note.duration * 0.95;
+        });
+    }
+
+    // ✅ FONCTION DE DEBUG (EN DEHORS DE DOMContentLoaded)
+    // ✅ FONCTION DE DEBUG (EN DEHORS DE DOMContentLoaded)
+    function showDebugPopup() {
+        // Récupère les variables clés
+        const debugData = {
+            "État de pause": pause,
+            "Jeu démarré": gameStarted,
+            "Jeu terminé": gameOver,
+            "Vies restantes": vies,
+            "Niveau actuel": niveau,
+            "Score actuel": score,
+            "Position de la balle (x, y)": ball ? `${ball.x}, ${ball.y}` : "Balle non initialisée",
+            "Vitesse de la balle (DX, DY)": `${ballDX}, ${ballDY}`,
+            "Vitesse de la balle (globale)": ballSpeed,
+            "Position de la raquette (x)": paddleX,
+            "Largeur de la raquette": paddleW,
+            "Autopilote activé": autopilot,
+            "Cookies disponibles": cookies,
+            "Briques restantes": bricks.filter(b => b.alive).length,
+            "Power-ups actifs": powerups.length,
+            "Bonus actifs": bonuses.length,
+            "Skulls actifs": skulls.length,
+            "Animations en cours": animations.length,
+            "Particules": particles.length,
+            "GameLoop ID": gameLoopId
+        };
+
+        // Crée le contenu HTML de la pop-up
+        let content = '<div id="dragHandle" style="cursor: move; background: rgba(255,255,255,0.2); padding: 10px; text-align: center; font-weight: bold;">Débogage (Déplaçable)</div>';
+        content += '<table style="width:100%; border-collapse: collapse;">';
+        for (const [key, value] of Object.entries(debugData)) {
+            content += `<tr><td style="border:1px solid #ccc; padding:5px; font-weight:bold;">${key}</td><td style="border:1px solid #ccc; padding:5px;">${value}</td></tr>`;
+        }
+        content += '</table><button onclick="this.parentElement.style.display=\'none\';">Fermer</button>';
+
+        // Crée ou met à jour la pop-up
+        let popup = document.getElementById('debugPopup');
+        if (!popup) {
+            popup = document.createElement('div');
+            popup.id = 'debugPopup';
+            popup.style.cssText = `
+                position: fixed; top: calc(50% - 200px); left: calc(50% + 400px);
+                transform: translate(-50%, -50%); background: rgba(0,0,0,0.8);
+                color: #fff; padding: 20px; border-radius: 10px; z-index: 5000;
+                max-height: 80vh; overflow-y: auto; box-shadow: 0 0 20px #0ff;
+            `;
+            document.body.appendChild(popup);
+
+            // Ajout du drag
+            let offsetX = 0, offsetY = 0, isDragging = false;
+
+            popup.addEventListener('mousedown', function(e) {
+                if (e.target.id === 'dragHandle') {
+                    isDragging = true;
+                    offsetX = e.clientX - popup.getBoundingClientRect().left;
+                    offsetY = e.clientY - popup.getBoundingClientRect().top;
+                }
+            });
+
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    popup.style.left = `${e.clientX - offsetX}px`;
+                    popup.style.top = `${e.clientY - offsetY}px`;
+                    popup.style.transform = 'none';
+                }
+            });
+
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+        }
+        popup.innerHTML = content;
+        popup.style.display = 'block';
+    }
+
+  </script>
+
+
+  <script>
+  // ✅ OPTIMISATIONS SPÉCIFIQUES NOUVELLE FENÊTRE
+  window.addEventListener('load', function() {
+    // ✅ 1. TITRE DE LA FENÊTRE DYNAMIQUE
+    document.title = "🎮 Brick Blitz Elysium - Niveau " + niveau + " | Score: " + score;
+
+    // ✅ 2. MISE À JOUR DU TITRE EN TEMPS RÉEL
+    const originalUpdateHUD = updateHUD;
+    updateHUD = function() {
+      originalUpdateHUD.call(this);
+      document.title = `🎮 Brick Blitz Elysium - Niveau ${niveau} | Score: ${score.toLocaleString()}`;
+    };
+
+    // ✅ 3. FERMETURE PROPRE DE LA FENÊTRE
+    window.addEventListener('beforeunload', function(e) {
+      if (gameStarted && !gameOver) {
+        e.preventDefault();
+        e.returnValue = 'Voulez-vous vraiment quitter le jeu en cours ?';
+      }
+    });
+
+    // ✅ 4. FOCUS AUTOMATIQUE POUR LES CONTRÔLES
+    window.focus();
+
+    // ✅ 5. MESSAGE DE BIENVENUE DANS LA CONSOLE
+    console.log(`
+      🎮 BRICK BLITZ ELYSIUM 🎮
+      ========================
+      Contrôles:
+      • Flèches ← → ou Q/D : Déplacer la raquette
+      • P : Pause
+      • S : Son ON/OFF
+      • Z : Debug
+      • Espace : Bouton panique (avec cookies)
+
+      Bon jeu ! 🚀
+    `);
+  });
+
+  // ✅ 6. FONCTION DE FERMETURE DEPUIS LE JEU
+  function closeGameWindow() {
+    if (confirm('Voulez-vous fermer le jeu et retourner au blog ?')) {
+      window.close();
+    }
+  }
+
+  // ✅ 7. AJOUT D'UN BOUTON DE FERMETURE DISCRET
+  document.addEventListener('DOMContentLoaded', function() {
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.style.cssText = `
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      background: rgba(255, 0, 0, 0.7);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 9999;
+      transition: background 0.3s ease;
+    `;
+    closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255, 0, 0, 1)';
+    closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255, 0, 0, 0.7)';
+    closeBtn.onclick = closeGameWindow;
+    document.body.appendChild(closeBtn);
+  });
+  </script>
+0
+
+
+
+</body>
+</html>
