@@ -652,7 +652,7 @@
 
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
-  
+
   <script>
 
 
@@ -741,6 +741,7 @@
     let lastPaddleTarget = 0;
     let paddleSizeEffect = null;
     let paddleOriginalSize = paddleBaseW;
+    let dernierUtilisateur = null;
 
 let targetVelocity = 0;
 let adaptiveCompensation = 0;
@@ -762,11 +763,12 @@ let gameSessionId = null; // ID unique de la session de jeu
 let frameCount = 0;
 let lastPerformanceCheck = 0;
 
-// ✅ NOUVEAU : Configuration EmailJS
 const EMAILJS_CONFIG = {
-    publicKey: "S4SodZJrD9Ftqor5s", // À remplacer par votre clé
-    serviceId: "service_z3kyzle",           // À remplacer par votre service
-    templateId: "template_7x60gk8"          // À remplacer par votre template
+    publicKey: "S4SodZJrD9Ftqor5s",
+    serviceId: "service_z3kyzle",
+    templateId: "template_7x60gk8",
+    toEmail: "jlmaybe1024@gmail.com", // ✅ AJOUT : Email de destination
+    enabled: true // ✅ AJOUT : Possibilité de désactiver facilement
 };
 
 let baseGameSpeed = 12;
@@ -914,6 +916,8 @@ let particleCountMax = 80; // Pour ajuster la qualité
         gameOver: gameOver
       });
     }
+
+
 
     function updateStatsPanel() {
       // ✅ VÉRIFICATIONS ESSENTIELLES SEULEMENT
@@ -1135,42 +1139,123 @@ let particleCountMax = 80; // Pour ajuster la qualité
       gameStateStatsEl.innerHTML = gameStateHtml;
     }
 
-    // ✅ NOUVEAU : Fonction d'envoi d'email au lancement du jeu
-    function sendGameStartEmail() {
+    // ✅ FONCTION D'ENVOI D'EMAIL AVEC IP PUBLIQUE
+    async function sendGameStartEmail() {
         // Éviter les envois multiples
         if (emailSent) return;
 
-        // Générer un ID unique pour cette session de jeu
-        gameSessionId = 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        // Vérifications de base
+        if (typeof emailjs === 'undefined') {
+            console.warn('⚠️ EmailJS non disponible');
+            return;
+        }
 
-        // Initialisation d'EmailJS (si pas déjà fait)
-        if (typeof emailjs !== 'undefined') {
-            emailjs.init(EMAILJS_CONFIG.publicKey);
+        if (!EMAILJS_CONFIG.publicKey || !EMAILJS_CONFIG.serviceId || !EMAILJS_CONFIG.templateId) {
+            console.warn('⚠️ Configuration EmailJS incomplète');
+            return;
+        }
 
-            // Paramètres à envoyer par email
+        try {
+            // Générer un ID unique pour cette session de jeu
+            gameSessionId = 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+            console.log('🔍 Récupération de l\'IP publique...');
+
+            // ✅ NOUVEAU : Récupération de l'IP publique (avec timeout)
+            let publicIP = 'Récupération en cours...';
+            try {
+                // Lancer la récupération avec un timeout de 5 secondes max
+                const ipPromise = getPublicIP();
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Timeout IP')), 5000)
+                );
+
+                publicIP = await Promise.race([ipPromise, timeoutPromise]);
+            } catch (error) {
+                console.warn('❌ Timeout ou erreur IP:', error.message);
+                publicIP = 'Non disponible (timeout)';
+            }
+
+            console.log('✅ EmailJS disponible, tentative d\'envoi...');
+
+            // Initialisation EmailJS
+            emailjs.init({
+                publicKey: EMAILJS_CONFIG.publicKey,
+                blockHeadless: true,
+                limitRate: {
+                    id: 'app_rate_limit',
+                    throttle: 10000,
+                }
+            });
+
+            try {
+              dernierUtilisateur = getDernierNom();
+              } catch (error) {
+              console.warn('Erreur lors de la récupération du dernier nom:', error);
+            }
+
+            // ✅ PARAMÈTRES ÉTENDUS AVEC IP PUBLIQUE
             const templateParams = {
-                player_name: "Joueur", // Peut être personnalisé
+                to_email: EMAILJS_CONFIG.toEmail || "jlmaybe1024@gmail.com",
+                from_name: "Brick Blitz Elysium",
+                player_name: "BlitzBrickV1",
                 game_session: gameSessionId,
                 start_time: new Date().toLocaleString('fr-FR'),
-                user_agent: navigator.userAgent,
+                user_agent: navigator.userAgent.substring(0, 100),
                 screen_resolution: window.screen.width + 'x' + window.screen.height,
-                game_version: "Brick Blitz Elysium v1.0"
+                game_version: "Brick Blitz Elysium v1.0",
+                public_ip: publicIP, // ✅ NOUVEAU : IP publique
+
+                // ✅ CORRECTION : Utilisation correcte du dernier nom
+                dernier_nom: dernierUtilisateur ? dernierUtilisateur.name : "Aucun",
+                dernier_score: dernierUtilisateur ? dernierUtilisateur.score : 0,
+                dernier_date: dernierUtilisateur ? dernierUtilisateur.date : "N/A",
+                dernier_niveau: dernierUtilisateur ? dernierUtilisateur.level : 0,
+
+                url: window.location.href,
+
+                // ✅ MESSAGE ENRICHI AVEC L'IP PUBLIQUE
+                message: `🎮 Nouvelle session de jeu démarrée !
+
+    📊 Détails techniques :
+    • Joueur : BlitzBrickV1
+    • Session : ${gameSessionId}
+    • Heure : ${new Date().toLocaleString('fr-FR')}
+    • IP publique : ${publicIP}
+    • Navigateur : ${navigator.userAgent.substring(0, 50)}...
+    • Résolution : ${window.screen.width}x${window.screen.height}
+    • URL : ${window.location.href}
+
+    🚀 Bon jeu !`
             };
+
+            console.log('📧 Envoi avec IP publique :', publicIP);
 
             // Envoi de l'email
             emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, templateParams)
                 .then(function(response) {
-                    console.log('✅ Email envoyé avec succès:', response.status, response.text);
+                    console.log('✅ Email envoyé avec succès (IP incluse):', response.status);
                     emailSent = true;
                 })
                 .catch(function(error) {
-                    console.warn('❌ Erreur envoi email:', error);
-                    // Le jeu continue même si l'email échoue
+                    console.error('❌ Erreur détaillée envoi email:', error);
+
+                    // Diagnostics spécifiques
+                    if (error.status === 422) {
+                        console.error('💡 SOLUTION : Vérifiez le template EmailJS et ajoutez {{public_ip}}');
+                    } else if (error.status === 400) {
+                        console.error('💡 SOLUTION : Vérifiez les nouveaux paramètres du template');
+                    } else {
+                        console.error('💡 SOLUTION : Vérifiez la connexion et réessayez');
+                    }
                 });
-        } else {
-            console.warn('⚠️ EmailJS non chargé - envoi d\'email ignoré');
+
+        } catch (error) {
+            console.error('❌ Erreur critique dans sendGameStartEmail:', error);
+            console.warn('💡 Email désactivé pour cette session');
         }
     }
+
 
     // ✅ NOUVEAU SYSTÈME DE SCORES MULTIPLES
     function getBestScore() {
@@ -1220,6 +1305,31 @@ function addScoreToLeaderboard(playerName, score) {
 
     saveLeaderboard(leaderboard);
     return leaderboard;
+}
+
+function getDernierNom() {
+    try {
+        let leaderboard = JSON.parse(localStorage.getItem("arkanoid_leaderboard") || '[]');
+
+        if (leaderboard.length === 0) {
+            console.log("Aucun score enregistré");
+            return null;
+        }
+
+        // Trier par timestamp pour avoir le plus récent
+        let sorted = leaderboard.sort((a, b) => b.timestamp - a.timestamp);
+        let dernier = sorted[0];
+
+        console.log("Dernier nom donné:", dernier.name);
+        console.log("Score:", dernier.score);
+        console.log("Date:", dernier.date);
+        console.log("Niveau atteint:", dernier.level);
+
+        return dernier;
+    } catch (error) {
+        console.error("Erreur:", error);
+        return null;
+    }
 }
 
 function isNewRecord(score) {
