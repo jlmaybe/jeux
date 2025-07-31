@@ -771,6 +771,15 @@ const EMAILJS_CONFIG = {
     enabled: true // ✅ AJOUT : Possibilité de désactiver facilement
 };
 
+let gyroActive = false;
+let gyroSupported = false;
+let gyroPermission = false;
+let touchStartX = 0;
+let touchStartY = 0;
+let isTouching = false;
+let touchControlZone = null; // 'left', 'right', ou null
+
+
 let baseGameSpeed = 12;
 let currentGameSpeed = 15;
 let levelSpeedBonus = 0;
@@ -1752,7 +1761,7 @@ function displayLeaderboard() {
       // ✅ ORDRE CORRIGÉ : État du jeu à la fin
       pause = false;
       gameStarted = true;
-      emailSent = false;
+      emailSent = fase;
 
       paddleW = paddleBaseW;
       particles = []; powerups = []; bonuses = []; animations = [];
@@ -1780,7 +1789,27 @@ function displayLeaderboard() {
         try {
             // 1. Réinitialiser complètement
             resetGame();
-            // sendGameStartEmail();
+
+            // ✅ CORRECTION : Vérifier que les éléments DOM existent
+            if (!canvas || !ctx) {
+                console.error("❌ Canvas non trouvé !");
+                return;
+            }
+
+            if (!ball) {
+                console.error("❌ Balle non initialisée !");
+                return;
+            }
+
+            // ✅ S'assurer que AudioContext est initialisé
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => {
+                    console.log('🔊 AudioContext activé');
+                }).catch(e => {
+                    console.warn('⚠️ Problème audio:', e);
+                });
+            }
+
             // 2. S'assurer que la boucle n'est pas déjà lancée
             if (gameLoopId) {
                 cancelAnimationFrame(gameLoopId);
@@ -1790,32 +1819,46 @@ function displayLeaderboard() {
             // 3. Initialiser le panneau de stats
             try {
                 updateStatsPanel();
-                console.log("Panneau de stats initialisé");
+                console.log("✅ Panneau de stats initialisé");
             } catch (statsError) {
-                console.warn("Erreur panneau de stats:", statsError);
+                console.warn("⚠️ Erreur panneau de stats:", statsError);
             }
 
             // 4. Lancer la boucle de jeu
-            console.log("Lancement de la boucle de jeu");
+            console.log("🚀 Lancement de la boucle de jeu");
+            lastFrame = 0; // ✅ AJOUT : Reset du timer
             gameLoopId = requestAnimationFrame(gameLoop);
 
-            console.log("Jeu démarré avec succès - États:", {
+            console.log("✅ Jeu démarré avec succès - États:", {
                 gameStarted: gameStarted,
                 pause: pause,
-                gameOver: gameOver
+                gameOver: gameOver,
+                ballExists: !!ball
             });
 
         } catch (error) {
-            console.error("Erreur de démarrage:", error);
+            console.error("❌ Erreur critique de démarrage:", error);
 
-            // Fallback robuste
+            // ✅ Fallback robuste amélioré
             setTimeout(() => {
-                console.log("Tentative de récupération...");
+                console.log("🔄 Tentative de récupération...");
+
+                // Reset complet des états
                 gameStarted = true;
                 pause = false;
                 gameOver = false;
+
+                // Recréer la balle si nécessaire
+                if (!ball) {
+                    ball = {x: CANVAS_W/2, y: paddleY-30, r: ballR};
+                    ballDX = 5;
+                    ballDY = -5;
+                }
+
+                // Relancer la boucle
                 if (!gameLoopId) {
                     gameLoopId = requestAnimationFrame(gameLoop);
+                    console.log("✅ Boucle de récupération lancée");
                 }
             }, 1000);
         }
@@ -4094,6 +4137,21 @@ function autopilotMove(dt) {
         const statsPanel = document.getElementById('statsPanel');
         if (statsPanel) statsPanel.style.display = 'none';
 
+        // ✅ DÉTECTION MOBILE (fusionnée dans le même addEventListener)
+        if (isMobileDevice()) {
+            console.log('📱 Appareil mobile détecté');
+
+            // Afficher les contrôles mobiles
+            const mobileControls = document.getElementById('mobileControls');
+            if (mobileControls) {
+                mobileControls.style.display = 'flex';
+            }
+
+            // ... reste du code mobile ...
+        } else {
+            console.log('🖥️ Appareil desktop détecté');
+        }
+
         // ✅ GESTION DU BOUTON OK (MODIFIÉE)
         document.getElementById('closeBonusPanel').onclick = function() {
             document.getElementById('bonusPanel').style.display = 'none';
@@ -4105,13 +4163,53 @@ function autopilotMove(dt) {
             startGame();
             pause = false;
         };
-
-        // ✅ SUPPRIMÉ : Plus de démarrage automatique du jeu
-        // Les lignes suivantes sont commentées ou supprimées :
-        // resetGame();
-        // gameLoopId = requestAnimationFrame(gameLoop);
     });
 
+    function isMobileDevice() {
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    // ✅ FONCTION MANQUANTE : Récupération IP publique
+    async function getPublicIP() {
+        const services = [
+            'https://api.ipify.org?format=json',
+            'https://httpbin.org/ip',
+            'https://api.myip.com',
+            'https://ipapi.co/json'
+        ];
+
+        for (let service of services) {
+            try {
+                console.log(`🌐 Tentative de récupération IP via ${service}`);
+
+                const response = await fetch(service, {
+                    method: 'GET',
+                    timeout: 3000,
+                    signal: AbortSignal.timeout ? AbortSignal.timeout(3000) : undefined
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    // Extraction de l'IP selon le format du service
+                    let ip = null;
+                    if (data.ip) ip = data.ip;           // ipify.org et httpbin.org
+                    else if (data.origin) ip = data.origin; // httpbin.org (format alternatif)
+                    else if (data.query) ip = data.query;   // ip-api.com
+
+                    if (ip && ip.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+                        console.log(`✅ IP publique récupérée : ${ip}`);
+                        return ip;
+                    }
+                }
+            } catch (error) {
+                console.warn(`❌ Erreur service ${service}:`, error.message);
+            }
+        }
+
+        console.warn('⚠️ Impossible de récupérer l\'IP publique - fallback activé');
+        return 'IP non disponible';
+    }
 
 
     function diagnosticGame() {
