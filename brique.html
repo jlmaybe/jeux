@@ -702,7 +702,7 @@
     let ballSpeed0 = 12; // IMPORTANT : avant son utilisation
     let LancementAutoPilote = 10;
     let brickRows = 8; //et autour de la ligne 700
-
+    let isEndGame = false;
     let ball = null, ballSpeed = ballSpeed0, ballR = 13;
     let ballDX = 0, ballDY = 0;
     let leftDown = false, rightDown = false;
@@ -1769,7 +1769,7 @@ function displayLeaderboard() {
       // ✅ ORDRE CORRIGÉ : État du jeu à la fin
       pause = false;
       gameStarted = true;
-      emailSent = fase;
+      emailSent = false;
 
       paddleW = paddleBaseW;
       particles = []; powerups = []; bonuses = []; animations = [];
@@ -2103,7 +2103,7 @@ function displayLeaderboard() {
     document.addEventListener('keydown',e=>{
 
       if ((e.key==="m" || e.key==="M") && cookies > 0 && !autopilot) {
-          panic = 60; PanicButon=true
+          panic = 120; PanicButon=true
           --cookies; updateHUD();
           playSound("pi");
       }
@@ -2183,202 +2183,275 @@ canvas.addEventListener('wheel', e => {
 function autopilotMove(dt) {
     if (!ball) return;
 
-    let finalTargetX;
-    let moveSpeed = 400; // Vitesse de base
+    let finalTargetX = paddleX;
+    let moveSpeed = 600; // ✅ VITESSE DE BASE AUGMENTÉE
+    let urgency = 1;
 
-    // === 1. PRIORITÉ ABSOLUE : ÉVITER LES SKULLS ===
-    let dangerousSkull = null;
-    let minDanger = Infinity;
+    // === VARIABLES DE PERFORMANCE ===
+    const paddleCenter = paddleX + paddleW/2;
+    const remainingBricks = bricks.filter(b => b.alive);
+    const isEndGame = remainingBricks.length <= 8;
 
-    skulls.forEach(skull => {
-        if (skull.y < paddleY && skull.y > CANVAS_H * 0.4) {
-            let timeToImpact = (paddleY - skull.y) / skull.speed;
-            if (timeToImpact < minDanger && timeToImpact > 0.3) {
-                minDanger = timeToImpact;
-                dangerousSkull = skull;
+    // ✅ NOUVEAU : DÉTECTION ULTRA-AGRESSIVE DES POWER-UPS
+    let bestPowerup = null;
+    let bestPowerupScore = -1;
+    let powerupUrgency = 1;
+
+    // === 1. PHASE COLLECTE POWER-UPS - PRIORITÉ ABSOLUE ===
+    powerups.forEach(p => {
+        // ✅ ZONE DE DÉTECTION MASSIMENT ÉLARGIE
+        if (p.y > 50 && p.y < paddleY + 200 && !p.caught) { // Zone énorme !
+
+            // ✅ CALCUL PRÉDICTIF DE LA TRAJECTOIRE
+            let timeToIntercept = Math.max(0.1, (paddleY - p.y) / (p.speed || 6));
+            let futureX = p.x + (p.dx || 0) * timeToIntercept;
+            let currentDistance = Math.abs(futureX - paddleCenter);
+
+            // ✅ NOUVEAU : Test si c'est atteignable
+            let maxReachDistance = Math.min(CANVAS_W, paddleW * 4 + timeToIntercept * 1000);
+
+            if (currentDistance <= maxReachDistance && timeToIntercept < 5) {
+                let score = 5000; // Score de base énorme !
+
+                // ✅ PRIORISATION RÉVOLUTIONNAIRE DES MULTIPLICATEURS
+                if (p.type === "mult8") {
+                    score = 50000;  // ✅ PRIORITÉ MAXIMALE ABSOLUE
+                    powerupUrgency = 5;
+                } else if (p.type === "mult4") {
+                    score = 40000;  // ✅ ULTRA PRIORITAIRE
+                    powerupUrgency = 4.5;
+                } else if (p.type === "mult2") {
+                    score = 30000;  // ✅ TRÈS PRIORITAIRE
+                    powerupUrgency = 4;
+                } else if (p.type === "mult1") {
+                    score = 25000;  // ✅ PRIORITAIRE
+                    powerupUrgency = 3.5;
+                } else if (p.type === "huge") {
+                    score = 20000;  // ✅ Raquette géante importante
+                    powerupUrgency = 3;
+                } else if (p.type === "long") {
+                    score = 15000;  // ✅ Raquette longue importante
+                    powerupUrgency = 2.5;
+                } else if (p.type !== "skull") {
+                    score = 10000;  // ✅ Autres power-ups importants
+                    powerupUrgency = 2;
+                }
+
+                // ✅ BONUS TEMPOREL MASSIF
+                let timeBonus = Math.max(0, 10000 - timeToIntercept * 2000);
+                score += timeBonus;
+
+                // ✅ BONUS PROXIMITÉ ÉNORME
+                let proximityBonus = Math.max(0, 8000 - currentDistance * 20);
+                score += proximityBonus;
+
+                // ✅ BONUS D'URGENCE selon la hauteur
+                if (p.y > paddleY - 150) {
+                    score += 15000; // Bonus énorme si proche !
+                    powerupUrgency += 2;
+                }
+
+                // ✅ SÉLECTION DU MEILLEUR POWER-UP
+                if (score > bestPowerupScore) {
+                    bestPowerupScore = score;
+                    bestPowerup = {
+                        x: futureX,
+                        originalX: p.x,
+                        y: p.y,
+                        timeToIntercept: timeToIntercept,
+                        type: p.type,
+                        urgency: powerupUrgency,
+                        score: score
+                    };
+                }
             }
         }
     });
 
-    if (dangerousSkull) {
-        // ÉVITEMENT IMMÉDIAT ET SÉCURISÉ
-        let skullCenter = dangerousSkull.x;
-        let currentCenter = paddleX + paddleW/2;
-        let safeDistance = paddleW * 0.8;
+    // ✅ SI POWER-UP TROUVÉ : MODE COLLECTE ULTRA-AGRESSIF
+    if (bestPowerup) {
+        console.log(`🎯 POWER-UP CIBLÉ : ${bestPowerup.type} (Score: ${bestPowerup.score}) à ${Math.floor(bestPowerup.x)}`);
 
-        if (skullCenter - safeDistance > paddleW/2) {
-            // Aller à gauche du skull
-            finalTargetX = skullCenter - safeDistance - paddleW/2;
-        } else if (skullCenter + safeDistance < CANVAS_W - paddleW/2) {
-            // Aller à droite du skull
-            finalTargetX = skullCenter + safeDistance - paddleW/2;
+        finalTargetX = bestPowerup.x - paddleW/2;
+        moveSpeed = 1200 + bestPowerup.urgency * 200; // ✅ VITESSE ÉNORME !
+        urgency = bestPowerup.urgency;
+
+        // ✅ BOOST SUPPLÉMENTAIRE SI TRÈS PROCHE
+        if (bestPowerup.timeToIntercept < 1) {
+            moveSpeed *= 2; // DOUBLE LA VITESSE !
+            urgency *= 2;
+        }
+
+        // ✅ CORRECTION PRÉDICTIVE AVANCÉE
+        let horizontalSpeed = Math.abs(finalTargetX - paddleCenter);
+        let correctionFactor = Math.min(2, horizontalSpeed / 100);
+        finalTargetX += (finalTargetX > paddleCenter ? 1 : -1) * correctionFactor * 20;
+
+    // === 2. SI PAS DE POWER-UP : LOGIQUE DÉFENSIVE/OFFENSIVE ===
+    } else {
+        // ✅ ÉVITEMENT SKULLS (inchangé - fonctionne bien)
+        let dangerousSkull = null;
+        let minDanger = Infinity;
+
+        skulls.forEach(skull => {
+            if (skull.y < paddleY && skull.y > CANVAS_H * 0.4) {
+                let timeToImpact = (paddleY - skull.y) / skull.speed;
+                if (timeToImpact < minDanger && timeToImpact > 0.3) {
+                    minDanger = timeToImpact;
+                    dangerousSkull = skull;
+                }
+            }
+        });
+
+        if (dangerousSkull) {
+            let skullCenter = dangerousSkull.x;
+            let safeDistance = paddleW * 0.8;
+
+            if (skullCenter - safeDistance > paddleW/2) {
+                finalTargetX = skullCenter - safeDistance - paddleW/2;
+            } else if (skullCenter + safeDistance < CANVAS_W - paddleW/2) {
+                finalTargetX = skullCenter + safeDistance - paddleW/2;
+            } else {
+                finalTargetX = (paddleCenter < CANVAS_W/2) ? 0 : CANVAS_W - paddleW;
+            }
+            moveSpeed = 800;
+            urgency = 3;
+
+        // ✅ DÉFENSE (si balle descend)
+        } else if (ballDY > 0 && ball.y > CANVAS_H * 0.6) {
+            let timeToImpact = (paddleY - ball.y) / ballDY;
+            let impactX = ball.x + ballDX * timeToImpact;
+
+            // Gestion des rebonds
+            while (impactX < 0 || impactX > CANVAS_W) {
+                if (impactX < 0) impactX = -impactX;
+                if (impactX > CANVAS_W) impactX = CANVAS_W - (impactX - CANVAS_W);
+            }
+
+            finalTargetX = impactX - paddleW/2;
+            moveSpeed = 700;
+            urgency = 2;
+
+        // ✅ COLLECTE BONUS SECONDAIRE
         } else {
-            // Si pas de place, aller au plus proche bord
-            finalTargetX = (currentCenter < CANVAS_W/2) ? 0 : CANVAS_W - paddleW;
-        }
+            let bestBonus = null;
+            let bestBonusScore = -1;
 
-        moveSpeed = 600; // Plus rapide pour l'évitement
+            bonuses.forEach(b => {
+                if (b.y > CANVAS_H * 0.2 && b.y < paddleY - 10) {
+                    let timeToIntercept = (paddleY - b.y) / (b.speed || 6);
+                    let distance = Math.abs(b.x - paddleCenter);
 
-    // === 2. DÉFENSE : Si la balle descend vers nous ===
-    } else if (ballDY > 0 && ball.y > CANVAS_H * 0.6) {
-        let timeToImpact = (paddleY - ball.y) / ballDY;
-        let impactX = ball.x + ballDX * timeToImpact;
+                    if (timeToIntercept > 0.2 && timeToIntercept < 3 && distance < CANVAS_W * 0.7) {
+                        let score = (b.points || 100) * 10 + Math.max(0, 500 - distance);
 
-        // Correction pour les rebonds sur les murs
-        while (impactX < 0 || impactX > CANVAS_W) {
-            if (impactX < 0) impactX = -impactX;
-            if (impactX > CANVAS_W) impactX = CANVAS_W - (impactX - CANVAS_W);
-        }
-
-        finalTargetX = impactX - paddleW/2;
-        moveSpeed = 450; // Vitesse défensive
-
-        // === 3. PHASE OFFENSIVE ULTRA-RAPIDE ===
-        } else if (ballDY < 0 && ball.y < CANVAS_H * 0.8) {
-            let targetBrick = null;
-            let bestScore = -1;
-
-            // ✅ STRATÉGIE SIMPLIFIÉE ET RAPIDE
-            bricks.forEach(brick => {
-                if (!brick.alive) return;
-
-                // Calcul direct de distance + accessibilité
-                let distance = Math.abs(brick.x + brick.w/2 - ball.x) + Math.abs(brick.y - ball.y);
-                let accessibilityBonus = 0;
-
-                // Bonus pour les briques du bas (plus accessibles)
-                if (brick.y > wallOffset + brickH * 3) accessibilityBonus = 500;
-                else if (brick.y > wallOffset + brickH * 2) accessibilityBonus = 300;
-                else if (brick.y > wallOffset + brickH) accessibilityBonus = 200;
-
-                // Bonus pour les briques isolées
-                let isolationBonus = 0;
-                let neighbors = bricks.filter(b => b.alive &&
-                    Math.abs(b.x - brick.x) < brickW * 2 &&
-                    Math.abs(b.y - brick.y) < brickH * 2).length;
-                if (neighbors <= 2) isolationBonus = 300;
-
-                let totalScore = 2000 - distance + accessibilityBonus + isolationBonus;
-
-                if (totalScore > bestScore) {
-                    bestScore = totalScore;
-                    targetBrick = brick;
+                        if (score > bestBonusScore) {
+                            bestBonusScore = score;
+                            bestBonus = {x: b.x, timeToIntercept: timeToIntercept};
+                        }
+                    }
                 }
             });
 
-            if (targetBrick) {
-                // ✅ POSITIONNEMENT ULTRA-DIRECT
-                let targetX = targetBrick.x + targetBrick.w/2;
+            if (bestBonus) {
+                finalTargetX = bestBonus.x - paddleW/2;
+                moveSpeed = 600;
+                urgency = 1.5;
 
-                // Calcul simple de l'angle requis
-                let deltaX = targetX - ball.x;
-                let deltaY = targetBrick.y - ball.y;
-                let requiredAngle = Math.atan2(deltaX, -deltaY);
+            // ✅ PHASE OFFENSIVE (attaque des briques)
+            } else if (ballDY < 0 && ball.y < CANVAS_H * 0.7) {
+                // Logique de ciblage des briques simplifiée mais efficace
+                let targetBrick = null;
+                let bestBrickScore = -1;
 
-                // Position de raquette pour créer cet angle
-                let paddleOffset = Math.sin(requiredAngle) * paddleW * 0.4;
-                finalTargetX = ball.x - paddleW/2 + paddleOffset;
+                remainingBricks.forEach(brick => {
+                    let distance = Math.abs(brick.x + brick.w/2 - ball.x) + Math.abs(brick.y - ball.y);
+                    let score = 1000 - distance;
 
-                moveSpeed = 500; // ✅ VITESSE AUGMENTÉE
+                    // Bonus pour briques accessibles
+                    if (brick.y > wallOffset + brickH * 2) score += 300;
 
-            } else {
-                // Fallback : viser le centre des briques restantes
-                let avgX = 0, count = 0;
-                bricks.forEach(b => {
-                    if (b.alive) { avgX += b.x + b.w/2; count++; }
-                });
-                if (count > 0) {
-                    finalTargetX = (avgX / count) - paddleW/2;
-                    moveSpeed = 400;
-                } else {
-                    finalTargetX = (CANVAS_W - paddleW) / 2;
-                    moveSpeed = 300;
-                }
-            }
-            // === 4. COLLECTE INTELLIGENTE (MULTIPLICATEURS PRIORITAIRES) ===
-            } else {
-                let bestTarget = null;
-                let bestPriority = -1;
+                    // Bonus pour briques spéciales
+                    if (brick.special && brick.special.includes("️⃣")) score += 500;
 
-                // ✅ 1. PRIORITÉ ABSOLUE : MULTIPLICATEURS
-                powerups.forEach(p => {
-                    if (p.y > CANVAS_H * 0.3 && p.y < paddleY - 20) {
-                        let priority = 0;
-                        let distance = Math.abs(p.x - (paddleX + paddleW/2));
-
-                        // ✅ PRIORISATION DES MULTIPLICATEURS
-                        if (p.type === "mult8") priority = 1000; // x8 = priorité max
-                        else if (p.type === "mult4") priority = 800; // x4 = très prioritaire
-                        else if (p.type === "mult2") priority = 600; // x2 = prioritaire
-                        else if (p.type === "mult1") priority = 400; // x1 = moyennement prioritaire
-                        else if (p.type === "long") priority = 300;  // Raquette longue
-                        else if (p.type === "huge") priority = 350;  // Raquette géante
-                        else if (p.type !== "skull") priority = 200; // Autres powerups
-
-                        // Bonus de proximité
-                        priority += Math.max(0, 200 - distance);
-
-                        if (priority > bestPriority && distance < CANVAS_W * 0.5) {
-                            bestPriority = priority;
-                            bestTarget = p;
-                        }
+                    if (score > bestBrickScore) {
+                        bestBrickScore = score;
+                        targetBrick = brick;
                     }
                 });
 
-                // ✅ 2. BONUS SECONDAIRES (si pas de multiplicateur)
-                if (!bestTarget) {
-                    bonuses.forEach(b => {
-                        if (b.y > CANVAS_H * 0.3 && b.y < paddleY - 20) {
-                            let distance = Math.abs(b.x - (paddleX + paddleW/2));
-                            let priority = 150 - distance * 0.5;
-
-                            if (priority > bestPriority && distance < CANVAS_W * 0.4) {
-                                bestPriority = priority;
-                                bestTarget = b;
-                            }
-                        }
-                    });
-                }
-
-                if (bestTarget) {
-                    finalTargetX = bestTarget.x - paddleW/2;
-                    moveSpeed = 450; // ✅ VITESSE AUGMENTÉE pour collecte
+                if (targetBrick) {
+                    let targetX = targetBrick.x + targetBrick.w/2;
+                    let deltaX = targetX - ball.x;
+                    let deltaY = targetBrick.y - ball.y;
+                    let requiredAngle = Math.atan2(deltaX, -deltaY);
+                    let paddleOffset = Math.sin(requiredAngle) * paddleW * 0.4;
+                    finalTargetX = ball.x - paddleW/2 + paddleOffset;
+                    moveSpeed = 650;
+                    urgency = 1.8;
                 } else {
-                    // Position centrale par défaut
                     finalTargetX = (CANVAS_W - paddleW) / 2;
-                    moveSpeed = 250;
+                    moveSpeed = 400;
                 }
             }
+        }
+    }
 
-
-    // === 4. CONTRAINTES DE SÉCURITÉ ===
+    // === 3. MOUVEMENT ULTRA-OPTIMISÉ ET FLUIDE ===
     finalTargetX = Math.max(0, Math.min(CANVAS_W - paddleW, finalTargetX));
 
-    // === 5. MOUVEMENT SIMPLE ET DIRECT ===
     let currentX = paddleX;
     let deltaX = finalTargetX - currentX;
     let distance = Math.abs(deltaX);
 
-    if (distance > 3) {
+    if (distance > 1) { // Seuil ultra-fin
         let direction = deltaX > 0 ? 1 : -1;
-        let actualSpeed = Math.min(distance / dt, moveSpeed * dt * megaspeed * 1.5); // ✅ VITESSE x1.5
 
-        paddleX += direction * actualSpeed;
+        // ✅ VITESSE ADAPTATIVE RÉVOLUTIONNAIRE
+        let adaptiveSpeed = moveSpeed * urgency;
+
+        // ✅ BOOST MASSIF pour les power-ups
+        if (bestPowerup) {
+            adaptiveSpeed *= 2.5; // Boost énorme !
+        }
+
+        // Boost selon distance
+        if (distance > paddleW * 2) adaptiveSpeed *= 1.8;
+        else if (distance > paddleW) adaptiveSpeed *= 1.4;
+
+        // ✅ MOUVEMENT FLUIDE AVEC INERTIE AMÉLIORÉE
+        let maxMove = Math.min(distance, adaptiveSpeed * dt * megaspeed * 3);
+
+        // Lissage près de la cible
+        if (distance < 30) {
+            maxMove *= (0.5 + (distance / 30) * 0.5);
+        }
+
+        // ✅ SYSTÈME D'INERTIE NATURELLE
+        if (!paddleVelocity) paddleVelocity = 0;
+        let targetVelocity = direction * maxMove;
+        paddleVelocity += (targetVelocity - paddleVelocity) * 0.4; // Inertie plus réactive
+
+        paddleX += paddleVelocity;
+    } else {
+        // Arrêt en douceur
+        if (paddleVelocity) paddleVelocity *= 0.9;
+        paddleX += paddleVelocity;
     }
 
+    // Contraintes finales
     paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX));
 
-    // === 6. CONTRÔLE DE VITESSE SPÉCIFIQUE AUTOPILOTE ===
-    if (Math.sqrt(ballDX * ballDX + ballDY * ballDY) > 23) {
-        // Si la balle est trop rapide, on la ralentit légèrement
+    // ✅ CONTRÔLE VITESSE BALLE ENDGAME (inchangé)
+    if (isEndGame && Math.sqrt(ballDX * ballDX + ballDY * ballDY) < 16) {
         let currentSpeed = Math.sqrt(ballDX * ballDX + ballDY * ballDY);
-        let targetSpeed = 20 + niveau * 0.3;
-        let ratio = targetSpeed / currentSpeed;
-        ballDX *= ratio;
-        ballDY *= ratio;
+        let targetSpeed = Math.min(18, 16 + (8 - remainingBricks.length));
+        if (currentSpeed > 0) {
+            let ratio = targetSpeed / currentSpeed;
+            ballDX *= ratio;
+            ballDY *= ratio;
+        }
     }
-
-
 }
 
     /**
@@ -3243,8 +3316,8 @@ function autopilotMove(dt) {
           vies = Math.min(maxVies, vies + 1);
 
           // ✅ 3. GESTION DES OFFSETS (ORDRE CORRIGÉ)
-          wallOffset += 5;
-          wallOffsetPlus += 5;
+          wallOffset += 3;
+          wallOffsetPlus += 3;
 
           if (wallOffsetPlus >= 10) {
               brickRows = Math.min(12, brickRows + 1);
