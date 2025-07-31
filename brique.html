@@ -2102,7 +2102,7 @@ function displayLeaderboard() {
 
     document.addEventListener('keydown',e=>{
 
-      if (e.code==="M" && cookies > 0 && !autopilot) {
+      if ((e.key==="m" || e.key==="M") && cookies > 0 && !autopilot) {
           panic = 60; PanicButon=true
           --cookies; updateHUD();
           playSound("pi");
