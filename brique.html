@@ -1141,6 +1141,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
 
     // ✅ FONCTION D'ENVOI D'EMAIL AVEC IP PUBLIQUE
     async function sendGameStartEmail() {
+
         // Éviter les envois multiples
         if (emailSent) return;
 
@@ -1751,6 +1752,7 @@ function displayLeaderboard() {
       // ✅ ORDRE CORRIGÉ : État du jeu à la fin
       pause = false;
       gameStarted = true;
+      emailSent = false;
 
       paddleW = paddleBaseW;
       particles = []; powerups = []; bonuses = []; animations = [];
