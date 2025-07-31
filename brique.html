@@ -25,52 +25,53 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  padding-top: 20px;
+  padding-top: 120px;
   }
 
 
-  /* ✅ TITRE ADAPTÉ POUR NOUVELLE FENÊTRE */
   #title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 2.5em; /* ✅ RÉDUIT pour s'adapter */
-    letter-spacing: 0.1em;
-    text-shadow: 0 0 20px #0ff, 0 0 40px #ff0, 0 0 80px #f0f;
-    margin-top: 10px; /* ✅ RÉDUIT */
-    font-weight: bold;
-    filter: brightness(1.4);
-    text-align: center;
-    width: 100%;
-    position: relative; /* ✅ CHANGÉ de absolute à relative */
-    top: 0;
-    pointer-events: none;
-    user-select: none;
-    z-index: 20;
-    white-space: nowrap;
-    overflow: hidden;
-  }
+  font-family: 'Press Start 2P', monospace;
+  font-size:2.5em; letter-spacing:0.2em;
+  text-shadow: 0 0 15px #0ff, 0 0 40px #ff0, 0 0 150px #f0f;
+  margin-top:-10px;
+  padding: 40px 0;
+  font-weight:bold;
+  filter:brightness(1.4);
+  text-align: center;
+  /* ✅ CENTRAGE PARFAIT : Par rapport à la zone de jeu */
+  width: 1075px; /* ✅ CORRIGÉ : Même largeur que le canvas de jeu */
+  position: absolute;
+  left: 57%; /* ✅ CORRIGÉ : Centre horizontal de l'écran */
+  top: 1px;
+  transform: translateX(-50%); /* ✅ CORRIGÉ : Centrage parfait */
+  pointer-events: none;
+  user-select: none;
+  z-index: 20;
+  white-space: nowrap;
+  overflow: hidden;
+  /* ✅ SUPPRIMÉ : margin-left: -150px; (causait des problèmes) */
+  /* ✅ SUPPRIMÉ : width: calc(100vw - 300px - 40px); (logique incorrecte) */
+}
 
 
-  /* ✅ HUD ADAPTÉ */
+
   #hud {
-    position: relative; /* ✅ CHANGÉ de absolute à relative */
-    left: 0;
-    top: 20px; /* ✅ RÉDUIT */
-    transform: none; /* ✅ SUPPRIMÉ translateX */
-    width: 100%;
-    max-width: 1220px;
-    text-align: center;
-    font-family: 'Press Start 2P', monospace;
-    color: #fff;
-    pointer-events: none;
-    z-index: 10;
-    user-select: none;
-    background: linear-gradient(260deg, #0ff 0%, #f0f 50%, #ff0 100%);
-    box-shadow: 0 0 20px #0ff, 0 0 40px #f0f;
+    position:absolute;
+    left: 58%; /* ✅ CORRIGÉ : 57% → 50% pour centrage parfait */
+    top:100px;
+    transform:translateX(-50%); /* ✅ CONSERVÉ : Centrage mathématique parfait */
+    width:1220px;
+    text-align:center;
+    font-family:'Press Start 2P', monospace;
+    color:#fff;
+    pointer-events:none;
+    z-index:10;
+    user-select:none;
+    background: linear-gradient(260deg,#0ff 0%, #f0f 50%, #ff0 100%);
+    box-shadow:0 0 20px #0ff, 0 0 40px #f0f;
     border-radius: 10px;
     padding: 8px 0 6px 0;
-    margin-bottom: 20px; /* ✅ AJOUT espacement */
   }
-
 
     #score, #vies, #niveau, #mult {
       font-family: 'Press Start 2P', monospace;
@@ -143,20 +144,20 @@
     }
   }
 
-  /* ✅ PANNEAU DE STATS REPOSITIONNÉ */
   #statsPanel {
     position: fixed;
-    right: 20px;
-    top: 50%; /* ✅ CENTRÉ VERTICALEMENT */
-    transform: translateY(-50%);
-    width: 280px; /* ✅ LÉGÈREMENT RÉDUIT */
-    height: 80vh; /* ✅ ADAPTATIF À LA HAUTEUR DE FENÊTRE */
+    right: max(20px, calc((100vw - 875px)/2 - 320px)); /* ✅ Calcul automatique */
+    top: 145px;
+    width: 300px;
+    height: 900px;
     background: #111;
     box-shadow: 0 0 40px #0ff, 0 0 80px #f0f;
     border-radius: 12px;
     z-index: 5;
     overflow-y: auto;
   }
+
+
 
     #bonusPanel {
       font-family: 'Press Start 2P', monospace;
@@ -692,9 +693,9 @@
     let paddleW = 150, paddleH = 18, paddleY = CANVAS_H-60;
     let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 13;
 
-    let ballSpeed0 = 15; // IMPORTANT : avant son utilisation
-    let LancementAutoPilote = 200;
-    let brickRows = 5; //et autour de la ligne 700
+    let ballSpeed0 = 12; // IMPORTANT : avant son utilisation
+    let LancementAutoPilote = 10;
+    let brickRows = 9; //et autour de la ligne 700
 
     let ball = null, ballSpeed = ballSpeed0, ballR = 13;
     let ballDX = 0, ballDY = 0;
@@ -755,9 +756,9 @@ let baseGameSpeed = 12;
 let currentGameSpeed = 15;
 let levelSpeedBonus = 0;
 let brickSpeedBonus = 0;
-let speedIncreasePerBrick = 0.008; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
-let speedIncreasePerLevel = 0.6;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
-let autopilotSpeedMultiplier = 1.08; // ✅ RÉDUIT de 1.15 à 1.08 (seulement 8% plus rapide)
+let speedIncreasePerBrick = 0.002; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
+let speedIncreasePerLevel = 0.2;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
+let autopilotSpeedMultiplier = 1.04; // ✅ RÉDUIT de 1.15 à 1.08 (seulement 8% plus rapide)
 
 let bricksHit = 0;
 let powerupsCaptured = {
@@ -1574,7 +1575,7 @@ function displayLeaderboard() {
       displayScore = 0;
       paddleW = paddleBaseW; paddleX = (CANVAS_W-paddleW)/2;
       ballSpeed = ballSpeed0; gameOver = false;
-      wallOffset = 90; brickRows = 5;levelsPassed = 0;
+      wallOffset = 90; brickRows = 10;levelsPassed = 0;
 
       compensationStep = 5;
       shotHistory = [];
@@ -1829,7 +1830,7 @@ function displayLeaderboard() {
 //      updateBallSpeed(); // Recalcule la vitesse actuelle
 
       // ✅ PROGRESSION TRÈS GRADUELLE par niveau
-      baseGameSpeed = Math.min(15, 12 + (niveau - 1) * 0.1);
+      baseGameSpeed = Math.min(14, 12 + (niveau - 1) * 0.05);
       ballSpeed = baseGameSpeed;
 
       let angle = (Math.random()*0.6+0.2)*Math.PI;
@@ -2274,9 +2275,9 @@ function autopilotMove(dt) {
 
         // ✅ LIMITATIONS PLUS STRICTES selon le mode
         if (autopilot) {
-            currentGameSpeed = Math.min(currentGameSpeed, 14 + niveau * 0.1); // Limite autopilote
+            currentGameSpeed = Math.min(currentGameSpeed, 13 + niveau * 0.05); // Limite autopilote
         } else {
-            currentGameSpeed = Math.min(currentGameSpeed, 16 + niveau * 0.3); // Limite normale
+            currentGameSpeed = Math.min(currentGameSpeed, 15 + niveau * 0.15); // Limite normale
         }
 
         return currentGameSpeed;
@@ -2296,8 +2297,8 @@ function autopilotMove(dt) {
 
         ballSpeed = newSpeed;
 
-        // ✅ SÉCURITÉ ABSOLUE : Plafond de vitesse global
-        let absoluteMaxSpeed = 15 + niveau * 0.15; // Progression très lente
+        // ✅ SÉCURITÉ ABSOLUE : Plafond de vitesse global RÉDUIT
+        let absoluteMaxSpeed = Math.min(18, 14 + niveau * 0.08); // Progression très lente + plafond à 18
         if (ballSpeed > absoluteMaxSpeed) {
             ballSpeed = absoluteMaxSpeed;
             console.log(`Vitesse limitée à ${absoluteMaxSpeed.toFixed(1)} au niveau ${niveau}`);
