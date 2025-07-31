@@ -1778,7 +1778,7 @@ function displayLeaderboard() {
         try {
             // 1. Réinitialiser complètement
             resetGame();
-            sendGameStartEmail();
+            // sendGameStartEmail();
             // 2. S'assurer que la boucle n'est pas déjà lancée
             if (gameLoopId) {
                 cancelAnimationFrame(gameLoopId);
@@ -3785,11 +3785,14 @@ function autopilotMove(dt) {
         }
 
         // Affichage du meilleur score
+        sendGameStartEmail();
         document.getElementById('bestScore').textContent = "Meilleur score : " + getBestScore().toLocaleString();
 
         // Afficher le panneau
         document.getElementById('endPanel').style.display = "flex";
         startPsychedelicBg();
+
+
     }
 
 
