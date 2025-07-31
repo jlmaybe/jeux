@@ -2,12 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-
   <title>p ELYSIUM</title>
-
   <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-
   <style>
+
+
 
   /* ✅ OPTIMISATION POUR NOUVELLE FENÊTRE */
   html, body {
@@ -651,7 +650,13 @@
     </div>
   </div>
 
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+  
   <script>
+
+
+
     // === CONSTANTES GLOBALES ===
 
     const COLORS = ["#0ff", "#f0f", "#ff0", "#0f0", "#fff"];
@@ -751,9 +756,18 @@ let bossAttackTimer = 0;
 let bossMovementTimer = 0;
 let bossDefeated = false;
 let psyAnimId = null;
+let emailSent = false; // Pour éviter les envois multiples
+let gameSessionId = null; // ID unique de la session de jeu
 
 let frameCount = 0;
 let lastPerformanceCheck = 0;
+
+// ✅ NOUVEAU : Configuration EmailJS
+const EMAILJS_CONFIG = {
+    publicKey: "S4SodZJrD9Ftqor5s", // À remplacer par votre clé
+    serviceId: "service_z3kyzle",           // À remplacer par votre service
+    templateId: "template_7x60gk8"          // À remplacer par votre template
+};
 
 let baseGameSpeed = 12;
 let currentGameSpeed = 15;
@@ -1121,6 +1135,42 @@ let particleCountMax = 80; // Pour ajuster la qualité
       gameStateStatsEl.innerHTML = gameStateHtml;
     }
 
+    // ✅ NOUVEAU : Fonction d'envoi d'email au lancement du jeu
+    function sendGameStartEmail() {
+        // Éviter les envois multiples
+        if (emailSent) return;
+
+        // Générer un ID unique pour cette session de jeu
+        gameSessionId = 'game_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        // Initialisation d'EmailJS (si pas déjà fait)
+        if (typeof emailjs !== 'undefined') {
+            emailjs.init(EMAILJS_CONFIG.publicKey);
+
+            // Paramètres à envoyer par email
+            const templateParams = {
+                player_name: "Joueur", // Peut être personnalisé
+                game_session: gameSessionId,
+                start_time: new Date().toLocaleString('fr-FR'),
+                user_agent: navigator.userAgent,
+                screen_resolution: window.screen.width + 'x' + window.screen.height,
+                game_version: "Brick Blitz Elysium v1.0"
+            };
+
+            // Envoi de l'email
+            emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, templateParams)
+                .then(function(response) {
+                    console.log('✅ Email envoyé avec succès:', response.status, response.text);
+                    emailSent = true;
+                })
+                .catch(function(error) {
+                    console.warn('❌ Erreur envoi email:', error);
+                    // Le jeu continue même si l'email échoue
+                });
+        } else {
+            console.warn('⚠️ EmailJS non chargé - envoi d\'email ignoré');
+        }
+    }
 
     // ✅ NOUVEAU SYSTÈME DE SCORES MULTIPLES
     function getBestScore() {
@@ -1618,7 +1668,7 @@ function displayLeaderboard() {
         try {
             // 1. Réinitialiser complètement
             resetGame();
-
+            sendGameStartEmail();
             // 2. S'assurer que la boucle n'est pas déjà lancée
             if (gameLoopId) {
                 cancelAnimationFrame(gameLoopId);
