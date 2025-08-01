@@ -556,27 +556,28 @@
       <h2>BONUS</h2>
       <li><span></span></li>
       <ul>
-        <li><span class="bonus-emoji">🍒</span> <b>+500 pts  </b> Petit bonus de score</li>
-        <li><span class="bonus-emoji">🍓</span> <b>+1000 pts </b> Bonus de score</li>
-        <li><span class="bonus-emoji">🛸</span> <b>+2000 pts </b> Super bonus</li>
-        <li><span class="bonus-emoji">🍑</span> <b>+5000 pts </b> Méga bonus</li>
-        <li><span class="bonus-emoji">🌸</span> <b>+500 pts  </b> Bonus fleuri</li>
-        <li><span class="bonus-emoji">💝</span> <b>+8000 pts </b> Bonus de score</li>
-        <li><span class="bonus-emoji">🍉</span> <b>+2000 pts </b> Super bonus</li>
-        <li><span class="bonus-emoji">💊</span> <b>+15000 pts </b> Méga bonus</li>
-        <li><span class="bonus-emoji">🐲</span> <b>+1500 pts  </b> Bonus fleuri</li>
-        <li><span class="bonus-emoji">🍇</span> <b>+500 pts  </b> Raisin surprise</li>
-        <li><span class="bonus-emoji">🍌</span> <b>+500 pts  </b> Banane dorée</li>
+        <li><span class="bonus-emoji">🍒</span> <b>+500 pts Petit bonus de score</li>
+        <li><span class="bonus-emoji">🍓</span> <b>+1000 pts Bonus de score</li>
+        <li><span class="bonus-emoji">🛸</span> <b>+2000 pts Super bonus</li>
+        <li><span class="bonus-emoji">🍑</span> <b>+5000 pts Méga bonus</li>
+        <li><span class="bonus-emoji">🌸</span> <b>+500 pts  Bonus fleuri</li>
+        <li><span class="bonus-emoji">💝</span> <b>+8000 pts Bonus de score</li>
+        <li><span class="bonus-emoji">🍉</span> <b>+2000 pts Super bonus</li>
+        <li><span class="bonus-emoji">💊</span> <b>+15000 pts Méga bonus</li>
+        <li><span class="bonus-emoji">🐲</span> <b>+1500 pts Bonus fleuri</li>
+        <li><span class="bonus-emoji">🍇</span> <b>+500 pts Raisin surprise</li>
+        <li><span class="bonus-emoji">🍌</span> <b>+500 pts Banane dorée</li>
         <h2>POWER-UPS</h2>
         <li><span class="bonus-emoji">🏳️</span> <b>Raquette longue</b></li>
         <li><span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b></li>
         <li><span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
-        <li><span class="bonus-emoji">1️⃣</span> <b>x2 Score  </b> Double les points pendant 30s</li>
-        <li><span class="bonus-emoji">2️⃣</span> <b>x3 Score  </b> Triple les points pendant 30s</li>
-        <li><span class="bonus-emoji">4️⃣</span> <b>x4 Score  </b> Quadruple les points pendant 30s</li>
-        <li><span class="bonus-emoji">8️⃣</span> <b>x8 Score  </b> Multiplie par 8 les points pendant 30s</li>
-        <li><span class="bonus-emoji">☠️</span>  <b>Malus     </b> Score en décrémentation pendant 30s</li>
-        <li><span class="bonus-emoji">🍪</span> <b>Cookies   </b> Bouton panique (M)</li>
+        <li><span class="bonus-emoji">1️⃣</span> <b>x2 Score Double les points pendant 30s</li>
+        <li><span class="bonus-emoji">2️⃣</span> <b>x3 Score Triple les points pendant 30s</li>
+        <li><span class="bonus-emoji">4️⃣</span> <b>x4 Score Quadruple les points pendant 30s</li>
+        <li><span class="bonus-emoji">8️⃣</span> <b>x8 Score Multiplie par 8 les points pendant 30s</li>
+        <li><span class="bonus-emoji">☠️</span>  <b>Malus    Score en décrémentation pendant 30s</li>
+        <li><span class="bonus-emoji">🍪</span> <b>Cookies  Bouton panique (M)</li>
+        <li><span class="bonus-emoji">🌈</span> <b>Vie      Une vie</li>
       </ul>
       <h2>ACTIONS</h2>
       <li><span class="bonus-emoji">M</span> – Bouton panique</li>
@@ -680,6 +681,7 @@
       {emoji:"🐲", points:15000, color:"#f9f"},
       {emoji:"🍇", points:2000, color:"#94f"},
       {emoji:"🍪", points:0, color:"#A67B5B", type:"cookie"},
+      {emoji:"🌈", points:0, color:"#A67B5B", type:"vie"},
       {emoji:"🍌", points:500, color:"#ff4"},
     ];
 
@@ -700,7 +702,7 @@
     let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 13;
 
     let ballSpeed0 = 12; // IMPORTANT : avant son utilisation
-    let LancementAutoPilote = 10;
+    let LancementAutoPilote = 5;
     let brickRows = 8; //et autour de la ligne 700
     let isEndGame = false;
     let ball = null, ballSpeed = ballSpeed0, ballR = 13;
@@ -819,7 +821,8 @@ let bonusesCaptured = {
   "💊": 0,   // +15000 pts
   "🐲": 0,   // +15000 pts
   "🍇": 0,   // +2000 pts
-  "🍪": 0,   // Cookies
+  "🍪": 0,   // Cookie(s)
+  "🌈": 0,   // Vie(s)
   "🍌": 0    // +500 pts
 };
 
@@ -994,6 +997,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
           case "💝": points = 8000; break;
           case "💊": case "🐲": points = 15000; break;
           case "🍪": points = 0; break; // Cookies ne donnent pas de points
+          case "🌈": points = 0; break; // Vie ne donnent pas de points
         }
         totalBonusPoints += bonusesCaptured[emoji] * points;
 
@@ -3108,6 +3112,10 @@ function autopilotMove(dt) {
 
           if (b.type === "cookie") {
                 cookies++; // On ajoute un cookie
+                playSound("life2");
+          }
+          if (b.type === "vie") {
+                vies++; // On ajoute une vie
                 playSound("life2");
           }
 
