@@ -13,9 +13,10 @@
     margin: 0;
     padding: 0;
     background: #000;
-    overflow-x: hidden; /* Empêche le scroll horizontal */
-    min-height: 100vh;
+    overflow: hidden; /* ✅ DÉSACTIVE COMPLÈTEMENT L'ASCENSEUR */
+    height: 100vh; /* ✅ HAUTEUR FIXE au lieu de min-height */
   }
+
 
   /* ✅ CONTENEUR PRINCIPAL CENTRÉ */
   body {
@@ -3924,7 +3925,7 @@ function autopilotMove(dt) {
 
         // Affichage du meilleur score
         sendGameStartEmail();
-        document.getElementById('bestScore').textContent = "Meilleur score : " + getBestScore().toLocaleString();
+  //      document.getElementById('bestScore').textContent = "Meilleur score : " + getBestScore().toLocaleString();
 
         // Afficher le panneau
         document.getElementById('endPanel').style.display = "flex";
