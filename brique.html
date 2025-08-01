@@ -594,6 +594,7 @@
       <li><span></span></li>
       <li><span></span></li>
       <h3>(c) jean-luc faisans 2025</h3>
+      <h3>v0.60</h3>
     </div>
   </div>
 
@@ -745,6 +746,16 @@
     let paddleSizeEffect = null;
     let paddleOriginalSize = paddleBaseW;
     let dernierUtilisateur = null;
+
+// === VARIABLES GALAXIE ÉVOLUTIVES ===
+let galaxyParticles = [];
+let galaxyTime = 0;
+let galaxyCenter = { x: CANVAS_W/2, y: CANVAS_H/2 };
+let galaxyRadius = 300;
+let galaxyParticleCount = 150; // Nombre de pixels lumineux
+let galaxyColorScheme = 0; // Schéma de couleur actuel (0-4)
+let galaxySpacing = 1.0; // Multiplicateur d'espacement (0.7-1.5)
+let galaxyRotationMode = 0; // Mode de rotation (0-2)
 
 let targetVelocity = 0;
 let adaptiveCompensation = 0;
@@ -914,6 +925,179 @@ let particleCountMax = 80; // Pour ajuster la qualité
       console.log("Toutes les animations ont été nettoyées");
     }
 
+    // === INITIALISATION DE LA GALAXIE ===
+    // === INITIALISATION DE LA GALAXIE (VERSION AMÉLIORÉE) ===
+    function initGalaxy() {
+        galaxyParticles = [];
+
+        for (let i = 0; i < galaxyParticleCount; i++) {
+            // Distribution en spirale pour un effet galaxie naturel
+            let angle = (i / galaxyParticleCount) * Math.PI * 6; // 6 tours de spirale
+            let radius = (i / galaxyParticleCount) * galaxyRadius;
+
+            // Position de base
+            let baseX = galaxyCenter.x + Math.cos(angle) * radius;
+            let baseY = galaxyCenter.y + Math.sin(angle) * radius * 0.6; // Effet d'aplatissement
+
+            galaxyParticles.push({
+                // Position initiale
+                baseRadius: radius,
+                baseAngle: angle,
+
+                // Position actuelle
+                x: baseX,
+                y: baseY,
+
+                // Vitesse de rotation (plus lent au centre, plus rapide au bord)
+                rotationSpeed: 0.001 + (radius / galaxyRadius) * 0.008,
+
+                // ✅ TAILLES RÉDUITES : Plus petites et plus variées
+                size: 0.5 + Math.random() * 1.2, // ✅ RÉDUIT : de 1-3.5 à 0.5-1.7
+                baseBrightness: 0.3 + Math.random() * 0.7,
+                brightness: 0.3 + Math.random() * 0.7,
+
+                // Couleur changeante
+                colorPhase: Math.random() * Math.PI * 2,
+                colorSpeed: 0.02 + Math.random() * 0.03,
+
+                // Scintillement
+                twinklePhase: Math.random() * Math.PI * 2,
+                twinkleSpeed: 0.05 + Math.random() * 0.1
+            });
+        }
+
+        console.log("🌌 Galaxie initialisée avec", galaxyParticleCount, "étoiles plus petites");
+    }
+
+    // === CHANGEMENT DE CONFIGURATION GALAXIE PAR TABLEAU ===
+    function changeGalaxyConfiguration() {
+        console.log("🌠 Changement de configuration de la galaxie pour nouveau tableau");
+
+        // ✅ 1. VARIATION DU NOMBRE D'ÉTOILES
+        let minStars = Math.max(80, 120 - niveau * 2); // Moins d'étoiles dans les niveaux avancés
+        let maxStars = Math.min(200, 140 + niveau * 3); // Plus d'étoiles possibles avec progression
+        galaxyParticleCount = minStars + Math.floor(Math.random() * (maxStars - minStars));
+
+        // ✅ 2. VARIATION DE L'ESPACEMENT (RAYON)
+        let baseRadius = 280;
+        let radiusVariation = 60 + niveau * 8; // Plus de variation avec le niveau
+        galaxyRadius = baseRadius + (Math.random() - 0.5) * radiusVariation;
+        galaxyRadius = Math.max(200, Math.min(450, galaxyRadius)); // Limites de sécurité
+
+        // ✅ 3. VARIATION DE L'ESPACEMENT ENTRE ÉTOILES
+        galaxySpacing = 0.8 + Math.random() * 0.6; // Entre 0.8x et 1.4x l'espacement normal
+
+        // ✅ 4. CHANGEMENT DU SCHÉMA DE COULEURS
+        galaxyColorScheme = Math.floor(Math.random() * 5);
+
+        // ✅ 5. CHANGEMENT DU MODE DE ROTATION
+        galaxyRotationMode = Math.floor(Math.random() * 3);
+
+        // ✅ 6. RÉINITIALISATION AVEC NOUVELLE CONFIG
+        initGalaxy();
+
+        // ✅ 7. LOG DES CHANGEMENTS
+        console.log(`✨ Nouvelle galaxie: ${galaxyParticleCount} étoiles, rayon ${galaxyRadius.toFixed(0)}, schéma couleur ${galaxyColorScheme}`);
+    }
+
+    // === MISE À JOUR DE LA GALAXIE ===
+    function updateGalaxy(dt) {
+        galaxyTime += dt * 0.01; // Temps global pour animations synchronisées
+
+        galaxyParticles.forEach(particle => {
+            // ✅ ROTATION : Chaque particule tourne autour du centre
+            particle.baseAngle += particle.rotationSpeed * dt;
+
+            // ✅ POSITION MISE À JOUR avec effet de spirale dynamique
+            let dynamicRadius = particle.baseRadius + Math.sin(galaxyTime + particle.colorPhase) * 10;
+            particle.x = galaxyCenter.x + Math.cos(particle.baseAngle) * dynamicRadius;
+            particle.y = galaxyCenter.y + Math.sin(particle.baseAngle) * dynamicRadius * 0.6; // Aplatissement galaxie
+
+            // ✅ COULEUR CHANGEANTE (cycle RGB)
+            particle.colorPhase += particle.colorSpeed * dt;
+
+            // ✅ SCINTILLEMENT
+            particle.twinklePhase += particle.twinkleSpeed * dt;
+            particle.brightness = particle.baseBrightness + Math.sin(particle.twinklePhase) * 0.3;
+            particle.brightness = Math.max(0.1, Math.min(1, particle.brightness));
+        });
+    }
+
+    // === RENDU DE LA GALAXIE ===
+    // === RENDU DE LA GALAXIE AVEC VARIATIONS ===
+    function renderGalaxy(ctx) {
+        ctx.save();
+
+        galaxyParticles.forEach(particle => {
+            // ✅ CALCUL DE LA COULEUR SELON LE SCHÉMA ACTUEL
+            let hue, saturation, lightness;
+
+            switch(galaxyColorScheme) {
+                case 0: // Schéma classique (cyan/magenta/jaune)
+                    hue = (particle.colorPhase * 57.3) % 360;
+                    if (hue < 60) {
+                        hue = 45 + Math.sin(particle.colorPhase) * 15; // Jaune-orange
+                    } else if (hue < 180) {
+                        hue = 180 + Math.sin(particle.colorPhase * 1.3) * 30; // Cyan
+                    } else {
+                        hue = 300 + Math.sin(particle.colorPhase * 0.8) * 20; // Magenta
+                    }
+                    break;
+
+                case 1: // Schéma "Feu" (rouge/orange/jaune)
+                    hue = 15 + Math.sin(particle.colorPhase * 1.5) * 25; // 0-40° (rouge-orange-jaune)
+                    break;
+
+                case 2: // Schéma "Océan" (bleu/cyan/vert)
+                    hue = 180 + Math.sin(particle.colorPhase * 1.2) * 60; // 120-240° (vert-cyan-bleu)
+                    break;
+
+                case 3: // Schéma "Violet" (violet/rose/bleu)
+                    hue = 270 + Math.sin(particle.colorPhase * 0.9) * 45; // 225-315° (bleu-violet-rose)
+                    break;
+
+                case 4: // Schéma "Arc-en-ciel" (toutes les couleurs)
+                    hue = (particle.colorPhase * 57.3 + galaxyTime * 2) % 360;
+                    break;
+            }
+
+            saturation = 80 + Math.sin(particle.colorPhase * 0.7) * 15; // 65-95%
+            lightness = 45 + particle.brightness * 35; // 45-80%
+
+            let color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+            // ✅ RENDU DU PIXEL LUMINEUX (taille réduite)
+            ctx.globalAlpha = particle.brightness * 0.8;
+            ctx.fillStyle = color;
+            ctx.shadowColor = color;
+            ctx.shadowBlur = particle.size * 3; // ✅ HALO RÉDUIT : *3 au lieu de *4
+
+            // Particule principale
+            ctx.beginPath();
+            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            // ✅ EFFET D'ÉTOILE RÉDUIT pour les plus grosses particules
+            if (particle.size > 1.2) { // ✅ SEUIL AJUSTÉ : 1.2 au lieu de 2
+                ctx.globalAlpha = particle.brightness * 0.4;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 0.4; // ✅ TRAIT PLUS FIN
+                ctx.shadowBlur = particle.size * 1.5; // ✅ HALO RÉDUIT
+
+                // Traits d'étoile plus petits
+                let starSize = particle.size * 1.5; // ✅ RÉDUIT : *1.5 au lieu de *2
+                ctx.beginPath();
+                ctx.moveTo(particle.x - starSize, particle.y);
+                ctx.lineTo(particle.x + starSize, particle.y);
+                ctx.moveTo(particle.x, particle.y - starSize);
+                ctx.lineTo(particle.x, particle.y + starSize);
+                ctx.stroke();
+            }
+        });
+
+        ctx.shadowBlur = 0; // Reset du blur
+        ctx.restore();
+    }
 
     function closeEndPanel() {
       console.log("Fermeture du panneau de fin");
@@ -1470,54 +1654,60 @@ function displayLeaderboard() {
     }
 
     function clearAllTimersEndLevel() {
-        // === NETTOYAGE DES TIMEOUTS ACTIFS ===
+        console.log("🧹 Nettoyage complet des timers de fin de niveau");
 
-        // Arrêter l'animation des bonus
+        // === NETTOYAGE DES TIMEOUTS CLASSIQUES ===
         if (bonusAnimTimeout) {
             clearTimeout(bonusAnimTimeout);
             bonusAnimTimeout = null;
         }
-
-        // Arrêter le timeout de la raquette géante
         if (paddleHugeTimeout) {
             clearTimeout(paddleHugeTimeout);
             paddleHugeTimeout = null;
         }
+        if (longTimeout) {
+            clearTimeout(longTimeout);
+            longTimeout = null;
+        }
+        if (shortTimeout) {
+            clearTimeout(shortTimeout);
+            shortTimeout = null;
+        }
+        if (impactTimeout) {
+            clearTimeout(impactTimeout);
+            impactTimeout = null;
+        }
 
-        // === REMISE À ZÉRO DES COMPTEURS DE TIMER ===
+        // === NETTOYAGE COMPLET DU TIMEOUT MANAGER ===
+        timeoutManager.clearAll(); // ✅ NOUVEAU : Nettoie TOUS les timeouts gérés
 
-        // Compteur du multiplicateur de score
+        // === REMISE À ZÉRO DES TIMERS ===
         multTimer = 0;
-
-        // Compteur du timer de décrémentation (malus)
         decrementTimer = 0;
-
-        // Compteur du timer de la raquette
         paddleTimer = 0;
+        bossAttackTimer = 0;
+        bossMovementTimer = 0;
 
-        // Réinitialiser l'état des flags de timer
+        // === RESET DES FLAGS DE TIMER ===
         paddleTimerActive = false;
         decrementActive = false;
         decrementEffect = false;
+        bossInvulnerable = false;
 
-        // === NETTOYAGE DES EFFETS VISUELS ===
-
-        // Masquer le panneau de décrémentation
+        // === RESET DES EFFETS VISUELS ===
         elDec.style.display = "none";
-
-        // Réinitialiser l'affichage du multiplicateur
-        updateMultDisplay(mult);
-
-        // Réinitialiser l'état des bonus/malus
-        mult = 1;
-
-        // === NETTOYAGE DES ANIMATIONS ===
-
-        // Réinitialiser l'animation des bonus
+        updateMultDisplay(1); // Reset multiplicateur visuel
         elBonusAnim.style.opacity = 0;
         elBonusAnim.style.transform = "translate(-50%,-50%) scale(1.2)";
 
-//        console.log("Tous les timers ont été nettoyés en fin de niveau");
+        // === RESET DES TAILLES DE RAQUETTE ===
+        paddleW = paddleBaseW; // ✅ IMPORTANT : Retour à la taille de base
+        paddleSizeEffect = null;
+
+        // === RESET DES MULTIPLICATEURS ===
+        mult = 1;
+
+        console.log("✅ Nettoyage terminé - Tous les timers remis à zéro");
     }
 
 
@@ -1767,9 +1957,12 @@ function displayLeaderboard() {
       shotHistory = [];
       lastTargetBrick = null;
 
-            clearAllTimersEndLevel();
+      clearAllTimersEndLevel();
       createBricks();
       resetBall();
+
+      // ✅ NOUVEAU : Initialisation de la galaxie
+      initGalaxy();
 
       // ✅ ORDRE CORRIGÉ : État du jeu à la fin
       pause = false;
@@ -2066,10 +2259,7 @@ function displayLeaderboard() {
       elNiveau.textContent = "NIVEAU:"+niveau;
       elMult.textContent = "x" + mult;
 
-      // ✅ APPEL DIRECT ET SIMPLE
-      if (document.getElementById('statsPanel')) {
-        updateStatsPanel();
-      }
+
 
       const elCookies = document.getElementById('cookies');
       if (elCookies) {
@@ -2644,6 +2834,12 @@ function autopilotMove(dt) {
           }
       }
 
+      // ✅ APPEL DIRECT ET SIMPLE
+      if (document.getElementById('statsPanel')) {
+        updateStatsPanel();
+      }
+
+
       // 2. Activation de l'autopilote (LOGIQUE CORRIGÉE)
       if (briquesRestantes <= LancementAutoPilote && !autopilot && !isBossLevel) {
           autopilot = true;
@@ -2823,6 +3019,8 @@ function autopilotMove(dt) {
               }
           }
       }
+
+      updateGalaxy(dt);
 
 
       // === COLLISION AVEC LE BOSS (VERSION SÉCURISÉE) ===
@@ -3151,15 +3349,6 @@ function autopilotMove(dt) {
               // Animation visuelle (sans délai pour les points)
               showScoreBonusAnim(b.x, b.y, finalPoints);
 
-              // Effet visuel seulement
-              handleIconImpact({
-                icon: "+" + finalPoints,
-                x: b.x,
-                y: b.y,
-                size: 20,
-                color: b.color,
-                points: 0 // ✅ Points déjà ajoutés, pas de double comptage
-              });
           }
         }
       });
@@ -3321,6 +3510,8 @@ function autopilotMove(dt) {
 
           // ✅ 2. PROGRESSION DU NIVEAU
           niveau++;
+          clearAllTimersEndLevel();
+          changeGalaxyConfiguration();
           levelsPassed++;
           vies = Math.min(maxVies, vies + 1);
 
@@ -3938,6 +4129,8 @@ function autopilotMove(dt) {
     function render() {
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
+      renderGalaxy(ctx);
+
       // Rendu des briques
       bricks.forEach(b => {
         if (!b.alive) return;
@@ -4213,9 +4406,6 @@ function autopilotMove(dt) {
       ctx.fill();
       ctx.restore();
 
-      if (gameOver) {
-        // Désormais, le panneau de fin s'affiche via showEndPanel()
-      }
     }
 
     // === LANCEMENT DU JEU ===
@@ -4227,9 +4417,9 @@ function autopilotMove(dt) {
         // ✅ NOUVEAU : Afficher le panneau de bonus au démarrage
         document.getElementById('bonusPanel').style.display = 'flex';
 
-        // ✅ NOUVEAU : Masquer le panneau de stats au démarrage
-        const statsPanel = document.getElementById('statsPanel');
-        if (statsPanel) statsPanel.style.display = 'none';
+//        // ✅ NOUVEAU : Masquer le panneau de stats au démarrage
+//        const statsPanel = document.getElementById('statsPanel');
+//        if (statsPanel) statsPanel.style.display = 'none';
 
         // ✅ DÉTECTION MOBILE (fusionnée dans le même addEventListener)
         if (isMobileDevice()) {
