@@ -649,16 +649,30 @@
     #endPanel {
       display: none;
       position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.7); /* ✅ NOUVEAU : Centrage + réduction */
+
+      /* ✅ DIMENSIONS FIXES au lieu de full-screen */
+      width: 70vw; /* ✅ 90% de la largeur de l'écran */
+      height: 90vh; /* ✅ 90% de la hauteur de l'écran */
+      max-width: 800px; /* ✅ Limite maximale */
+      max-height: 900px; /* ✅ Limite maximale */
+
       background: rgba(0,0,0,0.94);
       z-index: 3000;
       align-items: center;
       justify-content: center;
       flex-direction: column;
       font-family: 'Press Start 2P', monospace;
-      transform: scale(0.8); /* ✅ NOUVEAU : Zoom proportionnel au jeu */
-      transform-origin: center center;
+
+      /* ✅ AJOUTS ESTHÉTIQUES */
+      border-radius: 15px; /* ✅ Coins arrondis */
+      box-shadow: 0 0 50px rgba(0, 255, 255, 0.3); /* ✅ Halo cyan léger */
+      border: 2px solid rgba(255, 255, 255, 0.1); /* ✅ Bordure subtile */
+      overflow: hidden; /* ✅ Contenu ne déborde pas */
     }
+
 
     #endPanel .score-final {
       color:#FFD700;
