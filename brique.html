@@ -9,6 +9,14 @@
 
 
   /* ✅ OPTIMISATION POUR NOUVELLE FENÊTRE */
+
+
+  {
+      margin: 0 !important;
+      padding: 0 !important;
+      box-sizing: border-box;
+  }
+
   html, body {
     margin: 0;
     padding: 0;
@@ -25,10 +33,12 @@
       align-items: center;
       justify-content: center; /* ✅ CHANGÉ : centrage vertical parfait */
       height: 100vh; /* ✅ CHANGÉ : hauteur fixe sans dépassement */
-      padding: 0; /* ✅ SUPPRIMÉ : plus de padding qui crée des marges */
+      margin: 0; /* ✅ AJOUT : Supprime TOUTES les marges par défaut */
+      padding: 0; /* ✅ CHANGÉ : Supprime TOUS les paddings */
       max-width: 100vw;
-      overflow: hidden; /* ✅ COHÉRENT : avec les règles html, body */
+      overflow: hidden; /* ✅ COHÉRENT : pas de scroll */
   }
+
 
   /* === AJUSTEMENT DU TITRE === */
   #title {
@@ -189,7 +199,7 @@
       position: fixed;
       top: 42%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(1.10); /* ✅ COMPENSATION : 1/0.8 = 1.25 */
+      transform: translate(-50%, -50%) scale(0.7); /* ✅ COMPENSATION : 1/0.8 = 1.25 */
 
       /* ✅ DIMENSIONS AJUSTÉES POUR LE ZOOM */
       width: clamp(350px, 78vw, 560px); /* ✅ RÉDUIT : 500*0.8, 98*0.8, 700*0.8 */
@@ -336,7 +346,7 @@
   #bonusPanel:hover::after {
     animation-duration: 1.5s; /* Rotation plus rapide au survol */
     filter: blur(3px); /* Halo plus net */
-    transform: scale(1.05); /* Légèrement plus grand */
+    transform: scale(0.70); /* Légèrement plus grand */
   }
 
   #bonusPanel:hover {
@@ -379,37 +389,37 @@
 }
 
 
-    .game-main-container {
-      position: relative;
-      width: 1200px; /* Largeur de référence fixe */
-      height: 1000px; /* Hauteur de référence fixe */
-      margin: 0 auto;
-      transform-origin: center top; /* Point d'origine de la transformation */
-      transition: transform 0.3s ease; /* Animation fluide lors du redimensionnement */
-    }
+.game-main-container {
+  position: relative;
+  width: 1200px;
+  height: 1000px;
+  margin: 0; /* ✅ SUPPRIMÉ : auto qui créait les marges */
+  transform-origin: center top;
+  transition: transform 0.3s ease;
+}
 
     /* ✅ AJOUT : SYSTÈME DE MISE À L'ÉCHELLE AUTOMATIQUE */
     @media (max-width: 1400px) {
       .game-main-container {
-        transform: scale(0.85); /* 85% de la taille originale */
+        transform: scale(0.70); /* 85% de la taille originale */
       }
     }
 
     @media (max-width: 1200px) {
       .game-main-container {
-        transform: scale(0.75); /* 75% de la taille originale */
+        transform: scale(0.65); /* 75% de la taille originale */
       }
     }
 
     @media (max-width: 1000px) {
       .game-main-container {
-        transform: scale(0.65); /* 65% de la taille originale */
+        transform: scale(0.60); /* 65% de la taille originale */
       }
     }
 
     @media (max-width: 800px) {
       .game-main-container {
-        transform: scale(0.55); /* 55% de la taille originale */
+        transform: scale(0.50); /* 55% de la taille originale */
       }
 
       #statsPanel {
@@ -419,7 +429,7 @@
 
     @media (max-width: 650px) {
       .game-main-container {
-        transform: scale(0.45); /* 45% de la taille originale */
+        transform: scale(0.40); /* 45% de la taille originale */
       }
     }
 
