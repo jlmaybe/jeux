@@ -104,7 +104,7 @@
 
     #score.flash, #mult.flash {
       font-family: 'Press Start 2P', monospace;
-      filter: brightness(2.5) drop-shadow(0 0 10px #ff0);
+      filter: brightness(1) drop-shadow(0 0 15px #ff0);
       /* ✅ SUPPRIMÉ : font-size:1.3em; pour éviter le redimensionnement */
       color: #ff0;
       /* ✅ NOUVEAU : Effet visuel alternatif sans changement de taille */
@@ -113,7 +113,7 @@
         0 0 24px #ff0,
         0 0 36px #fff,
         0 0 48px #fff;
-      transform: scale(1.05); /* ✅ Légère mise à l'échelle qui n'affecte pas le layout */
+      transform: scale(1.02); /* ✅ Légère mise à l'échelle qui n'affecte pas le layout */
       transform-origin: center center;
     }
 
@@ -649,60 +649,84 @@
     #endPanel {
       display: none;
       position: fixed;
-      top: -300px; left: 0; right: 0; bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.94);
       z-index: 3000;
       align-items: center;
       justify-content: center;
       flex-direction: column;
       font-family: 'Press Start 2P', monospace;
+      transform: scale(0.8); /* ✅ NOUVEAU : Zoom proportionnel au jeu */
+      transform-origin: center center;
     }
+
     #endPanel .score-final {
       color:#FFD700;
-      font-size:2.6em;
-      text-shadow:0 0 30px #ff0,0 0 60px #f0f;
-      margin-bottom:20px;
+      font-size: clamp(1.8em, 3vw, 2.2em); /* ✅ RÉDUIT ET RESPONSIVE */
+      text-shadow:0 0 25px #ff0,0 0 50px #f0f; /* ✅ RÉDUIT */
+      margin-bottom: clamp(14px, 2.5vw, 18px); /* ✅ RESPONSIVE */
       text-align:center;
     }
+
     #endPanel .stat {
       color:#fff;
-      font-size:1.1em;
-      margin-bottom:16px;
+      font-size: clamp(0.9em, 1.5vw, 1em); /* ✅ RÉDUIT ET RESPONSIVE */
+      margin-bottom: clamp(12px, 2vw, 14px); /* ✅ RESPONSIVE */
       text-align:center;
+      line-height: 1.4; /* ✅ NOUVEAU : Meilleur espacement */
     }
+
     #endPanel .best-score {
       color:#FFD700;
-      font-size:1.1em;
-      margin-bottom:18px;
+      font-size: clamp(0.9em, 1.5vw, 1em); /* ✅ RÉDUIT ET RESPONSIVE */
+      margin-bottom: clamp(14px, 2.5vw, 16px); /* ✅ RESPONSIVE */
       text-align:center;
     }
+
     #endPanel button {
-      padding:12px 38px;
-      font-size:1.1em;
-      border-radius:9px;
+      padding: clamp(10px, 2vw, 12px) clamp(30px, 5vw, 35px); /* ✅ RESPONSIVE */
+      font-size: clamp(0.9em, 1.4vw, 1em); /* ✅ RÉDUIT ET RESPONSIVE */
+      border-radius: clamp(7px, 1.5vw, 9px); /* ✅ RESPONSIVE */
       background:linear-gradient(90deg,#FFD700 45%,#FF6F00 100%);
       border:none;
       color:#222;
       font-family:'Press Start 2P',monospace;
-      margin-top:16px;
+      margin-top: clamp(12px, 2.5vw, 16px); /* ✅ RESPONSIVE */
       cursor:pointer;
-    }
-    #endPanel button:hover {
-      background: linear-gradient(90deg, #FFEC80 45%, #FF9F00 100%);
-      transform: scale(1.06);
+      transition: transform 0.1s ease; /* ✅ NOUVEAU : Animation hover */
     }
 
-    #endPanel {
-      position: fixed;
-      top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.94);
-      z-index: 3000;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      font-family: 'Press Start 2P', monospace;
-      display: none;
-      overflow: hidden;
+    #endPanel button:hover {
+      background: linear-gradient(90deg, #FFEC80 45%, #FF9F00 100%);
+      transform: scale(1.05); /* ✅ EFFET HOVER AJUSTÉ */
+    }
+
+    /* ✅ NOUVEAU : Ajustements pour le leaderboard dans endPanel */
+    #leaderboardSection {
+      max-height: clamp(350px, 60vh, 450px) !important; /* ✅ HAUTEUR RESPONSIVE */
+      overflow: hidden !important; /* ✅ COHÉRENT avec les autres panneaux */
+      margin-top: clamp(15px, 3vw, 20px); /* ✅ MARGE RESPONSIVE */
+    }
+
+    #leaderboardList table {
+      font-size: clamp(0.6em, 1.2vw, 0.8em) !important; /* ✅ TAILLE AJUSTÉE */
+      line-height: 1.3 !important; /* ✅ ESPACEMENT OPTIMISÉ */
+    }
+
+    #leaderboardList td {
+      padding: clamp(6px, 1.5vw, 8px) clamp(3px, 1vw, 4px) !important; /* ✅ PADDING RESPONSIVE */
+    }
+
+    /* ✅ NOUVEAU : Ajustements pour la saisie du nom */
+    #playerNameSection input {
+      font-size: clamp(0.9em, 1.4vw, 1em) !important; /* ✅ TAILLE AJUSTÉE */
+      padding: clamp(8px, 1.5vw, 10px) !important; /* ✅ PADDING RESPONSIVE */
+      width: clamp(160px, 25vw, 200px) !important; /* ✅ LARGEUR RESPONSIVE */
+    }
+
+    #playerNameSection button {
+      font-size: clamp(0.8em, 1.2vw, 0.9em) !important; /* ✅ BOUTONS PLUS PETITS */
+      padding: clamp(8px, 1.5vw, 10px) clamp(15px, 3vw, 20px) !important; /* ✅ PADDING AJUSTÉ */
     }
 
     #psyCanvas {
