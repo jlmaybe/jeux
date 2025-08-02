@@ -18,8 +18,8 @@
   }
 
   html, body {
-    margin: 0;
-    padding: 0;
+    margin: 5;
+    padding: 5;
     background: #000;
     overflow: hidden; /* ✅ DÉSACTIVE COMPLÈTEMENT L'ASCENSEUR */
     height: 100vh; /* ✅ HAUTEUR FIXE au lieu de min-height */
@@ -33,8 +33,8 @@
       align-items: center;
       justify-content: flex-start;
       height: 100vh; /* ✅ CHANGÉ : hauteur exacte sans dépassement */
-      padding: 0; /* ✅ SUPPRIMÉ : plus de padding qui crée des marges */
-      margin: 0; /* ✅ AJOUT : supprime les marges par défaut */
+      padding: 5; /* ✅ SUPPRIMÉ : plus de padding qui crée des marges */
+      margin: 5; /* ✅ AJOUT : supprime les marges par défaut */
       max-width: 100vw;
       overflow: hidden; /* ✅ COHÉRENT : pas de scroll */
   }
@@ -200,7 +200,7 @@
       position: fixed;
       top: 42%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(0.7); /* ✅ COMPENSATION : 1/0.8 = 1.25 */
+      transform: translate(-50%, -50%) scale(0.8); /* ✅ COMPENSATION : 1/0.8 = 1.25 */
 
       /* ✅ DIMENSIONS AJUSTÉES POUR LE ZOOM */
       width: clamp(350px, 78vw, 560px); /* ✅ RÉDUIT : 500*0.8, 98*0.8, 700*0.8 */
@@ -402,25 +402,25 @@
     /* ✅ AJOUT : SYSTÈME DE MISE À L'ÉCHELLE AUTOMATIQUE */
     @media (max-width: 1400px) {
       .game-main-container {
-        transform: scale(0.70); /* 85% de la taille originale */
+        transform: scale(0.65); /* 85% de la taille originale */
       }
     }
 
     @media (max-width: 1200px) {
       .game-main-container {
-        transform: scale(0.65); /* 75% de la taille originale */
+        transform: scale(0.60); /* 75% de la taille originale */
       }
     }
 
     @media (max-width: 1000px) {
       .game-main-container {
-        transform: scale(0.60); /* 65% de la taille originale */
+        transform: scale(0.55); /* 65% de la taille originale */
       }
     }
 
     @media (max-width: 800px) {
       .game-main-container {
-        transform: scale(0.50); /* 55% de la taille originale */
+        transform: scale(0.40); /* 55% de la taille originale */
       }
 
       #statsPanel {
@@ -430,7 +430,7 @@
 
     @media (max-width: 650px) {
       .game-main-container {
-        transform: scale(0.40); /* 45% de la taille originale */
+        transform: scale(0.35); /* 45% de la taille originale */
       }
     }
 
@@ -484,16 +484,6 @@
       .bonus-panel-content h2 {
         font-size: 0.8em;
         margin-bottom: 10px;
-      }
-    }
-
-    /* ✅ GRANDES RÉSOLUTIONS : Évite que le panneau devienne trop grand */
-    @media (min-width: 1800px) {
-      #bonusPanel {
-        width: 50vw;
-        height: 55vh;
-        max-width: 700px;
-        max-height: 600px;
       }
     }
 
