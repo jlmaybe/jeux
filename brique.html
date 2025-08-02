@@ -20,74 +20,92 @@
 
   /* ✅ CONTENEUR PRINCIPAL CENTRÉ */
   body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  min-height: 100vh;
-  padding-top: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding-top: 20px; /* ✅ RÉDUIT : moins d'espace en haut */
+    max-width: 100vw;
+    overflow-x: hidden;
+    overflow-y: auto; /* ✅ CHANGÉ : permet le scroll vertical si nécessaire */
   }
 
 
+
+  /* === AJUSTEMENT DU TITRE === */
   #title {
-  font-family: 'Press Start 2P', monospace;
-  font-size:2.5em; letter-spacing:0.2em;
-  text-shadow: 0 0 15px #0ff, 0 0 40px #ff0, 0 0 150px #f0f;
-  margin-top:-10px;
-  padding: 40px 0;
-  font-weight:bold;
-  filter:brightness(1.4);
-  text-align: center;
-  /* ✅ CENTRAGE PARFAIT : Par rapport à la zone de jeu */
-  width: 1075px; /* ✅ CORRIGÉ : Même largeur que le canvas de jeu */
-  position: absolute;
-  left: 57%; /* ✅ CORRIGÉ : Centre horizontal de l'écran */
-  top: 1px;
-  transform: translateX(-50%); /* ✅ CORRIGÉ : Centrage parfait */
-  pointer-events: none;
-  user-select: none;
-  z-index: 20;
-  white-space: nowrap;
-  overflow: hidden;
-  /* ✅ SUPPRIMÉ : margin-left: -150px; (causait des problèmes) */
-  /* ✅ SUPPRIMÉ : width: calc(100vw - 300px - 40px); (logique incorrecte) */
-}
+    font-family: 'Press Start 2P', monospace;
+    font-size: 2.5em;
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 15px #0ff, 0 0 40px #ff0, 0 0 150px #f0f;
+    margin-top: -10px;
+    padding: 40px 0;
+    font-weight: bold;
+    filter: brightness(1.4);
+    text-align: center;
+    width: 100%; /* ✅ CHANGÉ : largeur relative au container */
+    position: relative; /* ✅ CHANGÉ : position relative */
+    left: 0; /* ✅ RESET */
+    top: 0; /* ✅ RESET */
+    transform: none; /* ✅ RESET */
+    pointer-events: none;
+    user-select: none;
+    z-index: 20;
+    white-space: nowrap;
+    overflow: hidden;
+  }
 
 
-
+  /* === AJUSTEMENT DU HUD === */
   #hud {
-    position:absolute;
-    left: 58%; /* ✅ CORRIGÉ : 57% → 50% pour centrage parfait */
-    top:100px;
-    transform:translateX(-50%); /* ✅ CONSERVÉ : Centrage mathématique parfait */
-    width:1220px;
-    text-align:center;
-    font-family:'Press Start 2P', monospace;
-    color:#fff;
-    pointer-events:none;
-    z-index:10;
-    user-select:none;
-    background: linear-gradient(260deg,#0ff 0%, #f0f 50%, #ff0 100%);
-    box-shadow:0 0 20px #0ff, 0 0 40px #f0f;
-    border-radius: 10px;
+    position: relative; /* ✅ CHANGÉ : position relative */
+    left: 0; /* ✅ RESET */
+    top: 0; /* ✅ RESET */
+    transform: none; /* ✅ RESET */
+    width: 100%; /* ✅ CHANGÉ : largeur relative */
+    max-width: 1140px; /* ✅ AJOUTÉ : largeur maximale */
+    margin: 20px auto; /* ✅ CHANGÉ : centrage automatique */
+    text-align: center;
+    font-family: 'Press Start 2P', monospace;
+    color: #fff;
+    pointer-events: none;
+    z-index: 10;
+    user-select: none;
+    background: linear-gradient(260deg, #0ff 0%, #f0f 50%, #ff0 100%);
+    box-shadow: 0 0 20px #0ff, 0 0 40px #f0f;
+    border-radius: 12px;
     padding: 8px 0 6px 0;
   }
 
-    #score, #vies, #niveau, #mult {
-      font-family: 'Press Start 2P', monospace;
-      font-size:1.1em; margin:0 30px; display:inline-block;
-      text-shadow:0 0 9px #0ff, 0 0 9px #f0f;
-      text-align: right;
-      vertical-align:top;
-      color: #fff;
-      letter-spacing: 2px;
-      transition: filter 0.2s, font-size 0.15s, color 0.15s;
-    }
+
+  /* ✅ CORRECTION : Ajouter #cookies au sélecteur */
+  #score, #vies, #niveau, #mult, #cookies {
+    font-family: 'Press Start 2P', monospace;
+    font-size:1.1em;
+    margin:0 30px;
+    display:inline-block;
+    text-shadow:0 0 9px #0ff, 0 0 9px #f0f;
+    text-align: right;
+    vertical-align:top;
+    color: #fff;
+    letter-spacing: 2px;
+    transition: filter 0.2s, font-size 0.15s, color 0.15s;
+  }
+
     #score.flash, #mult.flash {
       font-family: 'Press Start 2P', monospace;
       filter: brightness(2.5) drop-shadow(0 0 10px #ff0);
-      font-size:1.3em;
+      /* ✅ SUPPRIMÉ : font-size:1.3em; pour éviter le redimensionnement */
       color: #ff0;
+      /* ✅ NOUVEAU : Effet visuel alternatif sans changement de taille */
+      text-shadow:
+        0 0 12px #ff0,
+        0 0 24px #ff0,
+        0 0 36px #fff,
+        0 0 48px #fff;
+      transform: scale(1.05); /* ✅ Légère mise à l'échelle qui n'affecte pas le layout */
+      transform-origin: center center;
     }
 
 
@@ -118,71 +136,385 @@
       top: 0;
     }
 
-    /* ✅ CANVAS CENTRÉ NATURELLEMENT */
-  #gameCanvas {
-    display: block;
-    margin: 20px auto; /* ✅ CHANGÉ : margin centré */
-    background: #111;
-    box-shadow: 0 0 40px #0ff, 0 0 80px #f0f;
-    border-radius: 12px;
-    position: relative;
-    top: 0; /* ✅ SUPPRIMÉ le décalage */
-  }
-
-  /* ✅ ADAPTATION RESPONSIVE POUR NOUVELLE FENÊTRE */
-  @media (max-width: 1200px) {
-    #statsPanel {
-      display: none; /* Masquer sur petites fenêtres */
+    /* === CONTAINER DE COUPLAGE GAMECANVAS + STATSPANEL === */
+    .game-canvas-container {
+      display: flex;
+      align-items: flex-start; /* Alignement parfait en hauteur */
+      gap: 15px; /* ✅ EXACTEMENT 15px entre canvas et panel */
+      justify-content: center;
+      position: relative;
+      margin: 20px auto 0; /* Centrage et marge supérieure */
+      width: fit-content; /* S'adapte au contenu */
     }
 
-    #title {
-      font-size: 2em;
-    }
-
+    /* === GAMECANVAS DANS LE CONTAINER === */
     #gameCanvas {
-      transform: scale(0.9); /* Réduire légèrement le jeu */
+      display: block;
+      margin: 0; /* ✅ SUPPRIMÉ : tous les margins/positions manuels */
+      background: #111;
+      box-shadow: 0 0 40px #0ff, 0 0 80px #f0f;
+      border-radius: 12px;
+      /* ✅ SUPPRIMÉ : position, left, top - maintenant géré par flex */
+      flex-shrink: 0; /* Empêche la compression */
+      cursor: none !important;
     }
-  }
 
-  #statsPanel {
-    position: fixed;
-    right: max(20px, calc((100vw - 875px)/2 - 320px)); /* ✅ Calcul automatique */
-    top: 145px;
-    width: 300px;
-    height: 900px;
-    background: #111;
-    box-shadow: 0 0 40px #0ff, 0 0 80px #f0f;
-    border-radius: 12px;
-    z-index: 5;
-    overflow-y: auto;
-  }
+    /* === STATSPANEL COUPLÉ AU CANVAS === */
+    #statsPanel {
+      /* ✅ NOUVEAU : Plus de position fixed - maintenant dans le flux */
+      position: static !important;
 
+      /* ✅ DIMENSIONS IDENTIQUES AU CANVAS */
+      width: 250px !important;
+      height: 900px !important; /* ✅ EXACTEMENT comme le canvas */
+      max-height: 900px !important;
+      min-height: 900px !important;
 
+      /* ✅ STYLES VISUELS CONSERVÉS */
+      background: #111;
+      box-shadow: 0 0 40px #0ff, 0 0 80px #f0f;
+      border-radius: 12px;
+      z-index: 5;
+      overflow-y: auto;
+      overflow-x: hidden;
+      box-sizing: border-box !important;
+
+      /* ✅ FLEX : Pas de compression ni d'expansion */
+      flex-shrink: 0;
+      flex-grow: 0;
+
+      /* ✅ SUPPRIMÉ : left, top, transform - maintenant géré par flex */
+    }
 
     #bonusPanel {
-      font-family: 'Press Start 2P', monospace;
-      position: fixed;
-      top: 100px; /* Remplacez la valeur existante */
-      left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.82);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
+    font-family: 'Press Start 2P', monospace;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    /* ✅ DIMENSIONS CONSERVÉES */
+    width: clamp(500px, 98vw, 700px);
+    height: clamp(700px, 95vh, 850px);
+    max-width: 700px;
+    max-height: 750px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+
+    font-size: clamp(0.6rem, 1.2vw, 0.8rem);
+    box-sizing: border-box;
+    overflow: hidden;
+
+    /* ✅ HALO DE BASE RENFORCÉ */
+    border-radius: 18px;
+    box-shadow:
+      0 0 40px rgba(0, 255, 255, 0.8),
+      0 0 80px rgba(255, 0, 255, 0.6),
+      0 0 120px rgba(255, 255, 0, 0.4),
+      inset 0 0 30px rgba(0, 255, 255, 0.2);
+  }
+
+  /* ✅ ARRIÈRE-PLAN AVEC PULSATION VISIBLE */
+  #bonusPanel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 18px;
+
+    box-shadow:
+      0 0 60px rgba(0, 255, 255, 1),
+      0 0 120px rgba(255, 0, 255, 0.8),
+      0 0 180px rgba(255, 255, 0, 0.6);
+
+    animation: haloStaticPulse 2s ease-in-out infinite alternate;
+  }
+
+  /* ✅ HALO EXTERNE ROTATIF ULTRA-VISIBLE */
+  #bonusPanel::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    z-index: -2;
+
+    /* ✅ NOUVEAU : Gradient en forme de rayons pour rotation visible */
+    background: conic-gradient(
+      from 0deg,
+      rgba(0, 255, 255, 1) 0%,     /* Cyan intense - rayon 1 */
+      transparent 5%,
+      rgba(255, 0, 255, 1) 15%,    /* Magenta intense - rayon 2 */
+      transparent 20%,
+      rgba(255, 255, 0, 1) 30%,    /* Jaune intense - rayon 3 */
+      transparent 35%,
+      rgba(0, 255, 0, 1) 45%,      /* Vert intense - rayon 4 */
+      transparent 50%,
+      rgba(255, 165, 0, 1) 60%,    /* Orange intense - rayon 5 */
+      transparent 65%,
+      rgba(138, 43, 226, 1) 75%,   /* Violet intense - rayon 6 */
+      transparent 80%,
+      rgba(0, 255, 255, 1) 90%,    /* Retour cyan - rayon 7 */
+      transparent 95%,
+      rgba(255, 0, 255, 1) 100%    /* Magenta final - rayon 8 */
+    );
+
+    border-radius: 35px;
+
+    /* ✅ ANIMATION PLUS RAPIDE ET VISIBLE */
+    animation: haloRotate 3s linear infinite;
+
+    /* ✅ BLUR RÉDUIT pour voir la rotation */
+    filter: blur(6px);
+  }
+
+  /* ✅ ANIMATIONS OPTIMISÉES POUR LA VISIBILITÉ */
+  @keyframes haloRotate {
+    0% {
+      transform: rotate(0deg) scale(1);
+      filter: blur(6px);
+    }
+    25% {
+      transform: rotate(90deg) scale(1.03);
+      filter: blur(4px);
+    }
+    50% {
+      transform: rotate(180deg) scale(1);
+      filter: blur(6px);
+    }
+    75% {
+      transform: rotate(270deg) scale(1.03);
+      filter: blur(4px);
+    }
+    100% {
+      transform: rotate(360deg) scale(1);
+      filter: blur(6px);
+    }
+  }
+
+  @keyframes haloStaticPulse {
+    0% {
+      opacity: 0.8;
+      transform: scale(0.98);
+      box-shadow:
+        0 0 60px rgba(0, 255, 255, 1),
+        0 0 120px rgba(255, 0, 255, 0.8),
+        0 0 180px rgba(255, 255, 0, 0.6);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.02);
+      box-shadow:
+        0 0 80px rgba(0, 255, 255, 1),
+        0 0 160px rgba(255, 0, 255, 1),
+        0 0 240px rgba(255, 255, 0, 0.8);
+    }
+    100% {
+      opacity: 0.9;
+      transform: scale(1);
+      box-shadow:
+        0 0 70px rgba(0, 255, 255, 1),
+        0 0 140px rgba(255, 0, 255, 0.9),
+        0 0 210px rgba(255, 255, 0, 0.7);
+    }
+  }
+
+  /* ✅ EFFET HOVER RENFORCÉ */
+  #bonusPanel:hover::before {
+    animation-duration: 1s; /* Pulsation plus rapide au survol */
+    background: rgba(0, 0, 0, 0.9);
+  }
+
+  #bonusPanel:hover::after {
+    animation-duration: 1.5s; /* Rotation plus rapide au survol */
+    filter: blur(3px); /* Halo plus net */
+    transform: scale(1.05); /* Légèrement plus grand */
+  }
+
+  #bonusPanel:hover {
+    box-shadow:
+      0 0 80px rgba(0, 255, 255, 1),
+      0 0 160px rgba(255, 0, 255, 0.9),
+      0 0 240px rgba(255, 255, 0, 0.8),
+      inset 0 0 50px rgba(0, 255, 255, 0.4);
+  }
+
+
+
+  @media (max-width: 800px) {
+  #bonusPanel::before {
+    animation-duration: 4s; /* Plus lent sur mobile pour économiser la batterie */
+  }
+
+  #bonusPanel::after {
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    filter: blur(8px);
+    animation-duration: 8s; /* Plus lent sur mobile */
+  }
+
+  #bonusPanel {
+    box-shadow:
+      0 0 30px rgba(0, 255, 255, 0.5),
+      0 0 60px rgba(255, 0, 255, 0.4),
+      0 0 90px rgba(255, 255, 0, 0.3);
+  }
+}
+
+@media (max-width: 500px) {
+  #bonusPanel::after {
+    filter: blur(6px);
+    animation-duration: 10s; /* Encore plus lent sur très petits écrans */
+  }
+}
+
+
+    .game-main-container {
+      position: relative;
+      width: 1200px; /* Largeur de référence fixe */
+      height: 1000px; /* Hauteur de référence fixe */
+      margin: 0 auto;
+      transform-origin: center top; /* Point d'origine de la transformation */
+      transition: transform 0.3s ease; /* Animation fluide lors du redimensionnement */
+    }
+
+    /* ✅ AJOUT : SYSTÈME DE MISE À L'ÉCHELLE AUTOMATIQUE */
+    @media (max-width: 1400px) {
+      .game-main-container {
+        transform: scale(0.85); /* 85% de la taille originale */
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .game-main-container {
+        transform: scale(0.75); /* 75% de la taille originale */
+      }
+    }
+
+    @media (max-width: 1000px) {
+      .game-main-container {
+        transform: scale(0.65); /* 65% de la taille originale */
+      }
+    }
+
+    @media (max-width: 800px) {
+      .game-main-container {
+        transform: scale(0.55); /* 55% de la taille originale */
+      }
+
+      #statsPanel {
+        display: none !important; /* Masquer sur petits écrans */
+      }
+    }
+
+    @media (max-width: 650px) {
+      .game-main-container {
+        transform: scale(0.45); /* 45% de la taille originale */
+      }
+    }
+
+    /* ✅ MEDIA QUERIES ADAPTÉES À LA NOUVELLE TAILLE */
+    @media (max-width: 600px) {
+      #bonusPanel {
+        width: 98vw;
+        height: 92vh; /* ✅ AUGMENTÉ pour garder les proportions */
+        font-size: 0.7rem;
+      }
+
+      .bonus-panel-content {
+        padding: 18px 15px 12px 15px; /* ✅ AUGMENTÉ */
+        font-size: 0.65em;
+      }
+
+      .bonus-panel-content h2 {
+        font-size: 1em;
+        margin-bottom: 15px; /* ✅ AUGMENTÉ */
+      }
+
+      .bonus-panel-content li {
+        font-size: 0.6em; /* ✅ AUGMENTÉ : de 0.55em */
+        margin-bottom: 10px; /* ✅ AUGMENTÉ */
+      }
+
+      .bonus-emoji {
+        font-size: 1.1em; /* ✅ AUGMENTÉ */
+        margin-right: 12px; /* ✅ AUGMENTÉ */
+      }
+
+      #closeBonusPanel {
+        padding: 8px 22px; /* ✅ AUGMENTÉ */
+        font-size: 0.75em; /* ✅ AUGMENTÉ */
+      }
+    }
+
+    @media (max-width: 400px) {
+      #bonusPanel {
+        width: 98vw;
+        height: 90vh;
+        font-size: 0.6rem;
+      }
+
+      .bonus-panel-content {
+        padding: 12px 8px;
+        font-size: 0.55em;
+        line-height: 1.4;
+      }
+
+      .bonus-panel-content h2 {
+        font-size: 0.8em;
+        margin-bottom: 10px;
+      }
+    }
+
+    /* ✅ GRANDES RÉSOLUTIONS : Évite que le panneau devienne trop grand */
+    @media (min-width: 1800px) {
+      #bonusPanel {
+        width: 50vw;
+        height: 55vh;
+        max-width: 700px;
+        max-height: 600px;
+      }
     }
 
     .bonus-panel-content {
-      background: rgba(30,40,60,0.99);
-      transform: translateY(-200px);
+      background: rgba(30, 40, 60, 0.99);
       color: #fff;
-      border-radius: 18px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.45);
-      padding: 38px 36px 26px 36px;
+      border-radius: clamp(12px, 2vw, 18px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+
+      /* ✅ NOUVEAU : Padding responsive mais sans créer de débordement */
+      padding: clamp(20px, 5vw, 40px) clamp(25px, 6vw, 45px) clamp(15px, 4vw, 35px) clamp(25px, 6vw, 45px);
+
       font-family: 'Press Start 2P', monospace;
       text-align: left;
-      max-width: 600px;
-      min-width: 600px;
-      font-size: 0.8em;
+
+      /* ✅ SUPPRIMÉ : overflow-y: auto pour éliminer l'ascenseur interne */
+      /* ✅ SUPPRIMÉ : height: 100% qui forçait le scroll */
+      width: 100%;
+      max-width: 100%;
+
+      /* ✅ NOUVEAU : Taille de police légèrement plus grande */
+      font-size: clamp(0.6em, 1.8vw, 0.85em); /* ✅ AUGMENTÉ pour meilleure lisibilité */
+
+      /* ✅ NOUVEAU : Espacement des lignes optimisé */
+      line-height: clamp(1.4, 2vw, 1.8);
+      box-sizing: border-box;
+
+      /* ✅ NOUVEAU : Disposition naturelle sans contrainte de hauteur */
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
 
     /* Animation de clignotement générique et réutilisable */
@@ -195,72 +527,79 @@
       }
     }
 
-    .bonus-panel-content h2 {
-      text-align: center;
-      color: #FFD700;
-      margin-top: 0;
-      margin-bottom: 18px;
-      font-size: 1.1em;
-      letter-spacing: 2px;
-      text-shadow: 1px 2px 0 #222;
-    }
 
-    .bonus-panel-content h3 {
-      text-align: center;
-      color: #FFE000;
-      margin-top: 0;
-      margin-bottom: 18px;
-      font-size: 0.5em;
-      letter-spacing: 2px;
-      text-shadow: 1px 5px 0 #122;
-    }
+    /* ✅ NOUVEAU : Éléments internes responsive */
+    /* ✅ NOUVEAU : Éléments internes optimisés pour la nouvelle taille */
+  .bonus-panel-content h2 {
+    text-align: center;
+    color: #FFD700;
+    margin-top: 0;
+    margin-bottom: clamp(12px, 4vw, 25px); /* ✅ AUGMENTÉ proportionnellement */
 
+    font-size: clamp(0.9em, 2.4vw, 1.3em); /* ✅ AUGMENTÉ : de 2vw à 2.4vw */
+    letter-spacing: clamp(1px, 0.4vw, 3px); /* ✅ AUGMENTÉ */
+    text-shadow: 1px 2px 0 #222;
+  }
 
-    .bonus-panel-content h1 {
-      text-align: center;
-      color: #FFD700;
-      margin-top: 0;
-      margin-bottom: 18px;
-      font-size: 2.1em;
-      letter-spacing: 2px;
-      text-shadow: 1px 2px 0 #222;
-    }
-    .bonus-panel-content ul {
-      list-style: none;
-      padding: 0;
-      margin-bottom: 24px;
-    }
-    .bonus-panel-content li {
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      font-size: 0.95em;
-    }
-    .bonus-emoji {
-      font-size: 1.3em;
-      margin-right: 14px;
-      filter: drop-shadow(0 0 6px #0ff);
-    }
-    #closeBonusPanel {
-      display: block;
-      margin: 0 auto;
-      margin-top: 10px;
-      padding: 12px 36px;
-      background: linear-gradient(90deg, #FFD700 45%, #FF6F00 100%);
-      color: #222;
-      border: none;
-      border-radius: 9px;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 1em;
-      letter-spacing: 2px;
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      transition: background 0.2s, transform 0.1s;
-    }
-    #closeBonusPanel:hover {
-      background: linear-gradient(90deg, #FFEC80 45%, #FF9F00 100%);
-      transform: scale(1.06);
-    }
+  .bonus-panel-content h3 {
+    text-align: center;
+    color: #FFE000;
+    margin-top: 0;
+    margin-bottom: clamp(10px, 2.5vw, 20px); /* ✅ AUGMENTÉ */
+
+    font-size: clamp(0.4em, 1.2vw, 0.6em); /* ✅ AUGMENTÉ : de 1vw à 1.2vw */
+    letter-spacing: clamp(1px, 0.25vw, 2.5px);
+    text-shadow: 1px 5px 0 #122;
+  }
+
+  .bonus-panel-content ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: clamp(15px, 4vw, 30px); /* ✅ AUGMENTÉ */
+  }
+
+  .bonus-panel-content li {
+    margin-bottom: clamp(8px, 2vw, 16px); /* ✅ AUGMENTÉ : de 1.5vw à 2vw */
+    display: flex;
+    align-items: center;
+    font-size: clamp(0.55em, 1.6vw, 0.95em); /* ✅ AUGMENTÉ : de 1.3vw à 1.6vw */
+  }
+
+  .bonus-emoji {
+    font-size: clamp(1em, 2.4vw, 1.5em); /* ✅ AUGMENTÉ : de 2vw à 2.4vw */
+    margin-right: clamp(10px, 2.5vw, 18px); /* ✅ AUGMENTÉ */
+    filter: drop-shadow(0 0 6px #0ff);
+
+    /* ✅ NOUVELLE TAILLE minimale */
+    min-width: clamp(20px, 3.5vw, 30px); /* ✅ AUGMENTÉ */
+    display: inline-block;
+    text-align: center;
+  }
+
+  #closeBonusPanel {
+    display: block;
+    margin: clamp(8px, 2.5vw, 15px) auto 0; /* ✅ AUGMENTÉ */
+    padding: clamp(10px, 2.5vw, 16px) clamp(25px, 6vw, 45px); /* ✅ AUGMENTÉ */
+
+    background: linear-gradient(90deg, #FFD700 45%, #FF6F00 100%);
+    color: #222;
+    border: none;
+    border-radius: clamp(8px, 2vw, 12px); /* ✅ AUGMENTÉ */
+
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(0.7em, 1.8vw, 1.2em); /* ✅ AUGMENTÉ : de 1.5vw à 1.8vw */
+    letter-spacing: clamp(1px, 0.4vw, 2.5px);
+    cursor: pointer;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  #closeBonusPanel:hover {
+    background: linear-gradient(90deg, #FFEC80 45%, #FF9F00 100%);
+    transform: scale(clamp(1.03, 1.08, 1.12)); /* ✅ AUGMENTÉ : hover plus marqué */
+  }
+
     /* Panneau de fin */
     #endPanel {
       display: none;
@@ -355,20 +694,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-    }
-
-    /* ✅ NOUVEAU : Adaptation pour écrans plus petits */
-    @media (max-width: 1400px) {
-      #statsPanel {
-        right: 10px;
-        width: 280px;
-      }
-    }
-
-    @media (max-width: 1200px) {
-      #statsPanel {
-        display: none; /* Masquer sur très petits écrans */
-      }
     }
 
 
@@ -502,102 +827,87 @@
   </style>
 </head>
 
-
 <body>
-  <div id="title">BRICK BLITZ ELYSIUM</div>
-  <div id="hud">
-    <span id="vies">VIES : 3</span>
-    <span id="cookies">cookies : 0</span>
-    <span id="niveau">NIVEAU:1</span>
-    <span id="mult">x1</span>
-    <span id="score">000000000</span>
-    <span id="autopilot-status">AUTOPILOT</span>
+  <!-- ✅ NOUVEAU : Container principal scalable -->
+  <div class="game-main-container">
+    <div id="title">BRICK BLITZ ELYSIUM</div>
 
-  </div>
-  <div id="bonus-anim"></div>
-  <div id="decrement-timer"></div>
-  <canvas id="gameCanvas" width="875" height="900"></canvas>
+    <div id="hud">
+      <span id="vies">VIE(S):3</span>
+      <span id="cookies">COOKIE(S):0</span>
+      <span id="niveau">NIVEAU(X):1</span>
+      <span id="mult">x1</span>
+      <span id="score">000000000</span>
+      <span id="autopilot-status">AUTOPILOT</span>
+    </div>
 
+    <div id="bonus-anim"></div>
+    <div id="decrement-timer"></div>
 
-  <!-- Panneau de statistiques en temps réel -->
-  <div id="statsPanel">
-    <div class="stats-panel-content">
-      <h3>STATISTIQUES</h3>
+    <!-- ✅ NOUVEAU : Container de couplage Canvas + StatsPanel -->
+    <div class="game-canvas-container">
+      <canvas id="gameCanvas" width="875" height="900"></canvas>
 
-      <div class="stats-section">
-        <h4>BRIQUES</h4>
-        <div id="bricksStats"></div>
-      </div>
+      <div id="statsPanel">
+        <div class="stats-panel-content">
+          <h3>STATISTIQUES</h3>
 
-      <div class="stats-section">
-        <h4>BONUS</h4>
-        <div id="bonusesStats"></div>
-      </div>
+          <div class="stats-section">
+            <h4>BRIQUES</h4>
+            <div id="bricksStats"></div>
+          </div>
 
-      <div class="stats-section">
-        <h4>POWER-UPS</h4>
-        <div id="powerupsStats"></div>
-      </div>
+          <div class="stats-section">
+            <h4>BONUS</h4>
+            <div id="bonusesStats"></div>
+          </div>
 
-      <div class="stats-section">
-        <h4>ÉTAT DU JEU</h4>
-        <div id="gameStateStats"></div>
+          <div class="stats-section">
+            <h4>POWER-UPS</h4>
+            <div id="powerupsStats"></div>
+          </div>
+
+          <div class="stats-section">
+            <h4>ÉTAT DU JEU</h4>
+            <div id="gameStateStats"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- ✅ FIN du container principal scalable -->
 
-
-
+  <!-- ✅ Éléments qui restent HORS du scaling -->
   <div id="autopilot-banner"></div>
+
   <!-- Panneau d'explication des bonus -->
   <div id="bonusPanel">
     <div class="bonus-panel-content">
-      <li><span></span></li>
       <h2>BONUS</h2>
-      <li><span></span></li>
       <ul>
-        <li><span class="bonus-emoji">🍒</span> <b>+500 pts Petit bonus de score</li>
-        <li><span class="bonus-emoji">🍓</span> <b>+1000 pts Bonus de score</li>
-        <li><span class="bonus-emoji">🛸</span> <b>+2000 pts Super bonus</li>
-        <li><span class="bonus-emoji">🍑</span> <b>+5000 pts Méga bonus</li>
-        <li><span class="bonus-emoji">🌸</span> <b>+500 pts  Bonus fleuri</li>
-        <li><span class="bonus-emoji">💝</span> <b>+8000 pts Bonus de score</li>
-        <li><span class="bonus-emoji">🍉</span> <b>+2000 pts Super bonus</li>
-        <li><span class="bonus-emoji">💊</span> <b>+15000 pts Méga bonus</li>
-        <li><span class="bonus-emoji">🐲</span> <b>+1500 pts Bonus fleuri</li>
-        <li><span class="bonus-emoji">🍇</span> <b>+500 pts Raisin surprise</li>
-        <li><span class="bonus-emoji">🍌</span> <b>+500 pts Banane dorée</li>
+        <li><span class="bonus-emoji">🍒 🍌 🍇 🌸</span> <b>500 pts Petit bonus de score</li>
+        <li><span class="bonus-emoji">🍓</span> <b>1000 pts Bonus de score</li>
+        <li><span class="bonus-emoji">🐲</span> <b>1500 pts Bonus fleuri</li>
+        <li><span class="bonus-emoji">🛸 🍉</span> <b>2000 pts Super bonus</li>
+        <li><span class="bonus-emoji">🍑</span> <b>5000 pts Méga bonus</li>
+        <li><span class="bonus-emoji">💝</span> <b>8000 pts Bonus de score</li>
+        <li><span class="bonus-emoji">💊</span> <b>15000 pts Méga bonus</li>
         <h2>POWER-UPS</h2>
-        <li><span class="bonus-emoji">🏳️</span> <b>Raquette longue</b></li>
-        <li><span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b></li>
-        <li><span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
-        <li><span class="bonus-emoji">1️⃣</span> <b>x2 Score Double les points pendant 30s</li>
-        <li><span class="bonus-emoji">2️⃣</span> <b>x3 Score Triple les points pendant 30s</li>
-        <li><span class="bonus-emoji">4️⃣</span> <b>x4 Score Quadruple les points pendant 30s</li>
-        <li><span class="bonus-emoji">8️⃣</span> <b>x8 Score Multiplie par 8 les points pendant 30s</li>
-        <li><span class="bonus-emoji">☠️</span>  <b>Malus    Score en décrémentation pendant 30s</li>
+        <li><span class="bonus-emoji">🏳️</span> <b>Raquette longue</b> <span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b> <span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
+        <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ 8️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
         <li><span class="bonus-emoji">🍪</span> <b>Cookies  Bouton panique (M)</li>
         <li><span class="bonus-emoji">🌈</span> <b>Vie      Une vie</li>
+        <li><span class="bonus-emoji">☠️</span>  <b>Malus    Score en décrémentation pendant 30s</li>
       </ul>
       <h2>ACTIONS</h2>
-      <li><span class="bonus-emoji">M</span> – Bouton panique</li>
-      <li><span class="bonus-emoji">P</span> – Pause</li>
-      <li><span class="bonus-emoji">S</span> – Son Marche/Arrêt</li>
-      <li><span class="bonus-emoji">z</span> – Variables</li>
+      <li><span class="bonus-emoji">M</span>Bouton panique  <span class="bonus-emoji">P</span>Pause <span class="bonus-emoji">S</span>Son Marche/Arrêt <span class="bonus-emoji">z</span>Variables</li>
       <ul>
-      <li><span></span></li>
-      <li><span></span></li>
-      <li><span></span></li>
       <button id="closeBonusPanel">OK</button>
       <li><span></span></li>
-      <li><span></span></li>
-      <li><span></span></li>
-      <h3>(c) jean-luc faisans 2025</h3>
-      <h3>v0.60</h3>
+      <h3>(c) jean-luc faisans 2025     v1.01</h3>
     </div>
   </div>
-
 
   <!-- Panneau de fin de partie -->
   <div id="endPanel">
@@ -642,8 +952,6 @@
         <br>  <br>
       </div>
 
-
-
       <div class="stat" id="levelsPassed"></div>
       <div class="stat" id="bricksHit"></div>
       <div class="stat" id="timePlayed"></div>
@@ -652,6 +960,9 @@
       <button onclick="closeEndPanel()">OK</button>
     </div>
   </div>
+
+</body>
+
 
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
@@ -809,6 +1120,13 @@ let brickSpeedBonus = 0;
 let speedIncreasePerBrick = 0.002; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
 let speedIncreasePerLevel = 0.2;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
 let autopilotSpeedMultiplier = 1.04; // ✅ RÉDUIT de 1.15 à 1.08 (seulement 8% plus rapide)
+
+// === VARIABLES DE TRANSITION DE NIVEAU ===
+let levelTransition = false;
+let levelTransitionTimer = 0;
+let levelTransitionMessage = "";
+let levelTransitionDelay = 4000; // 4 secondes en millisecondes
+
 
 let bricksHit = 0;
 let powerupsCaptured = {
@@ -1463,6 +1781,59 @@ let particleCountMax = 80; // Pour ajuster la qualité
         }
     }
 
+    // === FONCTION DE CALCUL DU FACTEUR DE SCALE ACTUEL ===
+    function getCurrentScaleFactor() {
+        // Récupère le container principal
+        const gameContainer = document.querySelector('.game-main-container');
+        if (!gameContainer) return 1;
+
+        // Récupère le style computed pour obtenir la transform actuelle
+        const computedStyle = window.getComputedStyle(gameContainer);
+        const transform = computedStyle.transform;
+
+        // Extrait le facteur de scale de la matrice de transformation
+        if (transform && transform !== 'none') {
+            const matrixMatch = transform.match(/matrix\(([^)]+)\)/);
+            if (matrixMatch) {
+                const matrixValues = matrixMatch[1].split(',');
+                // Le premier élément de la matrice est le facteur de scale X
+                return parseFloat(matrixValues[0]) || 1;
+            }
+        }
+
+        // Fallback : calcul basé sur la largeur de la fenêtre
+        const windowWidth = window.innerWidth;
+        if (windowWidth <= 650) return 0.45;
+        if (windowWidth <= 800) return 0.55;
+        if (windowWidth <= 1000) return 0.65;
+        if (windowWidth <= 1200) return 0.75;
+        if (windowWidth <= 1400) return 0.85;
+
+        return 1; // Taille normale
+    }
+
+    // === FONCTION DE CONVERSION DES COORDONNÉES ===
+    function getScaledCoordinates(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleFactor = getCurrentScaleFactor();
+
+        // Position de la souris relative au canvas
+        let x = (clientX - rect.left) / scaleFactor;
+        let y = (clientY - rect.top) / scaleFactor;
+
+        return { x, y };
+    }
+
+    // === FONCTION DE CALCUL DES LIMITES EFFECTIVES ===
+    function getEffectiveCanvasLimits() {
+        const scaleFactor = getCurrentScaleFactor();
+        return {
+            width: CANVAS_W, // La largeur logique reste la même
+            height: CANVAS_H, // La hauteur logique reste la même
+            scaleFactor: scaleFactor
+        };
+    }
+    //Fin de fonction getEffectiveCanvasLimits
 
     // ✅ NOUVEAU SYSTÈME DE SCORES MULTIPLES
     function getBestScore() {
@@ -1682,7 +2053,7 @@ function displayLeaderboard() {
         timeoutManager.clearAll(); // ✅ NOUVEAU : Nettoie TOUS les timeouts gérés
 
         // === REMISE À ZÉRO DES TIMERS ===
-        multTimer = 0;
+        // multTimer = 0;
         decrementTimer = 0;
         paddleTimer = 0;
         bossAttackTimer = 0;
@@ -1705,9 +2076,14 @@ function displayLeaderboard() {
         paddleSizeEffect = null;
 
         // === RESET DES MULTIPLICATEURS ===
-        mult = 1;
+        // mult = 1;
 
-        console.log("✅ Nettoyage terminé - Tous les timers remis à zéro");
+        // === RESET DES VARIABLES DE TRANSITION ===
+        levelTransition = false;
+        levelTransitionTimer = 0;
+        levelTransitionMessage = "";
+
+        console.log("✅ Variables de transition remises à zéro");
     }
 
 
@@ -2335,45 +2711,54 @@ function displayLeaderboard() {
 
 
     canvas.addEventListener('mousemove', e => {
-      let rect = canvas.getBoundingClientRect();
-      let mx = e.clientX - rect.left;
+        // Empêche la souris de prendre le contrôle si l'autopilote est actif
+        if (autopilot) return;
 
-      // Empêche la souris de prendre le contrôle si l'autopilote est actif
-      if (!autopilot) {
+        // ✅ NOUVEAU : Calcul des coordonnées avec scale
+        const scaledCoords = getScaledCoordinates(e.clientX, e.clientY);
+        const limits = getEffectiveCanvasLimits();
+
+        // ✅ NOUVEAU : Position ajustée selon le scale
         paddleX = Math.max(
-          0,
-          Math.min(CANVAS_W - paddleW, mx - paddleW / 2)
+            0,
+            Math.min(limits.width - paddleW, scaledCoords.x - paddleW / 2)
         );
-      }
     });
+    //Fin de fonction mousemove_corrected
 
     // ✅ NOUVEAU : Contrôle par molette de souris
-canvas.addEventListener('wheel', e => {
-  e.preventDefault(); // Empêche le scroll de la page
+    // === CONTRÔLE MOLETTE CORRIGÉ POUR LE RESPONSIVE ===
+    canvas.addEventListener('wheel', e => {
+        e.preventDefault(); // Empêche le scroll de la page
 
-  // Ne pas contrôler si l'autopilote est actif
-  if (autopilot) return;
+        // Ne pas contrôler si l'autopilote est actif
+        if (autopilot) return;
 
-  // Sensibilité du mouvement (ajustable selon tes préférences)
-  const sensitivity = 20;
+        // ✅ NOUVEAU : Sensibilité ajustée selon le scale
+        const scaleFactor = getCurrentScaleFactor();
+        const baseSensitivity = 20;
+        const adjustedSensitivity = baseSensitivity * scaleFactor;
 
-  // Calcul du déplacement basé sur la direction de la molette
-  let deltaMove = 0;
+        // Calcul du déplacement basé sur la direction de la molette
+        let deltaMove = 0;
 
-  if (e.deltaY > 0) {
-    // Molette vers le bas = mouvement vers la droite
-    deltaMove = sensitivity;
-  } else if (e.deltaY < 0) {
-    // Molette vers le haut = mouvement vers la gauche
-    deltaMove = -sensitivity;
-  }
+        if (e.deltaY > 0) {
+            // Molette vers le bas = mouvement vers la droite
+            deltaMove = adjustedSensitivity;
+        } else if (e.deltaY < 0) {
+            // Molette vers le haut = mouvement vers la gauche
+            deltaMove = -adjustedSensitivity;
+        }
 
-  // Application du mouvement avec contraintes
-  paddleX = Math.max(
-    0,
-    Math.min(CANVAS_W - paddleW, paddleX + deltaMove)
-  );
-});
+        // ✅ NOUVEAU : Limites ajustées selon le scale
+        const limits = getEffectiveCanvasLimits();
+        paddleX = Math.max(
+            0,
+            Math.min(limits.width - paddleW, paddleX + deltaMove)
+        );
+    });
+    //Fin de fonction wheel_corrected
+
 
 function autopilotMove(dt) {
     if (!ball) return;
@@ -2635,7 +3020,10 @@ function autopilotMove(dt) {
     }
 
     // Contraintes finales
-    paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX));
+    //  paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX));
+
+    const limits = getEffectiveCanvasLimits();
+    paddleX = Math.max(0, Math.min(limits.width - paddleW, paddleX));
 
     // ✅ CONTRÔLE VITESSE BALLE ENDGAME (inchangé)
     if (isEndGame && Math.sqrt(ballDX * ballDX + ballDY * ballDY) < 16) {
@@ -2901,15 +3289,31 @@ function autopilotMove(dt) {
           autopilotMove(dt);
       } else {
           // Contrôle manuel
+          // CONTRÔLE MANUEL (VERSION CORRIGÉE POUR LE RESPONSIVE)
           if (leftDown && !rightDown) {
               paddleAcceleration = Math.min(paddleAcceleration + paddleAccelerationStep, maxPaddleAcceleration);
-              paddleX = Math.max(0, paddleX - (paddleSpeed + paddleAcceleration) * dt);
+
+              // ✅ NOUVEAU : Vitesse ajustée selon le scale
+              const scaleFactor = getCurrentScaleFactor();
+              const adjustedSpeed = (paddleSpeed + paddleAcceleration) * scaleFactor;
+
+              paddleX = Math.max(0, paddleX - adjustedSpeed * dt);
+
           } else if (rightDown && !leftDown) {
               paddleAcceleration = Math.min(paddleAcceleration + paddleAccelerationStep, maxPaddleAcceleration);
-              paddleX = Math.min(CANVAS_W - paddleW, paddleX + (paddleSpeed + paddleAcceleration) * dt);
+
+              // ✅ NOUVEAU : Vitesse et limites ajustées selon le scale
+              const scaleFactor = getCurrentScaleFactor();
+              const adjustedSpeed = (paddleSpeed + paddleAcceleration) * scaleFactor;
+              const limits = getEffectiveCanvasLimits();
+
+              paddleX = Math.min(limits.width - paddleW, paddleX + adjustedSpeed * dt);
+
           } else {
               paddleAcceleration = 0;
           }
+          //Fin de fonction controle_manuel_corrige
+
       }
 
 
@@ -3490,6 +3894,7 @@ function autopilotMove(dt) {
       }
 
       // === CONDITION DE VICTOIRE ÉQUILIBRÉE ===
+      // === CONDITION DE VICTOIRE ÉQUILIBRÉE AVEC DÉLAI ===
       let levelComplete = false;
 
       if (isBossLevel) {
@@ -3498,69 +3903,108 @@ function autopilotMove(dt) {
                          !boss.alive &&
                          bossDefeated &&
                          bricks.every(b => !b.alive) &&
-                         bossHP <= 0; // ✅ AJOUT : Vérification santé
+                         bossHP <= 0;
       } else {
           // NIVEAU NORMAL : Juste les briques
           levelComplete = bricks.every(b => !b.alive);
       }
 
-      if (levelComplete) {
-          // ✅ 1. SAUVEGARDE DE L'ÉTAT ACTUEL
-          let wasIsBossLevel = isBossLevel;
+      // ✅ NOUVEAU : Gestion de la transition avec délai
+      if (levelComplete && !levelTransition) {
+          // ✅ 1. DÉMARRER LA TRANSITION
+          levelTransition = true;
+          levelTransitionTimer = performance.now();
 
-          // ✅ 2. PROGRESSION DU NIVEAU
-          niveau++;
-          clearAllTimersEndLevel();
-          changeGalaxyConfiguration();
-          levelsPassed++;
-          vies = Math.min(maxVies, vies + 1);
-
-          // ✅ 3. GESTION DES OFFSETS (ORDRE CORRIGÉ)
-          wallOffset += 3;
-          wallOffsetPlus += 3;
-
-          if (wallOffsetPlus >= 10) {
-              brickRows = Math.min(12, brickRows + 1);
-              wallOffsetPlus = 0;
+          // ✅ 2. MESSAGE DE TRANSITION SELON LE TYPE DE NIVEAU
+          if (isBossLevel) {
+              levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans 3...`;
+              playSound("boss_death");
+          } else {
+              levelTransitionMessage = `✅ NIVEAU ${niveau} TERMINÉ !\n\nProchain niveau dans 3...`;
+              playSound("coins");
           }
 
-          // ✅ 4. NETTOYAGE COMPLET (AVANT LA CRÉATION)
-          if (wasIsBossLevel) {
-              // Nettoyage spécifique boss
-              timeoutManager.clear('bossInvulnerable');
-              for (let i = 0; i < 50; i++) {
-                  timeoutManager.clear(`bossVictory${i}`);
+          // ✅ 3. ARRÊTER LA BALLE TEMPORAIREMENT
+          ballDX = 0;
+          ballDY = 0;
+
+          console.log(`🎯 Transition démarrée : ${levelTransitionMessage}`);
+      }
+
+      // ✅ 4. GESTION DU DÉLAI DE TRANSITION
+      if (levelTransition) {
+          let elapsed = performance.now() - levelTransitionTimer;
+          let secondsLeft = Math.ceil((levelTransitionDelay - elapsed) / 1000);
+
+          // ✅ Mise à jour du message avec compte à rebours
+          if (isBossLevel) {
+              levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans ${secondsLeft}...`;
+          } else {
+              levelTransitionMessage = `✅ NIVEAU ${niveau} TERMINÉ !\n\nProchain niveau dans ${secondsLeft}...`;
+          }
+
+          // ✅ 5. FIN DE LA TRANSITION - PASSAGE AU NIVEAU SUIVANT
+          if (elapsed >= levelTransitionDelay) {
+              levelTransition = false;
+              levelTransitionMessage = "";
+
+              // ✅ 6. SAUVEGARDE DE L'ÉTAT ACTUEL
+              let wasIsBossLevel = isBossLevel;
+
+              // ✅ 7. PROGRESSION DU NIVEAU (CODE EXISTANT)
+              niveau++;
+              clearAllTimersEndLevel();
+              changeGalaxyConfiguration();
+              levelsPassed++;
+              vies = Math.min(maxVies, vies + 1);
+
+              // ✅ 8. GESTION DES OFFSETS (ORDRE CORRIGÉ)
+              wallOffset += 3;
+              wallOffsetPlus += 3;
+
+              if (wallOffsetPlus >= 10) {
+                  brickRows = Math.min(12, brickRows + 1);
+                  wallOffsetPlus = 0;
               }
 
-              // Reset des variables boss
-              isBossLevel = false;
-              boss = null;
-              bossDefeated = false;
-              bossHP = 0;
-              bossInvulnerable = false;
-              bossAttackTimer = 0;
-              bossMovementTimer = 0;
-          }
+              // ✅ 9. NETTOYAGE COMPLET (AVANT LA CRÉATION)
+              if (wasIsBossLevel) {
+                  // Nettoyage spécifique boss
+                  timeoutManager.clear('bossInvulnerable');
+                  for (let i = 0; i < 50; i++) {
+                      timeoutManager.clear(`bossVictory${i}`);
+                  }
 
-          // Nettoyage général
-          clearAllTimersEndLevel();
+                  // Reset des variables boss
+                  isBossLevel = false;
+                  boss = null;
+                  bossDefeated = false;
+                  bossHP = 0;
+                  bossInvulnerable = false;
+                  bossAttackTimer = 0;
+                  bossMovementTimer = 0;
+              }
 
-          // ✅ 5. CRÉATION DU PROCHAIN NIVEAU (LOGIQUE CORRIGÉE)
-          if (niveau % 5 === 0) { // ✅ Boss tous les 5 niveaux : 5, 10, 15, 20, etc.
-            createBoss();
-          } else {
-            createBricks();
-          }
+              // Nettoyage général
+              clearAllTimersEndLevel();
 
-          // ✅ 6. FINALISATION
-          resetBall();
-          // ✅ PROGRESSION DE VITESSE PAR NIVEAU (au lieu de += 1.1)
+              // ✅ 10. CRÉATION DU PROCHAIN NIVEAU
+              if (niveau % 5 === 0) {
+                  createBoss();
+              } else {
+                  createBricks();
+              }
 
-          updateHUD();
+              // ✅ 11. FINALISATION
+              resetBall();
+              updateHUD();
 
-          // ✅ 7. BONUS (PROBABILITÉ ÉQUILIBRÉE)
-          if (Math.random() < 0.60) {
-              spawnBonus();
+              // ✅ 12. BONUS (PROBABILITÉ ÉQUILIBRÉE)
+              if (Math.random() < 0.60) {
+                  spawnBonus();
+              }
+
+              console.log(`🚀 Niveau ${niveau} démarré !`);
           }
       }
 
@@ -3716,7 +4160,7 @@ function autopilotMove(dt) {
       if (p.type && p.type.startsWith("mult")) {
         let val = parseInt(p.type.replace("mult", ""));
         mult = Math.min(mult + val, multMax);
-        multTimer = 30; // Si géré par un interval ailleurs, assurez-vous de le clearer si needed
+        multTimer += 30; // Si géré par un interval ailleurs, assurez-vous de le clearer si needed
       }
 
       if (p.type === "cookie") { // Correction : b.type -> p.type (assuming typo)
@@ -4315,6 +4759,63 @@ function autopilotMove(dt) {
           ctx.restore();
       }
 
+      // === RENDU DU MESSAGE DE TRANSITION DE NIVEAU ===
+      // === RENDU DU MESSAGE DE TRANSITION DE NIVEAU ===
+      if (levelTransition && levelTransitionMessage) {
+          ctx.save();
+
+          // ✅ Fond semi-transparent
+          ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+          ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+          // ✅ POLICE ULTRA-RÉDUITE avec police système
+          ctx.font = "25px Arial, sans-serif"; // ✅ CHANGÉ : Police système + taille minimale
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#FFD700";
+          ctx.shadowColor = "#FFD700";
+          ctx.shadowBlur = 8; // ✅ RÉDUIT : blur plus petit
+
+          // ✅ Affichage du message (multi-lignes)
+          let lines = levelTransitionMessage.split('\n');
+          let centerY = CANVAS_H / 2;
+          let lineHeight = 32; // ✅ ENCORE PLUS RÉDUIT : de 25 à 12
+
+          lines.forEach((line, index) => {
+              let y = centerY + (index - (lines.length - 1) / 2) * lineHeight;
+
+              // ✅ Effet de pulsation RÉDUIT pour la dernière ligne
+              if (index === lines.length - 1) {
+                  let pulse = 1 + Math.sin(performance.now() / 200) * 0.05; // ✅ RÉDUIT : 0.1 -> 0.05
+                  ctx.save();
+                  ctx.translate(CANVAS_W / 2, y);
+                  ctx.scale(pulse, pulse);
+                  ctx.fillText(line, 0, 0);
+                  ctx.restore();
+              } else {
+                  ctx.fillText(line, CANVAS_W / 2, y);
+              }
+          });
+
+          // ✅ Particules dorées RÉDUITES
+          for (let i = 0; i < 8; i++) {
+              let angle = (performance.now() / 1000 + i * Math.PI / 4) % (Math.PI * 2);
+              let radius = 40 + Math.sin(performance.now() / 300 + i) * 10; // ✅ RÉDUIT : rayon divisé par 2
+              let x = CANVAS_W / 2 + Math.cos(angle) * radius;
+              let y = CANVAS_H / 2 + Math.sin(angle) * radius;
+
+              ctx.fillStyle = "#FFD700";
+              ctx.shadowBlur = 8; // ✅ RÉDUIT
+              ctx.beginPath();
+              ctx.arc(x, y, 1.5, 0, Math.PI * 2); // ✅ RÉDUIT : taille particule divisée par 2
+              ctx.fill();
+          }
+
+          ctx.restore();
+      }
+      //Fin de fonction render_transition_message_minimal
+
+      //Fin de fonction render_transition_message
 
 
       // --- Boucle de rendu des animations (corrigée) ---
@@ -4343,10 +4844,6 @@ function autopilotMove(dt) {
         ctx.fillStyle = a.color;
         ctx.fillText(a.icon, 0, 0);
         ctx.shadowBlur = 0;
-
-
-
-
 
         // Effets visuels supplémentaires (inchangés)
         if (a.frames < 10) {
@@ -4405,6 +4902,8 @@ function autopilotMove(dt) {
       ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
       ctx.fill();
       ctx.restore();
+
+
 
     }
 
@@ -4671,42 +5170,7 @@ function autopilotMove(dt) {
     `);
   });
 
-  // ✅ 6. FONCTION DE FERMETURE DEPUIS LE JEU
-  function closeGameWindow() {
-    if (confirm('Voulez-vous fermer le jeu et retourner au blog ?')) {
-      window.close();
-    }
-  }
 
-  // ✅ 7. AJOUT D'UN BOUTON DE FERMETURE DISCRET
-  document.addEventListener('DOMContentLoaded', function() {
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '✕';
-    closeBtn.style.cssText = `
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      width: 30px;
-      height: 30px;
-      background: rgba(255, 0, 0, 0.7);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      z-index: 9999;
-      transition: background 0.3s ease;
-    `;
-    closeBtn.onmouseover = () => closeBtn.style.background = 'rgba(255, 0, 0, 1)';
-    closeBtn.onmouseout = () => closeBtn.style.background = 'rgba(255, 0, 0, 0.7)';
-    closeBtn.onclick = closeGameWindow;
-    document.body.appendChild(closeBtn);
-  });
   </script>
-0
 
-
-
-</body>
 </html>
