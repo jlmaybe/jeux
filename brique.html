@@ -23,14 +23,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 100vh;
-      padding-top: 20px; /* ✅ RÉDUIT : moins d'espace en haut */
+      justify-content: center; /* ✅ CHANGÉ : centrage vertical parfait */
+      height: 100vh; /* ✅ CHANGÉ : hauteur fixe sans dépassement */
+      padding: 0; /* ✅ SUPPRIMÉ : plus de padding qui crée des marges */
       max-width: 100vw;
-      overflow-x: hidden;
-//      overflow-y: auto; /* ✅ CHANGÉ : permet le scroll vertical si nécessaire */
-      overflow: hidden;
-      zoom: 0.8; /* ✅ NOUVEAU : Force le zoom à 80% */
+      overflow: hidden; /* ✅ COHÉRENT : avec les règles html, body */
   }
 
   /* === AJUSTEMENT DU TITRE === */
@@ -46,7 +43,7 @@
     text-align: center;
     width: 100%; /* ✅ CHANGÉ : largeur relative au container */
     position: relative; /* ✅ CHANGÉ : position relative */
-    left: 100px; /* ✅ RESET */
+    left: 0px; /* ✅ RESET */
     top: 0; /* ✅ RESET */
     transform: none; /* ✅ RESET */
     pointer-events: none;
@@ -60,7 +57,7 @@
   /* === AJUSTEMENT DU HUD === */
   #hud {
       position: relative;
-      left: 57%; /* ✅ NOUVEAU : Position au centre */
+      left: 50%; /* ✅ NOUVEAU : Position au centre */
       top: 0;
       transform: translateX(-50%); /* ✅ NOUVEAU : Correction du centrage exact */
       width: 100%;
