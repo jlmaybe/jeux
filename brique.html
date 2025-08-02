@@ -394,45 +394,89 @@
   position: relative;
   width: 1200px;
   height: 1000px;
-  margin: 0; /* ✅ SUPPRIMÉ : auto qui créait les marges */
+  margin: 0 auto;
   transform-origin: center top;
   transition: transform 0.3s ease;
+  transform: scale(0.7); /* ✅ Zoom de base conservé */
 }
 
-    /* ✅ AJOUT : SYSTÈME DE MISE À L'ÉCHELLE AUTOMATIQUE */
-    @media (max-width: 1400px) {
-      .game-main-container {
-        transform: scale(0.65); /* 85% de la taille originale */
-      }
-    }
+/* ✅ NOUVEAUX : Media queries adaptés aux MacBook */
+/* MacBook Air 13" et similaires (1440x900, 1680x1050) */
+@media (min-width: 1400px) and (max-height: 1050px) {
+  .game-main-container {
+    transform: scale(0.65); /* ✅ Plus petit pour s'adapter à la hauteur limitée */
+  }
+}
 
-    @media (max-width: 1200px) {
-      .game-main-container {
-        transform: scale(0.60); /* 75% de la taille originale */
-      }
-    }
+/* Écrans larges mais bas (comme certains MacBook Pro) */
+@media (min-width: 1600px) and (max-height: 1200px) {
+  .game-main-container {
+    transform: scale(0.7); /* ✅ Ajustement spécifique */
+  }
+}
 
-    @media (max-width: 1000px) {
-      .game-main-container {
-        transform: scale(0.55); /* 65% de la taille originale */
-      }
-    }
+/* ✅ CONSERVATION des media queries existantes améliorées */
+@media (max-width: 1400px) {
+  .game-main-container {
+    transform: scale(0.85);
+  }
+}
 
-    @media (max-width: 800px) {
-      .game-main-container {
-        transform: scale(0.40); /* 55% de la taille originale */
-      }
+@media (max-width: 1200px) {
+  .game-main-container {
+    transform: scale(0.75);
+  }
+}
 
-      #statsPanel {
-        display: none !important; /* Masquer sur petits écrans */
-      }
-    }
+@media (max-width: 1000px) {
+  .game-main-container {
+    transform: scale(0.65);
+  }
+}
 
-    @media (max-width: 650px) {
-      .game-main-container {
-        transform: scale(0.35); /* 45% de la taille originale */
-      }
-    }
+@media (max-width: 800px) {
+  .game-main-container {
+    transform: scale(0.55);
+  }
+
+  #statsPanel {
+    display: none !important;
+  }
+}
+
+@media (max-width: 650px) {
+  .game-main-container {
+    transform: scale(0.45);
+  }
+}
+
+/* ✅ NOUVEAUX : Ajustements spécifiques pour hauteurs très limitées */
+@media (max-height: 800px) and (min-width: 1000px) {
+  .game-main-container {
+    transform: scale(0.55); /* ✅ Réduction forcée si hauteur insuffisante */
+  }
+}
+
+@media (max-height: 700px) and (min-width: 800px) {
+  .game-main-container {
+    transform: scale(0.5); /* ✅ Encore plus petit pour écrans très bas */
+  }
+}
+
+/* ✅ NOUVEAU : Media query pour les ratios d'aspect larges (> 16:10) */
+@media (min-aspect-ratio: 16/10) {
+  .game-main-container {
+    transform: scale(0.6); /* ✅ Adaptation aux écrans ultra-larges */
+  }
+}
+
+/* ✅ NOUVEAU : MacBook Pro 16" (3072x1920 mais scaled) */
+@media (min-width: 1728px) and (min-height: 1080px) {
+  .game-main-container {
+    transform: scale(0.8); /* ✅ Meilleur usage de l'espace sur grands écrans */
+  }
+}
+
 
     /* ✅ MEDIA QUERIES ADAPTÉES À LA NOUVELLE TAILLE */
     @media (max-width: 600px) {
