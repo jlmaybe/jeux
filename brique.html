@@ -28,7 +28,8 @@
       padding-top: 20px; /* ✅ RÉDUIT : moins d'espace en haut */
       max-width: 100vw;
       overflow-x: hidden;
-      overflow-y: auto; /* ✅ CHANGÉ : permet le scroll vertical si nécessaire */
+//      overflow-y: auto; /* ✅ CHANGÉ : permet le scroll vertical si nécessaire */
+      overflow: hidden;
       zoom: 0.8; /* ✅ NOUVEAU : Force le zoom à 80% */
   }
 
@@ -45,7 +46,7 @@
     text-align: center;
     width: 100%; /* ✅ CHANGÉ : largeur relative au container */
     position: relative; /* ✅ CHANGÉ : position relative */
-    left: 0; /* ✅ RESET */
+    left: 100px; /* ✅ RESET */
     top: 0; /* ✅ RESET */
     transform: none; /* ✅ RESET */
     pointer-events: none;
@@ -189,9 +190,9 @@
     #bonusPanel {
       font-family: 'Press Start 2P', monospace;
       position: fixed;
-      top: 50%;
+      top: 42%;
       left: 50%;
-      transform: translate(-50%, -50%) scale(1.25); /* ✅ COMPENSATION : 1/0.8 = 1.25 */
+      transform: translate(-50%, -50%) scale(1.10); /* ✅ COMPENSATION : 1/0.8 = 1.25 */
 
       /* ✅ DIMENSIONS AJUSTÉES POUR LE ZOOM */
       width: clamp(350px, 78vw, 560px); /* ✅ RÉDUIT : 500*0.8, 98*0.8, 700*0.8 */
