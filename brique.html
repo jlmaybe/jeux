@@ -874,24 +874,24 @@
     #autopilot-banner {
       display: none; /* Caché par défaut */
       position: absolute;
-      left: 50%;
-      top: 50%;
+      left: 45%;
+      top: 35%;
       transform: translate(-50%, -50%);
-      padding: 18px 30px;
+      padding: 12px 30px;
 
       font-family: 'Press Start 2P', monospace;
       font-size: 1em; /* Grande taille pour être bien visible */
       color: #FFD700; /* Couleur or, classique */
 
       background: rgba(20, 10, 40, 0.65); /* Fond plus transparent (0.85 -> 0.65) */
-        border: 4px solid rgba(255, 0, 255, 0.7); /* Bordure plus transparente */
+        border: 4px solid rgba(255, 0, 255, 0.5); /* Bordure plus transparente */
         border-radius: 12px;
-        box-shadow: 0 0 20px rgba(255, 0, 255, 0.7), /* Ombres externes plus douces */
+        box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), /* Ombres externes plus douces */
 
       text-align: center;
       text-shadow: 0 0 10px #ff0, 0 0 20px #f0f;
       white-space: nowrap; /* Empêche le texte de passer à la ligne */
-      z-index: 1500; /* S'assure qu'il est au-dessus du jeu */
+      z-index: 0; /* S'assure qu'il est au-dessus du jeu */
 
       user-select: none; /* Empêche la sélection du texte */
       pointer-events: none; /* Permet aux clics de passer à travers */
@@ -981,6 +981,7 @@
         <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ 8️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
         <li><span class="bonus-emoji">🍪</span> <b>Cookies  Bouton panique (M)</li>
         <li><span class="bonus-emoji">🌈</span> <b>Vie      Une vie</li>
+        <li><span class="bonus-emoji">🏖️</span> <b>Niveau   Niveau suivant</li>
         <li><span class="bonus-emoji">☠️</span>  <b>Malus    Score en décrémentation pendant 30s</li>
       </ul>
       <h2>ACTIONS</h2>
@@ -1078,6 +1079,7 @@
       {emoji:"🍇", points:2000, color:"#94f"},
       {emoji:"🍪", points:0, color:"#A67B5B", type:"cookie"},
       {emoji:"🌈", points:0, color:"#A67B5B", type:"vie"},
+      {emoji:"🏖", points:0, color:"#A67B5B", type:"niveau"},
       {emoji:"🍌", points:500, color:"#ff4"},
     ];
 
@@ -1167,6 +1169,7 @@ let bossDefeated = false;
 let psyAnimId = null;
 let emailSent = false; // Pour éviter les envois multiples
 let gameSessionId = null; // ID unique de la session de jeu
+let levelComplete = false;
 
 let gyroControls = {
     active: false,
@@ -1208,7 +1211,7 @@ let autopilotSpeedMultiplier = 1.04; // ✅ RÉDUIT de 1.15 à 1.08 (seulement 8
 let levelTransition = false;
 let levelTransitionTimer = 0;
 let levelTransitionMessage = "";
-let levelTransitionDelay = 4000; // 4 secondes en millisecondes
+let levelTransitionDelay = 5000; // 4 secondes en millisecondes
 
 
 let bricksHit = 0;
@@ -3410,22 +3413,6 @@ function autopilotMove(dt) {
           decrementEffect = false;
           elDec.style.display = "none";
           playSound("raquettenormale");
-        } else {
-          elDec.textContent = "☠️ SCORE - (" + Math.ceil(timeLeft) + "s)";
-          elDec.style.display = "block";
-          elDec.style.position = "absolute";
-          elDec.style.left = (canvas.offsetLeft + paddleX + paddleW/2 - elDec.offsetWidth/2) + "px";
-          elDec.style.top = (canvas.offsetTop + paddleY - 32) + "px";
-          elDec.style.background = "rgba(0,0,0,0)";
-          elDec.style.color = "#fff";
-          elDec.style.borderRadius = "8px";
-          elDec.style.padding = "6px 10px";
-          elDec.style.boxShadow = "0 2px 8px rgba(0,0,0,0)";
-          elDec.style.backdropFilter = "blur(2px)";
-          elDec.style.fontFamily = "'Press Start 2P', 'VT323', monospace";
-          elDec.style.fontSize = "10px";
-          elDec.style.pointerEvents = "none";
-          elDec.style.zIndex = 1;
         }
       }
 
@@ -3640,7 +3627,7 @@ function autopilotMove(dt) {
 
         if (decrementEffect) {
           // Si le malus est actif, on applique la pénalité.
-          let penalty = 100;
+          let penalty = 100 * mult;
           score -= penalty;
           showScoreDecrementAnim(b.x + b.w / 2, b.y + b.h / 2, penalty);
         } else {
@@ -3804,6 +3791,19 @@ function autopilotMove(dt) {
                 vies++; // On ajoute une vie
                 playSound("life2");
           }
+          if (b.type === "niveau") {
+              if (isBossLevel && boss) {
+                  boss.alive = false;
+                  bossDefeated = true;
+                  bossHP = 0;
+                }
+                bricks.forEach(b => b.alive = false);
+                vies++; // On ajoute une vie
+                //levelComplete = true
+//              playSound("life2");
+                playSound("boss_death");
+          }
+
 
           // ✅ AJOUT : Comptage des bonus collectés
           if (bonusesCaptured[b.emoji] !== undefined) {
@@ -3978,7 +3978,7 @@ function autopilotMove(dt) {
 
       // === CONDITION DE VICTOIRE ÉQUILIBRÉE ===
       // === CONDITION DE VICTOIRE ÉQUILIBRÉE AVEC DÉLAI ===
-      let levelComplete = false;
+      levelComplete = false;
 
       if (isBossLevel) {
           // BOSS : Vérifications complètes et sécurisées
@@ -4022,6 +4022,7 @@ function autopilotMove(dt) {
           // ✅ Mise à jour du message avec compte à rebours
           if (isBossLevel) {
               levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans ${secondsLeft}...`;
+              vies = Math.min(maxVies, vies + 4);
           } else {
               levelTransitionMessage = `✅ NIVEAU ${niveau} TERMINÉ !\n\nProchain niveau dans ${secondsLeft}...`;
           }
@@ -4147,8 +4148,8 @@ function autopilotMove(dt) {
       decrementActive = true;
       decrementEffect = true;
       decrementStartTime = performance.now(); // horodatage précis
-      elDec.textContent = "☠️ SCORE - (30s)";
-      elDec.style.display = "block";
+//      elDec.textContent = "☠️ SCORE - (30s)";
+//      elDec.style.display = "block";
     }
 
 
