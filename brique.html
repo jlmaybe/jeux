@@ -980,6 +980,11 @@
     let paddleOriginalSize = paddleBaseW;
     let dernierUtilisateur = null;
 
+    // === VARIABLE DE SENSIBILITÉ SOURIS ===
+    let mouseSensitivity = 1.1; // ✅ NOUVEAU : Facteur de démultiplication (1.8x plus sensible)
+    let lastMouseX = null; // ✅ NOUVEAU : Position précédente de la souris pour calcul du delta
+    //Fin de variables sensibilité souris
+
 // === VARIABLES GALAXIE ÉVOLUTIVES ===
 let galaxyParticles = [];
 let galaxyTime = 0;
@@ -1036,7 +1041,7 @@ let isTouching = false;
 let touchControlZone = null; // 'left', 'right', ou null
 
 // === SYSTÈME DE QUALITÉ DYNAMIQUE ===
-let renderQuality = "high"; // "high", "medium", "low"
+let renderQuality = "medium"; // "high", "medium", "low"
 let performanceFrames = 0;
 let performanceStart = 0;
 
@@ -1187,7 +1192,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
     function adjustRenderQuality() {
         performanceFrames++;
 
-        if (performanceFrames === 120) { // Test toutes les 2 secondes
+        if (performanceFrames > 120 ) { // Test toutes les 2 secondes
             let avgFrameTime = (performance.now() - performanceStart) / 120;
             let estimatedFPS = 1000 / avgFrameTime;
 
@@ -2854,13 +2859,36 @@ function displayLeaderboard() {
         const scaledCoords = getScaledCoordinates(e.clientX, e.clientY);
         const limits = getEffectiveCanvasLimits();
 
-        // ✅ NOUVEAU : Position ajustée selon le scale
-        paddleX = Math.max(
-            0,
-            Math.min(limits.width - paddleW, scaledCoords.x - paddleW / 2)
-        );
+        // ✅ NOUVEAU : Système de démultiplication du mouvement
+        if (lastMouseX !== null) {
+            // Calcul du déplacement réel de la souris
+            let deltaX = scaledCoords.x - lastMouseX;
+
+            // ✅ APPLICATION DE LA DÉMULTIPLICATION
+            let amplifiedDelta = deltaX * mouseSensitivity;
+
+            // Position cible avec démultiplication
+            let targetX = paddleX + paddleW/2 + amplifiedDelta - paddleW/2;
+
+            // ✅ CONTRAINTES : Rester dans les limites
+            paddleX = Math.max(
+                0,
+                Math.min(limits.width - paddleW, targetX)
+            );
+
+        } else {
+            // ✅ PREMIER MOUVEMENT : Position directe (sans démultiplication)
+            paddleX = Math.max(
+                0,
+                Math.min(limits.width - paddleW, scaledCoords.x - paddleW / 2)
+            );
+        }
+
+        // ✅ MÉMORISATION de la position pour le prochain mouvement
+        lastMouseX = scaledCoords.x;
     });
-    //Fin de fonction mousemove_corrected
+    //Fin de fonction mousemove_demultiplie
+
 
     // ✅ NOUVEAU : Contrôle par molette de souris
     // === CONTRÔLE MOLETTE CORRIGÉ POUR LE RESPONSIVE ===
