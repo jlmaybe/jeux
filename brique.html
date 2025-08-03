@@ -1053,8 +1053,6 @@
 
   <script>
 
-
-
     // === CONSTANTES GLOBALES ===
 
     const COLORS = ["#0ff", "#f0f", "#ff0", "#0f0", "#fff"];
@@ -1090,7 +1088,7 @@
     // === VARIABLES D'ÉTAT DU JEU ===
 
     // Ligne corrigée
-    let vies = 4, niveau = 1, score = 0, displayScore = 0, maxVies = 99;
+    let vies = 4, niveau = 1, score = 0, displayScore = 0;
     let mult = 1, multTimer = 0, multMax = 40, lastMult = 1;
     let bricks = [], particles = [], powerups = [], bonuses = [], animations = [];
     brickCols = 14;
@@ -4022,7 +4020,7 @@ function autopilotMove(dt) {
           // ✅ Mise à jour du message avec compte à rebours
           if (isBossLevel) {
               levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans ${secondsLeft}...`;
-              vies = Math.min(maxVies, vies + 4);
+              vies += 4;
           } else {
               levelTransitionMessage = `✅ NIVEAU ${niveau} TERMINÉ !\n\nProchain niveau dans ${secondsLeft}...`;
           }
@@ -4040,7 +4038,7 @@ function autopilotMove(dt) {
               clearAllTimersEndLevel();
               changeGalaxyConfiguration();
               levelsPassed++;
-              vies = Math.min(maxVies, vies + 1);
+              vies += 1;
 
               // ✅ 8. GESTION DES OFFSETS (ORDRE CORRIGÉ)
               wallOffset += 3;
