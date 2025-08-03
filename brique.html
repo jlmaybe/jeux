@@ -1035,6 +1035,10 @@ let touchStartY = 0;
 let isTouching = false;
 let touchControlZone = null; // 'left', 'right', ou null
 
+// === SYSTÈME DE QUALITÉ DYNAMIQUE ===
+let renderQuality = "high"; // "high", "medium", "low"
+let performanceFrames = 0;
+let performanceStart = 0;
 
 let baseGameSpeed = 12;
 let currentGameSpeed = 12;
@@ -1179,6 +1183,48 @@ let particleCountMax = 80; // Pour ajuster la qualité
         }
     }
     //Fin de fonction applyEndPanelScale
+
+    function adjustRenderQuality() {
+        performanceFrames++;
+
+        if (performanceFrames === 120) { // Test toutes les 2 secondes
+            let avgFrameTime = (performance.now() - performanceStart) / 120;
+            let estimatedFPS = 1000 / avgFrameTime;
+
+            // ✅ ADAPTATION AUTOMATIQUE DE LA QUALITÉ
+            if (estimatedFPS < 25) {
+                renderQuality = "low";
+                brickCacheRadius = 0; // Coins moins arrondis = plus rapide
+
+              } else if (estimatedFPS < 35) {
+                  renderQuality = "medium";
+                  brickCacheRadius = 1;
+
+                } else if (estimatedFPS < 40) {
+                    renderQuality = "medium";
+                    brickCacheRadius = 2;
+
+            } else if (estimatedFPS < 45) {
+                renderQuality = "medium";
+                brickCacheRadius = 3;
+            } else {
+                renderQuality = "high";
+                brickCacheRadius = 6; // Coins bien arrondis
+            }
+
+            // ✅ RECRÉER LE CACHE avec le nouveau rayon
+            brickShapeCache = null;
+
+            console.log(`🎯 Qualité ajustée: ${renderQuality} (FPS: ${estimatedFPS.toFixed(1)}, rayon: ${brickCacheRadius})`);
+
+            // Reset du compteur
+            performanceFrames = 0;
+            performanceStart = performance.now();
+        } else if (performanceFrames === 1) {
+            performanceStart = performance.now();
+        }
+    }
+    //Fin de fonction adjustRenderQuality
 
     // === SYSTÈME DE SCALE PROPORTIONNEL POUR BONUS PANEL ===
     function calculateBonusPanelScale() {
@@ -1802,6 +1848,53 @@ let particleCountMax = 80; // Pour ajuster la qualité
         }
     }
 
+    // === CACHE DE FORMES ARRONDIES POUR PERFORMANCE ===
+    let brickShapeCache = null;
+    let brickCacheRadius = 6;
+
+    function createBrickShapeCache() {
+        // Crée un Path2D réutilisable pour toutes les briques
+        brickShapeCache = new Path2D();
+
+        const x = 0, y = 0;
+        const w = brickW, h = brickH;
+        const r = brickCacheRadius;
+
+        // Construction du chemin une seule fois
+        brickShapeCache.moveTo(x + r, y);
+        brickShapeCache.lineTo(x + w - r, y);
+        brickShapeCache.arcTo(x + w, y, x + w, y + h, r);
+        brickShapeCache.arcTo(x + w, y + h, x, y + h, r);
+        brickShapeCache.arcTo(x, y + h, x, y, r);
+        brickShapeCache.arcTo(x, y, x + w, y, r);
+        brickShapeCache.closePath();
+    }
+
+    function drawRoundedBrick(ctx, x, y, fillStyle, strokeStyle = null) {
+        // Performance : cache créé seulement si nécessaire
+        if (!brickShapeCache) {
+            createBrickShapeCache();
+        }
+
+        ctx.save();
+        ctx.translate(x, y);
+
+        // Remplissage
+        ctx.fillStyle = fillStyle;
+        ctx.fill(brickShapeCache);
+
+        // Bordure optionnelle
+        if (strokeStyle) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = 1;
+            ctx.stroke(brickShapeCache);
+        }
+
+        ctx.restore();
+    }
+    //Fin de fonction drawRoundedBrick
+
+
     // === FONCTION DE CALCUL DU FACTEUR DE SCALE ACTUEL ===
     function getCurrentScaleFactor() {
         // Récupère le container principal
@@ -1931,6 +2024,8 @@ function getDernierNom() {
     }
 }
 
+
+
 function isNewRecord(score) {
     let leaderboard = getLeaderboard();
     // C'est un record si le classement a moins de 10 entrées OU si le score est meilleur que le 10ème
@@ -2002,6 +2097,9 @@ function displayLeaderboard() {
           gameLoopId = requestAnimationFrame(gameLoop);
           return;
       }
+
+      // ✅ NOUVEAU : Ajustement dynamique de la qualité
+      adjustRenderQuality();
 
       // ✅ CALIBRATION SIMPLE ET EFFICACE
           frameCount++;
@@ -2630,7 +2728,20 @@ function displayLeaderboard() {
       ctx.fill(p);
     }
 
+    // === FONCTION POUR DESSINER DES RECTANGLES ARRONDIS ===
+    function drawRoundedRect(ctx, x, y, width, height, radius = 8) {
+        if (width < 2 * radius) radius = width / 2;
+        if (height < 2 * radius) radius = height / 2;
 
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+    }
+    //Fin de fonction drawRoundedRect
 
     function resetBall() {
 
@@ -4603,13 +4714,14 @@ function autopilotMove(dt) {
       renderGalaxy(ctx);
 
       // Rendu des briques
+      // Rendu des briques AVEC COINS ARRONDIS
+      // Rendu des briques AVEC COINS ARRONDIS OPTIMISÉS
       bricks.forEach(b => {
         if (!b.alive) return;
 
-        // Animation d’arrivée
+        // Animation d'arrivée (inchangée)
         if (b.animating && b.animFrame < 36) {
           let t = b.animFrame / 36;
-          // Mouvement hélicoïdal vers la position finale
           b.x = CANVAS_W / 2 + (b.finalX - CANVAS_W / 2) * t + Math.cos(b.animAngle + t * 6) * (1 - t) * 60;
           b.y = CANVAS_H / 2 + (b.finalY - CANVAS_H / 2) * t + Math.sin(b.animAngle + t * 6) * (1 - t) * 60;
           b.animFrame++;
@@ -4620,22 +4732,22 @@ function autopilotMove(dt) {
           }
         }
 
-        // Gradient pour la brique
+        // ✅ OPTIMISATION : Gradient calculé une seule fois
         let grad = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
         let g = BRICK_GRADIENTS[b.colorIdx % BRICK_GRADIENTS.length];
         grad.addColorStop(0, g[0]);
         grad.addColorStop(1, g[1]);
-        ctx.fillStyle = grad;
-        ctx.fillRect(b.x, b.y, b.w, b.h);
 
-        // Effet de surbrillance
+        // ✅ NOUVEAU : Utilisation du cache ultra-rapide
+        drawRoundedBrick(ctx, b.x, b.y, grad, "rgba(255, 255, 255, 0.3)");
+
+        // ✅ OPTIMISATION : Effet de surbrillance simplifié
         ctx.save();
         ctx.globalAlpha = 0.42;
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(b.x, b.y, b.w, b.h);
+        drawRoundedBrick(ctx, b.x, b.y, "#fff");
         ctx.restore();
 
-        // Élément spécial (ex. : emoji)
+        // Élément spécial (inchangé)
         if (b.special) {
           ctx.font = "24px " + EMOJI_FONT;
           ctx.textAlign = "center";
@@ -4647,6 +4759,9 @@ function autopilotMove(dt) {
           ctx.strokeText(b.special, b.x + b.w / 2, b.y + b.h / 2 + 2);
         }
       });
+      //Fin de fonction render_briques_arrondies_optimisees
+
+    //Fin de fonction render_briques_arrondies
 
       // Rendu des particules
       particles.forEach(p => {
