@@ -1201,8 +1201,8 @@ let baseGameSpeed = 12;
 let currentGameSpeed = 12;
 let levelSpeedBonus = 0;
 let brickSpeedBonus = 0;
-let speedIncreasePerBrick = 0.002; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
-let speedIncreasePerLevel = 0.2;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
+let speedIncreasePerBrick = 0.001; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
+let speedIncreasePerLevel = 0.1;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
 let autopilotSpeedMultiplier = 1.04; // ✅ RÉDUIT de 1.15 à 1.08 (seulement 8% plus rapide)
 
 // === VARIABLES DE TRANSITION DE NIVEAU ===
@@ -2758,13 +2758,17 @@ function displayLeaderboard() {
     document.addEventListener('keydown',e=>{
 
       if ((e.key==="m" || e.key==="M") && cookies > 0 && !autopilot) {
-          panic = 120; PanicButon=true
+          panic = 600; PanicButon=true
           --cookies; updateHUD();
           playSound("pi");
       }
       if ((e.key==="*" || e.key==="*") && !autopilot) {
-          ++vies; updateHUD();
+//          ++vies; updateHUD();
           playSound("pi");
+      }
+
+      if ((e.key==="n" || e.key==="N") && !autopilot) {
+//          niveau +=1 ; updateHUD();
       }
 
       // ✅ TOUCHE DEBUG : Z (simple et sans conflit)
@@ -4013,6 +4017,7 @@ function autopilotMove(dt) {
       }
 
       // ✅ 4. GESTION DU DÉLAI DE TRANSITION
+      // ✅ 4. GESTION DU DÉLAI DE TRANSITION
       if (levelTransition) {
           let elapsed = performance.now() - levelTransitionTimer;
           let secondsLeft = Math.ceil((levelTransitionDelay - elapsed) / 1000);
@@ -4020,7 +4025,7 @@ function autopilotMove(dt) {
           // ✅ Mise à jour du message avec compte à rebours
           if (isBossLevel) {
               levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans ${secondsLeft}...`;
-              vies += 4;
+              // ✅ CORRECTION : Vies supprimées d'ici - elles sont déjà ajoutées ailleurs
           } else {
               levelTransitionMessage = `✅ NIVEAU ${niveau} TERMINÉ !\n\nProchain niveau dans ${secondsLeft}...`;
           }
