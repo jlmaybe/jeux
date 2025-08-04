@@ -920,6 +920,17 @@
       {emoji:"🍌", points:500, color:"#ff4"},
     ];
 
+
+
+    const PERF_CONFIG = {
+      enabled: true,               // Activer/désactiver l’adaptation
+      measureIntervalFrames: 300,  // Nombre de frames entre deux mesures
+      fpsThresholdDisable: 25,     // Seuil pour désactiver la galaxie
+      fpsThresholdLow: 30,         // Basculer en qualité “low” sous ce FPS
+    };
+
+
+
     const FONT = "Press Start 2P, monospace";
     const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Press Start 2P', monospace";
     const CANVAS_W = 875, CANVAS_H = 900;
@@ -935,6 +946,9 @@
     let brickW = 61, brickH = 28; brickGap = 2;
     let paddleW = 150, paddleH = 18, paddleY = CANVAS_H-60;
     let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 13;
+
+    let perfFrameCount = 0;
+    let perfLastTime = performance.now();
 
     let ballSpeed0 = 12; // IMPORTANT : avant son utilisation
     let LancementAutoPilote = 5;
@@ -995,6 +1009,28 @@ let galaxyColorScheme = 0; // Schéma de couleur actuel (0-4)
 let galaxySpacing = 1.0; // Multiplicateur d'espacement (0.7-1.5)
 let galaxyRotationMode = 0; // Mode de rotation (0-2)
 
+// ✅ OPTIMISATION : Cache trigonométrique
+let trigCache = {
+    sin: new Array(360),
+    cos: new Array(360),
+    init() {
+        for (let i = 0; i < 360; i++) {
+            let rad = (i * Math.PI) / 180;
+            this.sin[i] = Math.sin(rad);
+            this.cos[i] = Math.cos(rad);
+        }
+    },
+    getSin(angle) {
+        return this.sin[Math.floor(angle * 180 / Math.PI) % 360];
+    },
+    getCos(angle) {
+        return this.cos[Math.floor(angle * 180 / Math.PI) % 360];
+    }
+};
+trigCache.init();
+
+
+
 let targetVelocity = 0;
 let adaptiveCompensation = 0;
 let compensationStep = 5;
@@ -1042,8 +1078,8 @@ let touchControlZone = null; // 'left', 'right', ou null
 
 // === SYSTÈME DE QUALITÉ DYNAMIQUE ===
 let renderQuality = "low"; // "high", "medium", "low"
-let performanceFrames = 0;
-let performanceStart = 0;
+//let performanceFrames = 0;
+//let performanceStart = 0;
 
 let baseGameSpeed = 12;
 let currentGameSpeed = 12;
@@ -1090,6 +1126,21 @@ let bonusesCaptured = {
 
 let startTime = null;
 let elapsedTime = 0;
+
+// ✅ NOUVELLES VARIABLES POUR L'OPTIMISATION DES STATS ===
+let lastStatsUpdate = 0;
+let statsUpdateInterval = 200; // Mise à jour toutes les 200ms (5 fois/seconde)
+
+// Variables pour mémoriser l'état précédent
+let lastStatsState = {
+    aliveBricks: 0,
+    totalBonuses: 0,
+    totalPowerups: 0,
+    autopilot: false,
+    ballSpeed: 0,
+    mult: 1,
+    skulls: 0
+};
 
 
 // Variables manquantes pour le système de qualité
@@ -1156,6 +1207,9 @@ let particleCountMax = 80; // Pour ajuster la qualité
     const elAutopilotStatus = document.getElementById('autopilot-status');
     // === AUDIO : Effets sonores simples arcade ===
     const audioCtx = new(window.AudioContext||window.webkitAudioContext)();
+    // === NOUVELLE VARIABLE GLOBALE (à ajouter en haut du fichier) ===
+    let galaxyEnabled = true;
+
 
     // === SYSTÈME DE SCALE PROPORTIONNEL POUR END PANEL ===
     function calculateEndPanelScale() {
@@ -1190,11 +1244,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
     //Fin de fonction applyEndPanelScale
 
     function adjustRenderQuality() {
-        performanceFrames++;
 
-        if (performanceFrames > 120 ) { // Test toutes les 2 secondes
-            let avgFrameTime = (performance.now() - performanceStart) / 120;
-            let estimatedFPS = 1000 / avgFrameTime;
 
             // ✅ ADAPTATION AUTOMATIQUE DE LA QUALITÉ
             if (estimatedFPS < 25) {
@@ -1220,14 +1270,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
             // ✅ RECRÉER LE CACHE avec le nouveau rayon
             brickShapeCache = null;
 
-            console.log(`🎯 Qualité ajustée: ${renderQuality} (FPS: ${estimatedFPS.toFixed(1)}, rayon: ${brickCacheRadius})`);
 
-            // Reset du compteur
-            performanceFrames = 0;
-            performanceStart = performance.now();
-        } else if (performanceFrames === 1) {
-            performanceStart = performance.now();
-        }
     }
     //Fin de fonction adjustRenderQuality
 
@@ -1358,100 +1401,63 @@ let particleCountMax = 80; // Pour ajuster la qualité
 
     // === MISE À JOUR DE LA GALAXIE ===
     function updateGalaxy(dt) {
-        galaxyTime += dt * 0.01; // Temps global pour animations synchronisées
+        galaxyTime += dt * 0.01;
 
-        galaxyParticles.forEach(particle => {
-            // ✅ ROTATION : Chaque particule tourne autour du centre
+        // ✅ OPTIMISATION : Traitement par batch et calculs simplifiés
+        for (let i = 0; i < galaxyParticles.length; i++) {
+            let particle = galaxyParticles[i];
+
+            // ✅ Rotation simplifiée
             particle.baseAngle += particle.rotationSpeed * dt;
+            if (particle.baseAngle > Math.PI * 2) particle.baseAngle -= Math.PI * 2;
 
-            // ✅ POSITION MISE À JOUR avec effet de spirale dynamique
-            let dynamicRadius = particle.baseRadius + Math.sin(galaxyTime + particle.colorPhase) * 10;
-            particle.x = galaxyCenter.x + Math.cos(particle.baseAngle) * dynamicRadius;
-            particle.y = galaxyCenter.y + Math.sin(particle.baseAngle) * dynamicRadius * 0.6; // Aplatissement galaxie
+            // ✅ Position avec cache trigonométrique
+            let dynamicRadius = particle.baseRadius + trigCache.getSin(galaxyTime + particle.colorPhase) * 10;
+            particle.x = galaxyCenter.x + trigCache.getCos(particle.baseAngle) * dynamicRadius;
+            particle.y = galaxyCenter.y + trigCache.getSin(particle.baseAngle) * dynamicRadius * 0.6;
 
-            // ✅ COULEUR CHANGEANTE (cycle RGB)
+            // ✅ Mise à jour simplifiée des phases
             particle.colorPhase += particle.colorSpeed * dt;
-
-            // ✅ SCINTILLEMENT
             particle.twinklePhase += particle.twinkleSpeed * dt;
-            particle.brightness = particle.baseBrightness + Math.sin(particle.twinklePhase) * 0.3;
-            particle.brightness = Math.max(0.1, Math.min(1, particle.brightness));
-        });
-    }
 
+            // ✅ Brightness pré-calculé
+            particle.brightness = particle.baseBrightness + trigCache.getSin(particle.twinklePhase) * 0.3;
+            particle.brightness = Math.max(0.1, Math.min(1, particle.brightness));
+        }
+    }
     // === RENDU DE LA GALAXIE ===
     // === RENDU DE LA GALAXIE AVEC VARIATIONS ===
     function renderGalaxy(ctx) {
+        if (!galaxyEnabled || galaxyParticles.length === 0) return;
+
         ctx.save();
 
+        // ✅ OPTIMISATION : Groupement par taille pour réduire les changements d'état
+        const particlesBySize = { small: [], medium: [], large: [] };
+
         galaxyParticles.forEach(particle => {
-            // ✅ CALCUL DE LA COULEUR SELON LE SCHÉMA ACTUEL
-            let hue, saturation, lightness;
-
-            switch(galaxyColorScheme) {
-                case 0: // Schéma classique (cyan/magenta/jaune)
-                    hue = (particle.colorPhase * 57.3) % 360;
-                    if (hue < 60) {
-                        hue = 45 + Math.sin(particle.colorPhase) * 15; // Jaune-orange
-                    } else if (hue < 180) {
-                        hue = 180 + Math.sin(particle.colorPhase * 1.3) * 30; // Cyan
-                    } else {
-                        hue = 300 + Math.sin(particle.colorPhase * 0.8) * 20; // Magenta
-                    }
-                    break;
-
-                case 1: // Schéma "Feu" (rouge/orange/jaune)
-                    hue = 15 + Math.sin(particle.colorPhase * 1.5) * 25; // 0-40° (rouge-orange-jaune)
-                    break;
-
-                case 2: // Schéma "Océan" (bleu/cyan/vert)
-                    hue = 180 + Math.sin(particle.colorPhase * 1.2) * 60; // 120-240° (vert-cyan-bleu)
-                    break;
-
-                case 3: // Schéma "Violet" (violet/rose/bleu)
-                    hue = 270 + Math.sin(particle.colorPhase * 0.9) * 45; // 225-315° (bleu-violet-rose)
-                    break;
-
-                case 4: // Schéma "Arc-en-ciel" (toutes les couleurs)
-                    hue = (particle.colorPhase * 57.3 + galaxyTime * 2) % 360;
-                    break;
-            }
-
-            saturation = 80 + Math.sin(particle.colorPhase * 0.7) * 15; // 65-95%
-            lightness = 45 + particle.brightness * 35; // 45-80%
-
-            let color = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-
-            // ✅ RENDU DU PIXEL LUMINEUX (taille réduite)
-            ctx.globalAlpha = particle.brightness * 0.8;
-            ctx.fillStyle = color;
-            ctx.shadowColor = color;
-            ctx.shadowBlur = particle.size * 3; // ✅ HALO RÉDUIT : *3 au lieu de *4
-
-            // Particule principale
-            ctx.beginPath();
-            ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-            ctx.fill();
-
-            // ✅ EFFET D'ÉTOILE RÉDUIT pour les plus grosses particules
-            if (particle.size > 1.2) { // ✅ SEUIL AJUSTÉ : 1.2 au lieu de 2
-                ctx.globalAlpha = particle.brightness * 0.4;
-                ctx.strokeStyle = color;
-                ctx.lineWidth = 0.4; // ✅ TRAIT PLUS FIN
-                ctx.shadowBlur = particle.size * 1.5; // ✅ HALO RÉDUIT
-
-                // Traits d'étoile plus petits
-                let starSize = particle.size * 1.5; // ✅ RÉDUIT : *1.5 au lieu de *2
-                ctx.beginPath();
-                ctx.moveTo(particle.x - starSize, particle.y);
-                ctx.lineTo(particle.x + starSize, particle.y);
-                ctx.moveTo(particle.x, particle.y - starSize);
-                ctx.lineTo(particle.x, particle.y + starSize);
-                ctx.stroke();
-            }
+            if (particle.size <= 0.8) particlesBySize.small.push(particle);
+            else if (particle.size <= 1.2) particlesBySize.medium.push(particle);
+            else particlesBySize.large.push(particle);
         });
 
-        ctx.shadowBlur = 0; // Reset du blur
+        // ✅ Rendu groupé sans shadowBlur coûteux
+        Object.entries(particlesBySize).forEach(([sizeGroup, particles]) => {
+            if (particles.length === 0) return;
+
+            ctx.globalAlpha = 0.8;
+
+            particles.forEach(particle => {
+                let hue = (particle.colorPhase * 57.3 + galaxyTime * 2) % 360;
+                let color = `hsl(${hue}, 85%, ${45 + particle.brightness * 35}%)`;
+
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+        });
+
         ctx.restore();
     }
 
@@ -1481,6 +1487,36 @@ let particleCountMax = 80; // Pour ajuster la qualité
 
 
     function updateStatsPanel() {
+
+
+      const now = performance.now();
+      // ✅ NOUVEAU : Intervalle réduit si multiplicateur actif
+      const currentInterval = (mult > 1 && multTimer > 0) ? 100 : statsUpdateInterval; // 100ms au lieu de 200ms
+
+      if (now - lastStatsUpdate < currentInterval) {
+          return;
+      }
+
+      // ✅ NOUVEAU : Calcul de l'état actuel
+    const currentState = {
+        aliveBricks: bricks.filter(b => b && b.alive).length,
+        totalBonuses: Object.values(bonusesCaptured).reduce((a, b) => a + b, 0),
+        totalPowerups: Object.values(powerupsCaptured).reduce((a, b) => a + b, 0),
+        autopilot: autopilot,
+        ballSpeed: Math.floor(ballSpeed || 0),
+        mult: mult || 1,
+        skulls: skulls.length
+    };
+
+// ✅ NOUVEAU : Comparaison avec l'état précédent
+//    if (JSON.stringify(currentState) === JSON.stringify(lastStatsState)) {
+//        return; // Aucun changement, pas de mise à jour
+//    }
+
+    lastStatsUpdate = now;
+    lastStatsState = currentState;
+
+
       // ✅ VÉRIFICATIONS ESSENTIELLES SEULEMENT
       const bricksStatsEl = document.getElementById('bricksStats');
       const bonusesStatsEl = document.getElementById('bonusesStats');
@@ -1857,23 +1893,127 @@ let particleCountMax = 80; // Pour ajuster la qualité
     let brickShapeCache = null;
     let brickCacheRadius = 6;
 
-    function createBrickShapeCache() {
-        // Crée un Path2D réutilisable pour toutes les briques
-        brickShapeCache = new Path2D();
+    // === CACHE PATH2D ULTRA-OPTIMISÉ ===
+    let brickPath2D = null;
 
-        const x = 0, y = 0;
-        const w = brickW, h = brickH;
-        const r = brickCacheRadius;
+    function createOptimizedBrickPath() {
+        if (brickPath2D) return brickPath2D; // Déjà créé
 
-        // Construction du chemin une seule fois
-        brickShapeCache.moveTo(x + r, y);
-        brickShapeCache.lineTo(x + w - r, y);
-        brickShapeCache.arcTo(x + w, y, x + w, y + h, r);
-        brickShapeCache.arcTo(x + w, y + h, x, y + h, r);
-        brickShapeCache.arcTo(x, y + h, x, y, r);
-        brickShapeCache.arcTo(x, y, x + w, y, r);
-        brickShapeCache.closePath();
+        brickPath2D = new Path2D();
+        const r = 0; // Rayon des coins arrondis
+
+        // Forme arrondie centrée en (0,0)
+        brickPath2D.moveTo(r, 0);
+        brickPath2D.lineTo(brickW - r, 0);
+        brickPath2D.arcTo(brickW, 0, brickW, brickH, r);
+        brickPath2D.arcTo(brickW, brickH, 0, brickH, r);
+        brickPath2D.arcTo(0, brickH, 0, 0, r);
+        brickPath2D.arcTo(0, 0, brickW, 0, r);
+        brickPath2D.closePath();
+
+        return brickPath2D;
     }
+
+
+    function renderBricksOptimized() {
+        if (!brickPath2D) createOptimizedBrickPath();
+
+        const bricksByColor = {};
+
+        bricks.forEach(b => {
+            if (!b.alive) return;
+
+            // Animation d'arrivée
+            if (b.animating && b.animFrame < 36) {
+                let t = b.animFrame / 36;
+                b.x = CANVAS_W / 2 + (b.finalX - CANVAS_W / 2) * t + Math.cos(b.animAngle + t * 6) * (1 - t) * 60;
+                b.y = CANVAS_H / 2 + (b.finalY - CANVAS_H / 2) * t + Math.sin(b.animAngle + t * 6) * (1 - t) * 60;
+                b.animFrame++;
+                if (b.animFrame >= 36) {
+                    b.x = b.finalX;
+                    b.y = b.finalY;
+                    b.animating = false;
+                }
+            }
+
+            // Grouper par couleur
+            if (!bricksByColor[b.colorIdx]) {
+                bricksByColor[b.colorIdx] = [];
+            }
+            bricksByColor[b.colorIdx].push(b);
+        });
+
+        // Rendu groupé par couleur
+        Object.keys(bricksByColor).forEach(colorIdx => {
+            const bricksGroup = bricksByColor[colorIdx];
+            const g = BRICK_GRADIENTS[colorIdx % BRICK_GRADIENTS.length];
+
+            ctx.save();
+
+            // Rendu des briques de cette couleur
+            bricksGroup.forEach(b => {
+                let grad = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
+                grad.addColorStop(0, g[0]);
+                grad.addColorStop(1, g[1]);
+
+                ctx.fillStyle = grad;
+                ctx.setTransform(1, 0, 0, 1, b.x, b.y);
+                ctx.fill(brickPath2D);
+            });
+
+            // Bordures si qualité haute
+            if (renderQuality !== "low") {
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.3)";
+                ctx.lineWidth = 1;
+                bricksGroup.forEach(b => {
+                    ctx.setTransform(1, 0, 0, 1, b.x, b.y);
+                    ctx.stroke(brickPath2D);
+                });
+            }
+
+            ctx.restore();
+
+            // Éléments spéciaux
+            bricksGroup.forEach(b => {
+                if (b.special) {
+                    ctx.save();
+                    ctx.font = "24px " + EMOJI_FONT;
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillStyle = "#fff";
+                    ctx.fillText(b.special, b.x + b.w / 2, b.y + b.h / 2 + 2);
+
+                    if (renderQuality !== "low") {
+                        ctx.strokeStyle = "#0ff";
+                        ctx.lineWidth = 2;
+                        ctx.strokeText(b.special, b.x + b.w / 2, b.y + b.h / 2 + 2);
+                    }
+                    ctx.restore();
+                }
+            });
+        });
+
+        // Reset transformation
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+
+    function createBrickShapeCache() {
+        if (brickShapeCache) return brickShapeCache;
+
+        brickShapeCache = new Path2D();
+        const r = brickCacheRadius || 6;
+
+        brickShapeCache.moveTo(r, 0);
+        brickShapeCache.lineTo(brickW - r, 0);
+        brickShapeCache.arcTo(brickW, 0, brickW, brickH, r);
+        brickShapeCache.arcTo(brickW, brickH, 0, brickH, r);
+        brickShapeCache.arcTo(0, brickH, 0, 0, r);
+        brickShapeCache.arcTo(0, 0, brickW, 0, r);
+        brickShapeCache.closePath();
+
+        return brickShapeCache;
+    }
+
 
     function drawRoundedBrick(ctx, x, y, fillStyle, strokeStyle = null) {
         // Performance : cache créé seulement si nécessaire
@@ -2092,49 +2232,20 @@ function displayLeaderboard() {
     }
 
     function gameLoop(ts) {
-
+      if (Debug === true) {
+        showDebugPopup();
+      }
 
       if (!lastFrame) lastFrame = ts;
       let elapsed_ms = ts - lastFrame;
-      let dt = Math.max(0.4, Math.min(2.0, elapsed_ms / 16.7));
+//      let dt = Math.max(0.4, Math.min(2.0, elapsed_ms / 16.7));
+      let dt = Math.max(0.4, Math.min(2, elapsed_ms / 16.7));
+
 
       if (!gameStarted) {
           gameLoopId = requestAnimationFrame(gameLoop);
           return;
       }
-
-      // ✅ NOUVEAU : Ajustement dynamique de la qualité
-      adjustRenderQuality();
-
-      // ✅ CALIBRATION SIMPLE ET EFFICACE
-          frameCount++;
-          if (frameCount === 60) { // Test après 60 frames seulement
-              let avgFrameTime = (performance.now() - lastPerformanceCheck) / 60;
-              let estimatedFPS = 1000 / avgFrameTime;
-
-              // Ajustement automatique simple
-              if (estimatedFPS < 30) ballSpeed0 = 7;
-              else if (estimatedFPS < 45) ballSpeed0 = 8;
-              else if (estimatedFPS < 55) ballSpeed0 = 10;
-              else ballSpeed0 = 15;
-
-              ballSpeed = ballSpeed0; // Applique immédiatement
-              console.log(`FPS: ${estimatedFPS.toFixed(1)}, vitesse ajustée: ${ballSpeed0}`);
-          } else if (frameCount === 1) {
-              lastPerformanceCheck = performance.now();
-          }
-
-      if (Debug === true) {
-        showDebugPopup();
-      }
-
-// -------------------------------------------------------------
-// IA Perplexity – mod jeu – 18-07-2025
-// Applique le coefficient megaspeed quand l’autopilote est actif
-// -------------------------------------------------------------
-// ✅ SYSTÈME SIMPLIFIÉ - La vitesse est gérée directement dans la balle
-// Plus besoin de timescale, la vitesse est dans ballDX/ballDY
-
 
       lastFrame = ts;
 
@@ -2142,11 +2253,34 @@ function displayLeaderboard() {
         update(dt, elapsed_ms);
       }
 
-      render();
+      if (PERF_CONFIG.enabled) {
+          perfFrameCount++;
+          if (perfFrameCount >= PERF_CONFIG.measureIntervalFrames) {
+            const now = performance.now();
+            const avgFrameTime = (now - perfLastTime) / perfFrameCount;
+            const fps = 1000 / avgFrameTime;
 
-      // Stocker l'ID pour pouvoir l'annuler
-      gameLoopId = requestAnimationFrame(gameLoop);
-    }
+            // Qualité
+            if (fps < PERF_CONFIG.fpsThresholdLow) {
+              renderQuality = "low";
+              brickCacheRadius = 0;
+            } else {
+              renderQuality = "high";
+              brickCacheRadius = 6;
+            }
+
+            // Galaxie
+            galaxyEnabled = fps >= PERF_CONFIG.fpsThresholdDisable;
+
+            // Réinitialiser
+            perfFrameCount = 0;
+            perfLastTime = now;
+          }
+        }
+        render(); // ✅ AJOUTÉ !
+        gameLoopId = requestAnimationFrame(gameLoop);
+      }
+
 
     function clearAllTimersEndLevel() {
         console.log("🧹 Nettoyage complet des timers de fin de niveau");
@@ -2733,20 +2867,6 @@ function displayLeaderboard() {
       ctx.fill(p);
     }
 
-    // === FONCTION POUR DESSINER DES RECTANGLES ARRONDIS ===
-    function drawRoundedRect(ctx, x, y, width, height, radius = 8) {
-        if (width < 2 * radius) radius = width / 2;
-        if (height < 2 * radius) radius = height / 2;
-
-        ctx.beginPath();
-        ctx.moveTo(x + radius, y);
-        ctx.arcTo(x + width, y, x + width, y + height, radius);
-        ctx.arcTo(x + width, y + height, x, y + height, radius);
-        ctx.arcTo(x, y + height, x, y, radius);
-        ctx.arcTo(x, y, x + width, y, radius);
-        ctx.closePath();
-    }
-    //Fin de fonction drawRoundedRect
 
     function resetBall() {
 
@@ -3360,6 +3480,12 @@ function autopilotMove(dt) {
 
     function update(dt, elapsed_ms) {
 
+      // ✅ MISE À JOUR CONDITIONNELLE DE LA GALAXIE
+      if (galaxyEnabled) {
+          updateGalaxy(dt);
+      }
+
+
       // --- GESTION AUTOPILOTE & BANDEAU (VERSION CORRIGÉE) ---
       let briquesRestantes = bricks.filter(b => b.alive).length;
 
@@ -3572,7 +3698,7 @@ function autopilotMove(dt) {
           }
       }
 
-      updateGalaxy(dt);
+//      updateGalaxy(dt);
 
 
       // === COLLISION AVEC LE BOSS (VERSION SÉCURISÉE) ===
@@ -4082,7 +4208,7 @@ function autopilotMove(dt) {
               levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans 3...`;
               playSound("boss_death");
           } else {
-              levelTransitionMessage = `✅ NIVEAU ${niveau} TERMINÉ !\n\nProchain niveau dans 3...`;
+              levelTransitionMessage = `✅   ❇️NIVEAU ${niveau} TERMINÉ  ✅\n\nProchain niveau dans 3...`;
               playSound("coins");
           }
 
@@ -4101,10 +4227,10 @@ function autopilotMove(dt) {
 
           // ✅ Mise à jour du message avec compte à rebours
           if (isBossLevel) {
-              levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans ${secondsLeft}...`;
+              levelTransitionMessage = `🏆 BOSS VAINCU 🏆\n\nNiveau ${niveau + 1} dans ${secondsLeft}...`;
               // ✅ CORRECTION : Vies supprimées d'ici - elles sont déjà ajoutées ailleurs
           } else {
-              levelTransitionMessage = `✅ NIVEAU ${niveau} TERMINÉ !\n\nProchain niveau dans ${secondsLeft}...`;
+              levelTransitionMessage = `✅  NIVEAU ${niveau} TERMINÉ ✅\n\nProchain niveau dans ${secondsLeft}...`;
           }
 
           // ✅ 5. FIN DE LA TRANSITION - PASSAGE AU NIVEAU SUIVANT
@@ -4735,344 +4861,248 @@ function autopilotMove(dt) {
 
     }
 
-
     function render() {
-      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+        ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
-      renderGalaxy(ctx);
-
-      // Rendu des briques
-      // Rendu des briques AVEC COINS ARRONDIS
-      // Rendu des briques AVEC COINS ARRONDIS OPTIMISÉS
-      bricks.forEach(b => {
-        if (!b.alive) return;
-
-        // Animation d'arrivée (inchangée)
-        if (b.animating && b.animFrame < 36) {
-          let t = b.animFrame / 36;
-          b.x = CANVAS_W / 2 + (b.finalX - CANVAS_W / 2) * t + Math.cos(b.animAngle + t * 6) * (1 - t) * 60;
-          b.y = CANVAS_H / 2 + (b.finalY - CANVAS_H / 2) * t + Math.sin(b.animAngle + t * 6) * (1 - t) * 60;
-          b.animFrame++;
-          if (b.animFrame >= 36) {
-            b.x = b.finalX;
-            b.y = b.finalY;
-            b.animating = false;
-          }
+        // ✅ RENDU CONDITIONNEL DE LA GALAXIE
+        if (galaxyEnabled) {
+            renderGalaxy(ctx);
         }
 
-        // ✅ OPTIMISATION : Gradient calculé une seule fois
-        let grad = ctx.createLinearGradient(b.x, b.y, b.x, b.y + b.h);
-        let g = BRICK_GRADIENTS[b.colorIdx % BRICK_GRADIENTS.length];
-        grad.addColorStop(0, g[0]);
-        grad.addColorStop(1, g[1]);
+        // ✅ RENDU OPTIMISÉ DES BRIQUES (SEUL SYSTÈME ACTIF)
+        renderBricksOptimized();
 
-        // ✅ NOUVEAU : Utilisation du cache ultra-rapide
-        drawRoundedBrick(ctx, b.x, b.y, grad, "rgba(255, 255, 255, 0.3)");
-
-        // ✅ OPTIMISATION : Effet de surbrillance simplifié
-        ctx.save();
-        ctx.globalAlpha = 0.42;
-        drawRoundedBrick(ctx, b.x, b.y, "#fff");
-        ctx.restore();
-
-        // Élément spécial (inchangé)
-        if (b.special) {
-          ctx.font = "24px " + EMOJI_FONT;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillStyle = "#fff";
-          ctx.fillText(b.special, b.x + b.w / 2, b.y + b.h / 2 + 2);
-          ctx.strokeStyle = "#0ff";
-          ctx.lineWidth = 2;
-          ctx.strokeText(b.special, b.x + b.w / 2, b.y + b.h / 2 + 2);
-        }
-      });
-      //Fin de fonction render_briques_arrondies_optimisees
-
-    //Fin de fonction render_briques_arrondies
-
-      // Rendu des particules
-      particles.forEach(p => {
-        ctx.save();
-        ctx.globalAlpha = p.life / 30;
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.restore();
-      });
-
-      // ✅ RENDU DES POWER-UPS AVEC TAILLES DIFFÉRENCIÉES
-      powerups.forEach(p => {
-        if (p.drop && !p.caught) {
-          // ✅ NOUVEAU : Taille variable selon le type de projectile
-          let fontSize = 50; // Taille par défaut pour les powerups normaux
-          let shadowBlur = 18;
-          let shadowColor = "#fff";
-
-          // ✅ PROJECTILES DE BOSS : Plus gros et plus impressionnants
-          if (p.type === "boss_projectile") {
-            fontSize = 80; // ✅ 60% plus gros que les powerups normaux
-            shadowBlur = 25; // Halo plus intense
-            shadowColor = p.color || "#f00"; // Couleur du halo = couleur du projectile
-          }
-
-          ctx.font = fontSize + "px " + EMOJI_FONT;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.shadowColor = shadowColor;
-          ctx.shadowBlur = shadowBlur;
-          ctx.fillStyle = p.color || "#fff";
-          ctx.fillText(p.icon, p.x, p.y);
-          ctx.shadowBlur = 0;
-        }
-      });
-
-
-      // Rendu des bonus
-      bonuses.forEach(b => {
-        if (!b.caught) {
-          ctx.font = "50px " + EMOJI_FONT;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.shadowColor = b.color;
-          ctx.shadowBlur = 20;
-          ctx.fillStyle = b.color;
-          ctx.fillText(b.emoji, b.x, b.y);
-          ctx.shadowBlur = 0;
-        }
-      });
-
-      // Rendu des skulls
-      skulls.forEach(s => {
-        if (!s.caught) {
-          ctx.font = "50px " + EMOJI_FONT;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.shadowColor = "#fff";
-          ctx.shadowBlur = 18;
-          ctx.fillStyle = "#fff";
-          ctx.fillText(s.icon, s.x, s.y);
-          ctx.shadowBlur = 0;
-        }
-      });
-
-      // === RENDU DU BOSS ===
-      if (isBossLevel && boss && boss.alive) {
-          ctx.save();
-
-          // Animation d'entrée fluide
-          if (boss.entrancePhase) {
-              boss.entranceY += 1.2;
-              boss.y = boss.entranceY;
-              if (boss.y >= 140) {
-                  boss.entrancePhase = false;
-                  boss.y = 140;
-              }
-          }
-
-          // Calcul du ratio de santé
-          let healthRatio = Math.max(0, bossHP / bossMaxHP);
-          let skullSize = Math.max(80, boss.w * 0.8);
-
-          // Couleur et effets selon l'état du boss
-          if (boss.hitFlash > 0) {
-              ctx.shadowColor = "#f00";
-              ctx.shadowBlur = 35;
-              ctx.fillStyle = "#fff";
-              boss.hitFlash--;
-          } else if (bossInvulnerable) {
-              ctx.shadowColor = "#0ff";
-              ctx.shadowBlur = 30;
-              ctx.fillStyle = "#0ff";
-          } else if (healthRatio <= 0.3) {
-              ctx.shadowColor = "#f00";
-              ctx.shadowBlur = 25;
-              ctx.fillStyle = "#f44";
-          } else if (healthRatio <= 0.6) {
-              ctx.shadowColor = "#f80";
-              ctx.shadowBlur = 20;
-              ctx.fillStyle = "#fa0";
-          } else {
-              ctx.shadowColor = "#ff0";
-              ctx.shadowBlur = 18;
-              ctx.fillStyle = "#fff";
-          }
-
-          // Rendu de la tête de mort
-          ctx.font = skullSize + "px " + EMOJI_FONT;
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-
-          let centerX = boss.x + boss.w / 2;
-          let centerY = boss.y + boss.h / 2;
-
-          // Effet de tremblement si boss faible
-          if (healthRatio <= 0.3) {
-              centerX += (Math.random() - 0.5) * 4;
-              centerY += (Math.random() - 0.5) * 4;
-          }
-
-          // Animation de pulsation
-          let pulseScale = 1 + Math.sin(performance.now() / (200 - bossPhase * 50)) * 0.1;
-          ctx.save();
-          ctx.translate(centerX, centerY);
-          ctx.scale(pulseScale, pulseScale);
-
-          // Rendu avec contour
-          ctx.strokeStyle = "#000";
-          ctx.lineWidth = 3;
-          ctx.strokeText("☠️", 0, 0);
-          ctx.fillText("☠️", 0, 0);
-
-          ctx.restore();
-          ctx.restore();
-      }
-
-      // === RENDU DU MESSAGE DE TRANSITION DE NIVEAU ===
-      // === RENDU DU MESSAGE DE TRANSITION DE NIVEAU ===
-      if (levelTransition && levelTransitionMessage) {
-          ctx.save();
-
-          // ✅ Fond semi-transparent
-          ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
-          ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-
-          // ✅ POLICE ULTRA-RÉDUITE avec police système
-          ctx.font = "25px Arial, sans-serif"; // ✅ CHANGÉ : Police système + taille minimale
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-          ctx.fillStyle = "#FFD700";
-          ctx.shadowColor = "#FFD700";
-          ctx.shadowBlur = 8; // ✅ RÉDUIT : blur plus petit
-
-          // ✅ Affichage du message (multi-lignes)
-          let lines = levelTransitionMessage.split('\n');
-          let centerY = CANVAS_H / 2;
-          let lineHeight = 32; // ✅ ENCORE PLUS RÉDUIT : de 25 à 12
-
-          lines.forEach((line, index) => {
-              let y = centerY + (index - (lines.length - 1) / 2) * lineHeight;
-
-              // ✅ Effet de pulsation RÉDUIT pour la dernière ligne
-              if (index === lines.length - 1) {
-                  let pulse = 1 + Math.sin(performance.now() / 200) * 0.05; // ✅ RÉDUIT : 0.1 -> 0.05
-                  ctx.save();
-                  ctx.translate(CANVAS_W / 2, y);
-                  ctx.scale(pulse, pulse);
-                  ctx.fillText(line, 0, 0);
-                  ctx.restore();
-              } else {
-                  ctx.fillText(line, CANVAS_W / 2, y);
-              }
-          });
-
-          // ✅ Particules dorées RÉDUITES
-          for (let i = 0; i < 8; i++) {
-              let angle = (performance.now() / 1000 + i * Math.PI / 4) % (Math.PI * 2);
-              let radius = 40 + Math.sin(performance.now() / 300 + i) * 10; // ✅ RÉDUIT : rayon divisé par 2
-              let x = CANVAS_W / 2 + Math.cos(angle) * radius;
-              let y = CANVAS_H / 2 + Math.sin(angle) * radius;
-
-              ctx.fillStyle = "#FFD700";
-              ctx.shadowBlur = 8; // ✅ RÉDUIT
-              ctx.beginPath();
-              ctx.arc(x, y, 1.5, 0, Math.PI * 2); // ✅ RÉDUIT : taille particule divisée par 2
-              ctx.fill();
-          }
-
-          ctx.restore();
-      }
-      //Fin de fonction render_transition_message_minimal
-
-      //Fin de fonction render_transition_message
-
-
-      // --- Boucle de rendu des animations (corrigée) ---
-      animations.forEach(a => {
-        let t = 1 - a.frames / 36;
-
-        // Calcul de la position de l'animation
-        let cx = a.x + (a.targetX - a.x) * t;
-        let cy = a.y + (a.targetY - a.y) * t;
-
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(Math.sin(t * 5) * 0.4);
-
-        // ** LA CORRECTION EST ICI : CHOISIR LA BONNE POLICE D'ÉCRITURE **
-        // On vérifie si l'icône est du texte (commence par '+' ou '-') ou un emoji.
-        let isTextAnimation = a.icon.toString().startsWith('+') || a.icon.toString().startsWith('-');
-
-        // On applique la police du jeu pour le texte, et la police emoji pour les icônes.
-        ctx.font = a.size + "px " + (isTextAnimation ? FONT : EMOJI_FONT);
-
-        // Le reste du code de rendu est conservé, il est correct.
-        ctx.globalAlpha = 0.9 - t * 0.5;
-        ctx.shadowColor = a.color;
-        ctx.shadowBlur = 10 + 10 * Math.abs(Math.sin(t * 6));
-        ctx.fillStyle = a.color;
-        ctx.fillText(a.icon, 0, 0);
-        ctx.shadowBlur = 0;
-
-        // Effets visuels supplémentaires (inchangés)
-        if (a.frames < 10) {
-          for (let k = 0; k < 8; k++) {
+        // Rendu des particules
+        particles.forEach(p => {
             ctx.save();
-            ctx.globalAlpha = 0.18 + 0.12 * Math.sin(performance.now() / 80 + k);
+            ctx.globalAlpha = p.life / 30;
+            ctx.fillStyle = p.color;
             ctx.beginPath();
-            ctx.arc(a.targetX + Math.cos(k * Math.PI / 4) * 18, a.targetY + Math.sin(k * Math.PI / 4) * 18, 3, 0, 2 * Math.PI);
-            ctx.fillStyle = COLORS[k % COLORS.length];
-            ctx.shadowColor = COLORS[k % COLORS.length];
-            ctx.shadowBlur = 8;
+            ctx.arc(p.x, p.y, 5, 0, 2 * Math.PI);
             ctx.fill();
             ctx.restore();
-          }
-          if (a.frames < 10) {
-            for (let k = 0; k < 2; k++) {
-              ctx.save();
-              ctx.globalAlpha = 0.22 + 0.12 * Math.sin(performance.now() / 80 + k);
-              ctx.beginPath();
-              ctx.arc(a.targetX, a.targetY, 22 + 6 * k + a.frames * 1.2, 0, 2 * Math.PI);
-              ctx.strokeStyle = k % 2 === 0 ? "#ff0" : "#fff";
-              ctx.lineWidth = 1.5 + k;
-              ctx.shadowColor = k % 2 === 0 ? "#ff0" : "#fff";
-              ctx.shadowBlur = 8;
-              ctx.stroke();
-              ctx.restore();
+        });
+
+        // ✅ RENDU DES POWER-UPS
+        powerups.forEach(p => {
+            if (p.drop && !p.caught) {
+                let fontSize = 50;
+                let shadowBlur = 18;
+                let shadowColor = "#fff";
+
+                if (p.type === "boss_projectile") {
+                    fontSize = 80;
+                    shadowBlur = 25;
+                    shadowColor = p.color || "#f00";
+                }
+
+                ctx.font = fontSize + "px " + EMOJI_FONT;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.shadowColor = shadowColor;
+                ctx.shadowBlur = shadowBlur;
+                ctx.fillStyle = p.color || "#fff";
+                ctx.fillText(p.icon, p.x, p.y);
+                ctx.shadowBlur = 0;
             }
-          }
+        });
+
+        // Rendu des bonus
+        bonuses.forEach(b => {
+            if (!b.caught) {
+                ctx.font = "50px " + EMOJI_FONT;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.shadowColor = b.color;
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = b.color;
+                ctx.fillText(b.emoji, b.x, b.y);
+                ctx.shadowBlur = 0;
+            }
+        });
+
+        // Rendu des skulls
+        skulls.forEach(s => {
+            if (!s.caught) {
+                ctx.font = "50px " + EMOJI_FONT;
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.shadowColor = "#fff";
+                ctx.shadowBlur = 18;
+                ctx.fillStyle = "#fff";
+                ctx.fillText(s.icon, s.x, s.y);
+                ctx.shadowBlur = 0;
+            }
+        });
+
+        // === RENDU DU BOSS ===
+        if (isBossLevel && boss && boss.alive) {
+            ctx.save();
+
+            if (boss.entrancePhase) {
+                boss.entranceY += 1.2;
+                boss.y = boss.entranceY;
+                if (boss.y >= 140) {
+                    boss.entrancePhase = false;
+                    boss.y = 140;
+                }
+            }
+
+            let healthRatio = Math.max(0, bossHP / bossMaxHP);
+            let skullSize = Math.max(80, boss.w * 0.8);
+
+            if (boss.hitFlash > 0) {
+                ctx.shadowColor = "#f00";
+                ctx.shadowBlur = 35;
+                ctx.fillStyle = "#fff";
+                boss.hitFlash--;
+            } else if (bossInvulnerable) {
+                ctx.shadowColor = "#0ff";
+                ctx.shadowBlur = 30;
+                ctx.fillStyle = "#0ff";
+            } else if (healthRatio <= 0.3) {
+                ctx.shadowColor = "#f00";
+                ctx.shadowBlur = 25;
+                ctx.fillStyle = "#f44";
+            } else if (healthRatio <= 0.6) {
+                ctx.shadowColor = "#f80";
+                ctx.shadowBlur = 20;
+                ctx.fillStyle = "#fa0";
+            } else {
+                ctx.shadowColor = "#ff0";
+                ctx.shadowBlur = 18;
+                ctx.fillStyle = "#fff";
+            }
+
+            ctx.font = skullSize + "px " + EMOJI_FONT;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            let centerX = boss.x + boss.w / 2;
+            let centerY = boss.y + boss.h / 2;
+
+            if (healthRatio <= 0.3) {
+                centerX += (Math.random() - 0.5) * 4;
+                centerY += (Math.random() - 0.5) * 4;
+            }
+
+            let pulseScale = 1 + Math.sin(performance.now() / (200 - bossPhase * 50)) * 0.1;
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.scale(pulseScale, pulseScale);
+
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 3;
+            ctx.strokeText("☠️", 0, 0);
+            ctx.fillText("☠️", 0, 0);
+
+            ctx.restore();
+            ctx.restore();
         }
 
+        // === RENDU DU MESSAGE DE TRANSITION ===
+        if (levelTransition && levelTransitionMessage) {
+            ctx.save();
+            ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+            ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-       ctx.restore();
-        a.frames--;
-      });
-      animations = animations.filter(a => a.frames > 0);
+            ctx.font = "25px Arial, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillStyle = "#FFD700";
+            ctx.shadowColor = "#FFD700";
+            ctx.shadowBlur = 8;
 
-      // --- Rendu de la raquette avec halo (corrigé) ---
-      ctx.save();
-      // 1. On définit la couleur et l'intensité du halo (ombre portée).
-      ctx.shadowColor = "#0ff"; // Un halo cyan pour un look néon.
-      ctx.shadowBlur = 20;      // Plus cette valeur est élevée, plus le halo est diffus.
+            let lines = levelTransitionMessage.split('\n');
+            let centerY = CANVAS_H / 2;
+            let lineHeight = 32;
 
-      // 2. On définit la couleur fixe de la raquette.
-      ctx.fillStyle = "#fff";   // Une raquette blanche pour un contraste maximal.
+            lines.forEach((line, index) => {
+                let y = centerY + (index - (lines.length - 1) / 2) * lineHeight;
+                if (index === lines.length - 1) {
+                    let pulse = 1 + Math.sin(performance.now() / 200) * 0.05;
+                    ctx.save();
+                    ctx.translate(CANVAS_W / 2, y);
+                    ctx.scale(pulse, pulse);
+                    ctx.fillText(line, 0, 0);
+                    ctx.restore();
+                } else {
+                    ctx.fillText(line, CANVAS_W / 2, y);
+                }
+            });
 
-      // 3. On dessine la raquette.
-      ctx.fillRect(paddleX, paddleY, paddleW, paddleH);
-      ctx.restore(); // On réinitialise le contexte pour que le halo n'affecte pas les autres éléments.
+            ctx.restore();
+        }
 
-      // --- Rendu de la balle (maintenu séparément) ---
-      ctx.save();
-      ctx.shadowColor = "#f0f";
-      ctx.shadowBlur = 18;
-      ctx.fillStyle = "#ff0";
-      ctx.beginPath();
-      ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
-      ctx.fill();
-      ctx.restore();
+        // === RENDU DES ANIMATIONS (UNE SEULE FOIS) ===
+        animations.forEach(a => {
+            let t = 1 - a.frames / 36;
+            let cx = a.x + (a.targetX - a.x) * t;
+            let cy = a.y + (a.targetY - a.y) * t;
 
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.rotate(Math.sin(t * 5) * 0.4);
+
+            let isTextAnimation = a.icon.toString().startsWith('+') || a.icon.toString().startsWith('-');
+            ctx.font = a.size + "px " + (isTextAnimation ? FONT : EMOJI_FONT);
+
+            ctx.globalAlpha = 0.9 - t * 0.5;
+            ctx.shadowColor = a.color;
+            ctx.shadowBlur = 10 + 10 * Math.abs(Math.sin(t * 6));
+            ctx.fillStyle = a.color;
+            ctx.fillText(a.icon, 0, 0);
+            ctx.shadowBlur = 0;
+
+            if (a.frames < 10) {
+                for (let k = 0; k < 8; k++) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.18 + 0.12 * Math.sin(performance.now() / 80 + k);
+                    ctx.beginPath();
+                    ctx.arc(a.targetX + Math.cos(k * Math.PI / 4) * 18, a.targetY + Math.sin(k * Math.PI / 4) * 18, 3, 0, 2 * Math.PI);
+                    ctx.fillStyle = COLORS[k % COLORS.length];
+                    ctx.shadowColor = COLORS[k % COLORS.length];
+                    ctx.shadowBlur = 8;
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                for (let k = 0; k < 2; k++) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.22 + 0.12 * Math.sin(performance.now() / 80 + k);
+                    ctx.beginPath();
+                    ctx.arc(a.targetX, a.targetY, 22 + 6 * k + a.frames * 1.2, 0, 2 * Math.PI);
+                    ctx.strokeStyle = k % 2 === 0 ? "#ff0" : "#fff";
+                    ctx.lineWidth = 1.5 + k;
+                    ctx.shadowColor = k % 2 === 0 ? "#ff0" : "#fff";
+                    ctx.shadowBlur = 8;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+
+            ctx.restore();
+            a.frames--;
+        });
+        animations = animations.filter(a => a.frames > 0);
+
+        // === RENDU DE LA RAQUETTE ===
+        ctx.save();
+        ctx.shadowColor = "#0ff";
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(paddleX, paddleY, paddleW, paddleH);
+        ctx.restore();
+
+        // === RENDU DE LA BALLE ===
+        ctx.save();
+        ctx.shadowColor = "#f0f";
+        ctx.shadowBlur = 18;
+        ctx.fillStyle = "#ff0";
+        ctx.beginPath();
+        ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.restore();
     }
 
     // === LANCEMENT DU JEU ===
