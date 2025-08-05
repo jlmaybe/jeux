@@ -3483,6 +3483,34 @@ function autopilotMove(dt) {
       // --- GESTION AUTOPILOTE & BANDEAU (VERSION CORRIGÉE) ---
       let briquesRestantes = bricks.filter(b => b.alive).length;
 
+      // ✅ NOUVEAU : Spawn automatique du powerup niveau à 2 briques restantes
+      if (briquesRestantes === 2) {
+          // Vérifier qu'il n'y a pas déjà un powerup niveau actif
+          let powerupNiveauExiste = bonuses.some(bonus => bonus.type === "niveau" && !bonus.caught);
+
+          if (!powerupNiveauExiste) {
+              // Créer le powerup de changement de niveau
+              let powerupNiveau = {
+                  x: Math.random() * (CANVAS_W - 120) + 60, // Position aléatoire
+                  y: wallOffset + 30,
+                  emoji: "🏖️", // Emoji du powerup niveau
+                  points: 0,
+                  color: "#A67B5B",
+                  type: "niveau",
+                  speed: 4 + Math.random() * 2, // Vitesse plus lente pour être visible
+                  caught: false
+              };
+
+              bonuses.push(powerupNiveau);
+
+              // Son spécial pour signaler l'apparition
+              playSound("powerup");
+
+              console.log("🏖️ Powerup de niveau spawné ! Il reste 2 briques.");
+          }
+      }
+
+
       // 1. Logique du bandeau d'avertissement (SIMPLIFIÉE)
       if (!autopilot && !isBossLevel &&
           briquesRestantes > 0 && briquesRestantes <= LancementAutoPilote + countdownRange &&
