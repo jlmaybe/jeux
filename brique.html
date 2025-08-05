@@ -109,11 +109,11 @@
       color: #ff0;
       /* ✅ NOUVEAU : Effet visuel alternatif sans changement de taille */
       text-shadow:
-        0 0 12px #ff0,
+//        0 0 12px #ff0,
         0 0 24px #ff0,
-        0 0 36px #fff,
+        0 0 36px #fef,
         0 0 48px #fff;
-      transform: scale(1.02); /* ✅ Légère mise à l'échelle qui n'affecte pas le layout */
+      transform: scale(1.2); /* ✅ Légère mise à l'échelle qui n'affecte pas le layout */
       transform-origin: center center;
     }
 
@@ -925,8 +925,8 @@
     const PERF_CONFIG = {
       enabled: true,               // Activer/désactiver l’adaptation
       measureIntervalFrames: 300,  // Nombre de frames entre deux mesures
-      fpsThresholdDisable: 25,     // Seuil pour désactiver la galaxie
-      fpsThresholdLow: 30,         // Basculer en qualité “low” sous ce FPS
+      fpsThresholdDisable: 30,     // Seuil pour désactiver la galaxie
+      fpsThresholdLow: 35,         // Basculer en qualité “low” sous ce FPS
     };
 
 
@@ -946,7 +946,7 @@
     let brickW = 61, brickH = 28; brickGap = 2;
     let paddleW = 150, paddleH = 18, paddleY = CANVAS_H-60;
     let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 13;
-
+    let isMouseCaptured = false;
     let perfFrameCount = 0;
     let perfLastTime = performance.now();
 
@@ -2971,41 +2971,35 @@ function displayLeaderboard() {
     });
 
 
-    canvas.addEventListener('mousemove', e => {
+    // ✅ NOUVEAU CODE (fonctionne partout)
+    document.addEventListener('mousemove', e => {
         // Empêche la souris de prendre le contrôle si l'autopilote est actif
         if (autopilot) return;
 
-        // ✅ NOUVEAU : Calcul des coordonnées avec scale
-        const scaledCoords = getScaledCoordinates(e.clientX, e.clientY);
-        const limits = getEffectiveCanvasLimits();
+        // Calcul des coordonnées relatives au canvas même si souris à l'extérieur
+        const rect = canvas.getBoundingClientRect();
+        const scaleFactor = getCurrentScaleFactor();
 
-        // ✅ NOUVEAU : Système de démultiplication du mouvement
+        let canvasX = (e.clientX - rect.left) / scaleFactor;
+        let canvasY = (e.clientY - rect.top) / scaleFactor;
+
+        // ✅ NOUVEAU : Contraindre les coordonnées dans les limites du canvas
+        canvasX = Math.max(0, Math.min(CANVAS_W, canvasX));
+
+        // Système de démultiplication du mouvement (votre code existant)
         if (lastMouseX !== null) {
-            // Calcul du déplacement réel de la souris
-            let deltaX = scaledCoords.x - lastMouseX;
-
-            // ✅ APPLICATION DE LA DÉMULTIPLICATION
+            let deltaX = canvasX - lastMouseX;
             let amplifiedDelta = deltaX * mouseSensitivity;
-
-            // Position cible avec démultiplication
             let targetX = paddleX + paddleW/2 + amplifiedDelta - paddleW/2;
 
-            // ✅ CONTRAINTES : Rester dans les limites
-            paddleX = Math.max(
-                0,
-                Math.min(limits.width - paddleW, targetX)
-            );
-
+            const limits = getEffectiveCanvasLimits();
+            paddleX = Math.max(0, Math.min(limits.width - paddleW, targetX));
         } else {
-            // ✅ PREMIER MOUVEMENT : Position directe (sans démultiplication)
-            paddleX = Math.max(
-                0,
-                Math.min(limits.width - paddleW, scaledCoords.x - paddleW / 2)
-            );
+            const limits = getEffectiveCanvasLimits();
+            paddleX = Math.max(0, Math.min(limits.width - paddleW, canvasX - paddleW / 2));
         }
 
-        // ✅ MÉMORISATION de la position pour le prochain mouvement
-        lastMouseX = scaledCoords.x;
+        lastMouseX = canvasX;
     });
     //Fin de fonction mousemove_demultiplie
 
@@ -3777,7 +3771,7 @@ function autopilotMove(dt) {
                               y: boss.y + Math.random() * boss.h,
                               dx: (Math.random() - 0.5) * 8,
                               dy: (Math.random() - 0.5) * 8,
-                              life: 40,
+                              life: 50,
                               color: COLORS[Math.floor(Math.random() * COLORS.length)]
                           });
                       }, i * 30);
@@ -4137,8 +4131,8 @@ function autopilotMove(dt) {
       const scoreDifference = score - displayScore;
 
       // On anime le score s'il y a un écart significatif (l'animation fluide est conservée)
-      if (Math.abs(scoreDifference) > 0.5) {
-        displayScore += scoreDifference * 0.08; // Vitesse de l'animation
+      if (Math.abs(scoreDifference) > 1) {
+        displayScore += scoreDifference * 0.18; // Vitesse de l'animation
         elScore.classList.add("flash");
       } else {
         // Si l'animation est terminée, on s'assure que la valeur est exacte et on arrête le flash.
