@@ -818,7 +818,8 @@
         <h2>POWER-UPS</h2>
         <li><span class="bonus-emoji">🏳️</span> <b>Raquette longue</b> <span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b> <span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
         <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ 8️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
-        <li><span class="bonus-emoji">🍪</span> <b>Cookies  Bouton panique (M)</li>
+        <li><span class="bonus-emoji">🍪</span> <b>Cookies  Bouton autopilot</li>
+        <li><span class="bonus-emoji">🇵🇸</span> <b>Cookies  x2</li>
         <li><span class="bonus-emoji">🌈</span> <b>Vie      Une vie</li>
         <li><span class="bonus-emoji">🏖️</span> <b>Niveau   Niveau suivant</li>
         <li><span class="bonus-emoji">☠️</span>  <b>Malus    Score en décrémentation pendant 30s</li>
@@ -902,7 +903,7 @@
       ["#0f0", "#0c8"],
       ["#fff", "#aaa"]
     ];
-    const SPECIAL_ICONS = ["🏳️‍⚧️","🏴‍☠️","1️⃣","2️⃣","4️⃣","8️⃣","❤️‍🔥"];
+    const SPECIAL_ICONS = ["🏳️","‍⚧️","🏴‍☠️","1️⃣","2️⃣","4️⃣","8️⃣","❤️‍🔥"];
     const BONUS_ICONS = [
       {emoji:"🍒", points:500, color:"#f06"},
       {emoji:"🍓", points:1000, color:"#f44"},
@@ -915,6 +916,7 @@
       {emoji:"🐲", points:15000, color:"#f9f"},
       {emoji:"🍇", points:2000, color:"#94f"},
       {emoji:"🍪", points:0, color:"#A67B5B", type:"cookie"},
+      {emoji:"🇵🇸", points:0, color:"#A67B5B", type:"cookiex2"},
       {emoji:"🌈", points:0, color:"#A67B5B", type:"vie"},
       {emoji:"🏖", points:0, color:"#A67B5B", type:"niveau"},
       {emoji:"🍌", points:500, color:"#ff4"},
@@ -945,7 +947,7 @@
     let wallOffset = 50;
     let brickW = 61, brickH = 28; brickGap = 2;
     let paddleW = 150, paddleH = 18, paddleY = CANVAS_H-60;
-    let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 13;
+    let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 18;
     let isMouseCaptured = false;
     let perfFrameCount = 0;
     let perfLastTime = performance.now();
@@ -1068,6 +1070,7 @@ const EMAILJS_CONFIG = {
     enabled: true // ✅ AJOUT : Possibilité de désactiver facilement
 };
 
+let totalBonusPoints = 0;
 let gyroActive = false;
 let gyroSupported = false;
 let gyroPermission = false;
@@ -1086,7 +1089,7 @@ let currentGameSpeed = 12;
 let levelSpeedBonus = 0;
 let brickSpeedBonus = 0;
 let speedIncreasePerBrick = 0.001; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
-let speedIncreasePerLevel = 0.05;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
+let speedIncreasePerLevel = 0.025;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
 let autopilotSpeedMultiplier = 1.04; // ✅ RÉDUIT de 1.15 à 1.08 (seulement 8% plus rapide)
 
 // === VARIABLES DE TRANSITION DE NIVEAU ===
@@ -1120,6 +1123,7 @@ let bonusesCaptured = {
   "🐲": 0,   // +15000 pts
   "🍇": 0,   // +2000 pts
   "🍪": 0,   // Cookie(s)
+  "🇵🇸": 0,   // Cookie(x2)
   "🌈": 0,   // Vie(s)
   "🍌": 0    // +500 pts
 };
@@ -1247,13 +1251,13 @@ let particleCountMax = 80; // Pour ajuster la qualité
 
 
             // ✅ ADAPTATION AUTOMATIQUE DE LA QUALITÉ
-            if (estimatedFPS < 25) {
+            if (estimatedFPS < 30) {
                 renderQuality = "low";
                 brickCacheRadius = 0; // Coins moins arrondis = plus rapide
 
               } else if (estimatedFPS < 35) {
                   renderQuality = "medium";
-                  brickCacheRadius = 1;
+                  brickCacheRadius = 0;
 
                 } else if (estimatedFPS < 40) {
                     renderQuality = "medium";
@@ -1558,7 +1562,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
       // === STATISTIQUES DES BONUS COLLECTÉS (NOUVEAU) ===
       let bonusesHtml = '';
       let totalBonuses = 0;
-      let totalBonusPoints = 0;
+//      let totalBonusPoints = 0;
 
       // ✅ CALCUL DES TOTAUX
       for (let emoji in bonusesCaptured) {
@@ -1574,16 +1578,17 @@ let particleCountMax = 80; // Pour ajuster la qualité
           case "💝": points = 8000; break;
           case "💊": case "🐲": points = 15000; break;
           case "🍪": points = 0; break; // Cookies ne donnent pas de points
+          case "🇵🇸": points = 50000; break; // Cookies ne donnent pas de points
           case "🌈": points = 0; break; // Vie ne donnent pas de points
         }
-        totalBonusPoints += bonusesCaptured[emoji] * points;
+//        totalBonusPoints += bonusesCaptured[emoji] * points;
 
         // Affichage si collecté
         if (bonusesCaptured[emoji] > 0) {
           bonusesHtml += `
             <div class="stats-item">
               <span class="stats-item-label"><span class="stats-emoji">${emoji}</span>x${bonusesCaptured[emoji]}</span>
-              <span class="stats-item-value">${points > 0 ? points + 'pts' : 'cookie'}</span>
+              <span class="stats-item-value">${points > 0 ? points + 'pts' : ''}</span>
             </div>
           `;
         }
@@ -2254,7 +2259,11 @@ function displayLeaderboard() {
       }
 
       if (PERF_CONFIG.enabled) {
+
+          adjustShadowBlurQuality();
+
           perfFrameCount++;
+
           if (perfFrameCount >= PERF_CONFIG.measureIntervalFrames) {
             const now = performance.now();
             const avgFrameTime = (now - perfLastTime) / perfFrameCount;
@@ -2590,6 +2599,7 @@ function displayLeaderboard() {
       compensationStep = 5;
       shotHistory = [];
       lastTargetBrick = null;
+      totalBonusPoints = 0;
 
       clearAllTimersEndLevel();
       createBricks();
@@ -2863,7 +2873,8 @@ function displayLeaderboard() {
       p.arc(x+r,   y+h/2, r,  Math.PI/2, -Math.PI/2);
       ctx.fillStyle = '#fff';
       ctx.shadowColor = '#0ff';
-      ctx.shadowBlur  = 20;
+      setOptimizedShadowBlur(ctx, 20, "raquette");
+//      ctx.shadowBlur  = 20;
       ctx.fill(p);
     }
 
@@ -2884,6 +2895,7 @@ function displayLeaderboard() {
       ballDX = Math.cos(angle)*currentGameSpeed*(Math.random()<0.5?-1:1);
       ballDY = -Math.abs(Math.sin(angle)*currentGameSpeed);
       gameStarted = true; // Flag obligatoire
+//      totalBonusPoints = 0;
     }
 
     function updateHUD() {
@@ -2931,7 +2943,8 @@ function displayLeaderboard() {
     document.addEventListener('keydown',e=>{
 
       if ((e.key==="m" || e.key==="M") && cookies > 0 && !autopilot) {
-          panic = 600; PanicButon=true
+          panic = 1;
+          PanicButon=true;
           --cookies; updateHUD();
           playSound("pi");
       }
@@ -3470,11 +3483,271 @@ function autopilotMove(dt) {
 
     }
 
+
+    // === SYSTÈME D'OPTIMISATION DYNAMIQUE DES SHADOWBLUR ===
+
+// Configuration des profils de performance pour shadowBlur
+const SHADOWBLUR_PROFILES = {
+    "high": {
+        multiplier: 1.0,     // Valeurs originales
+        maxBlur: 40,
+        description: "Qualité maximale"
+    },
+    "medium": {
+        multiplier: 0.7,     // Réduction de 30%
+        maxBlur: 25,
+        description: "Qualité équilibrée"
+    },
+    "low": {
+        multiplier: 0.3,     // Réduction de 60%
+        maxBlur: 10,
+        description: "Performance maximale"
+    },
+    "minimal": {
+        multiplier: 0.1,     // Réduction de 80%
+        maxBlur: 0,
+        description: "Performance critique"
+    }
+};
+
+// Variable globale pour le profil actuel
+let currentShadowBlurProfile = "high";
+
+/**
+ * Fonction principale d'optimisation des shadowBlur selon les performances
+ * À intégrer dans ta boucle de mesure de performances existante
+ */
+
+ /**
+  * Son addictif basé sur le son "impact" avec profondeur progressive
+  * Plus le multiplicateur est élevé, plus le son gagne en profondeur et durée
+  */
+ function playSoundScoreMultiplied(basePoints, multiplier) {
+     if (!audioCtx) return;
+
+     let now = audioCtx.currentTime;
+
+     // ✅ TON SON "IMPACT" COMME BASE PARFAITE (x1 à x2)
+     let baseFreq = 420;
+     let targetFreq = 220;
+     let baseDuration = 0.1;
+     let baseGain = 0.13;
+
+     // ✅ PROGRESSION TRÈS SUBTILE DE LA PROFONDEUR selon le multiplicateur
+     let depthMultiplier = 1 + (multiplier - 1) * 0.3; // +30% de profondeur par niveau
+     let durationExtension = Math.min(2, 1 + (multiplier - 1) * 0.15); // Durée max x2
+
+     // ✅ SON PRINCIPAL (ton impact original étendu)
+     let mainOsc = audioCtx.createOscillator();
+     let mainGain = audioCtx.createGain();
+
+     let extendedDuration = baseDuration * durationExtension;
+     let extendedGain = Math.min(0.18, baseGain * depthMultiplier);
+
+     mainOsc.frequency.setValueAtTime(baseFreq, now);
+     mainOsc.frequency.linearRampToValueAtTime(targetFreq, now + 0.08);
+     mainGain.gain.setValueAtTime(extendedGain, now);
+     mainGain.gain.linearRampToValueAtTime(0, now + extendedDuration - 0.01);
+
+     mainOsc.connect(mainGain).connect(audioCtx.destination);
+     mainOsc.start(now);
+     mainOsc.stop(now + extendedDuration);
+
+     // ✅ AJOUT PROGRESSIF DE PROFONDEUR (seulement pour mult 3+)
+     if (multiplier >= 3) {
+         // Harmonique grave pour la profondeur (très subtile)
+         let depthOsc = audioCtx.createOscillator();
+         let depthGain = audioCtx.createGain();
+
+         depthOsc.type = "sine"; // Plus doux que square
+         depthOsc.frequency.setValueAtTime(baseFreq * 0.5, now + 0.02); // Octave grave
+         depthOsc.frequency.linearRampToValueAtTime(targetFreq * 0.5, now + 0.1);
+
+         // Volume très subtil qui augmente avec le multiplicateur
+         let depthVolume = Math.min(0.08, 0.02 + (multiplier - 3) * 0.01);
+         depthGain.gain.setValueAtTime(depthVolume, now + 0.02);
+         depthGain.gain.linearRampToValueAtTime(0, now + extendedDuration);
+
+         depthOsc.connect(depthGain).connect(audioCtx.destination);
+         depthOsc.start(now + 0.02);
+         depthOsc.stop(now + extendedDuration);
+     }
+
+     // ✅ RÉSONANCE SUPPLÉMENTAIRE (seulement pour mult 5+)
+     if (multiplier >= 5) {
+         // Écho très léger pour plus de richesse
+         setTimeout(() => {
+             let echoOsc = audioCtx.createOscillator();
+             let echoGain = audioCtx.createGain();
+             let echoNow = audioCtx.currentTime;
+
+             echoOsc.type = "triangle";
+             echoOsc.frequency.setValueAtTime(baseFreq * 0.75, echoNow);
+             echoOsc.frequency.linearRampToValueAtTime(targetFreq * 0.75, echoNow + 0.06);
+
+             let echoVolume = Math.min(0.06, 0.015 + (multiplier - 5) * 0.008);
+             echoGain.gain.setValueAtTime(echoVolume, echoNow);
+             echoGain.gain.exponentialRampToValueAtTime(0.001, echoNow + 0.08);
+
+             echoOsc.connect(echoGain).connect(audioCtx.destination);
+             echoOsc.start(echoNow);
+             echoOsc.stop(echoNow + 0.09);
+         }, 60); // Délai de 60ms pour l'effet d'écho
+     }
+
+     // ✅ RICHESSE HARMONIQUE MAXIMALE (seulement pour mult 8+)
+     if (multiplier >= 8) {
+         // Harmonique aiguë très subtile pour la brillance
+         setTimeout(() => {
+             let sparkleOsc = audioCtx.createOscillator();
+             let sparkleGain = audioCtx.createGain();
+             let sparkleNow = audioCtx.currentTime;
+
+             sparkleOsc.type = "sine";
+             sparkleOsc.frequency.setValueAtTime(baseFreq * 1.5, sparkleNow);
+             sparkleOsc.frequency.linearRampToValueAtTime(targetFreq * 1.5, sparkleNow + 0.04);
+
+             sparkleGain.gain.setValueAtTime(0.03, sparkleNow);
+             sparkleGain.gain.exponentialRampToValueAtTime(0.001, sparkleNow + 0.05);
+
+             sparkleOsc.connect(sparkleGain).connect(audioCtx.destination);
+             sparkleOsc.start(sparkleNow);
+             sparkleOsc.stop(sparkleNow + 0.06);
+         }, 30); // Délai de 30ms pour l'effet de brillance
+     }
+ }
+ //Fin de fonction playSoundScoreMultiplied
+  /**
+   * Système de progression addictive par accumulation harmonique
+   * Plus tu enchaînes, plus c'est satisfaisant
+   */
+  let harmonyChain = 0; // Variable globale à ajouter en haut du fichier
+
+  function playAddictiveChain(multiplier) {
+      if (!audioCtx) return;
+
+      // ✅ INCRÉMENT DE LA CHAÎNE HARMONIQUE
+      harmonyChain = Math.min(harmonyChain + 1, 8); // Max 8 notes
+
+      let now = audioCtx.currentTime;
+
+      // ✅ ÉCHELLE PENTATONIQUE (universellement agréable)
+      let scale = [220, 247, 277, 311, 370, 415, 466, 523]; // Pentatonique en La
+
+      // ✅ JOUER LA PROGRESSION ACCUMULÉE
+      for (let i = 0; i < harmonyChain; i++) {
+          let note = scale[i % scale.length];
+          let osc = audioCtx.createOscillator();
+          let gain = audioCtx.createGain();
+
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(note, now + i * 0.05);
+
+          // Volume dégressif pour ne pas saturer
+          let volume = 0.08 * Math.pow(0.8, i);
+          gain.gain.setValueAtTime(volume, now + i * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.15);
+
+          osc.connect(gain).connect(audioCtx.destination);
+          osc.start(now + i * 0.05);
+          osc.stop(now + i * 0.05 + 0.16);
+      }
+
+      // ✅ RESET DE LA CHAÎNE si pas d'activité pendant 3 secondes
+      clearTimeout(harmonyResetTimer);
+      harmonyResetTimer = setTimeout(() => {
+          harmonyChain = 0;
+      }, 3000);
+  }
+
+  let harmonyResetTimer = null; // Variable globale
+  //Fin de fonction playAddictiveChain
+
+function adjustShadowBlurQuality() {
+    // ✅ UTILISE TON SYSTÈME EXISTANT
+    if (!PERF_CONFIG.enabled) return;
+
+    // Mesure toutes les 300 frames comme ton système actuel
+    perfFrameCount++;
+    if (perfFrameCount >= PERF_CONFIG.measureIntervalFrames) {
+        const now = performance.now();
+        const avgFrameTime = (now - perfLastTime) / perfFrameCount;
+        const estimatedFPS = 1000 / avgFrameTime;
+
+        // ✅ NOUVEAU : Détermination du profil shadowBlur selon FPS
+        let newProfile = currentShadowBlurProfile;
+
+        if (estimatedFPS >= 55) {
+            newProfile = "high";     // Performance excellente
+        } else if (estimatedFPS >= 45) {
+            newProfile = "medium";   // Performance correcte
+        } else if (estimatedFPS >= 30) {
+            newProfile = "low";      // Performance limite
+        } else {
+            newProfile = "minimal";  // Performance critique
+        }
+
+        // ✅ Changement de profil si nécessaire
+        if (newProfile !== currentShadowBlurProfile) {
+            currentShadowBlurProfile = newProfile;
+            console.log(`🎨 ShadowBlur optimisé: ${SHADOWBLUR_PROFILES[newProfile].description} (FPS: ${estimatedFPS.toFixed(1)})`);
+        }
+
+        // Reset des compteurs (comme ton système existant)
+        perfFrameCount = 0;
+        perfLastTime = now;
+    }
+}
+
+/**
+ * Fonction utilitaire pour appliquer le shadowBlur optimisé
+ * À utiliser dans tous tes contextes de rendu
+ *
+ * @param {CanvasRenderingContext2D} ctx - Le contexte canvas
+ * @param {number} originalValue - La valeur shadowBlur originale
+ * @param {string} context - Contexte d'utilisation (optionnel, pour debug)
+ */
+function setOptimizedShadowBlur(ctx, originalValue, context = "") {
+    const profile = SHADOWBLUR_PROFILES[currentShadowBlurProfile];
+
+    // Calcul de la valeur optimisée
+    let optimizedValue = Math.round(originalValue * profile.multiplier);
+
+    // Application de la limite maximale
+    optimizedValue = Math.min(optimizedValue, profile.maxBlur);
+
+    // Valeur minimale de sécurité
+    optimizedValue = Math.max(optimizedValue, 0);
+
+    ctx.shadowBlur = optimizedValue;
+
+    // ✅ Debug optionnel
+    if (Debug && context) {
+        console.log(`ShadowBlur ${context}: ${originalValue} → ${optimizedValue} (profil: ${currentShadowBlurProfile})`);
+    }
+}
+
+/**
+ * Fonction de forçage manuel du profil (pour tests)
+ *
+ * @param {string} profileName - Nom du profil à forcer
+ */
+function forceShadowBlurProfile(profileName) {
+    if (SHADOWBLUR_PROFILES[profileName]) {
+        currentShadowBlurProfile = profileName;
+        console.log(`🔧 Profil shadowBlur forcé: ${SHADOWBLUR_PROFILES[profileName].description}`);
+    } else {
+        console.warn(`❌ Profil shadowBlur inconnu: ${profileName}`);
+    }
+}
+//Fin de fonction forceShadowBlurProfile
+
+
     // === LOGIQUE DE MISE À JOUR DU JEU ===
 
     function update(dt, elapsed_ms) {
 
-      // ✅ MISE À JOUR CONDITIONNELLE DE LA GALAXIE
+      //✅ MISE À JOUR CONDITIONNELLE DE LA GALAXIE
       if (galaxyEnabled) {
           updateGalaxy(dt);
       }
@@ -3488,7 +3761,7 @@ function autopilotMove(dt) {
           // Vérifier qu'il n'y a pas déjà un powerup niveau actif
           let powerupNiveauExiste = bonuses.some(bonus => bonus.type === "niveau" && !bonus.caught);
 
-          if (!powerupNiveauExiste) {
+            if (!powerupNiveauExiste && autopilot === true) {
               // Créer le powerup de changement de niveau
               let powerupNiveau = {
                   x: Math.random() * (CANVAS_W - 120) + 60, // Position aléatoire
@@ -3575,9 +3848,8 @@ function autopilotMove(dt) {
           megaspeed = 1;
       }
 
-      // GESTION DU MODE PANIC (CORRIGÉE)
+//      // GESTION DU MODE PANIC (CORRIGÉE)
       if (panic > 0) {
-          panic--;
           if (!autopilot) {
               autopilot = true;
               leftDown = rightDown = false;
@@ -3863,11 +4135,15 @@ function autopilotMove(dt) {
           updateStatsPanel();
 
           // ✅ NOUVEAU : Son de pièces pour les hauts scores
-          if (brickPoints >= 200) {  // 200+ points (multiplicateur x2 minimum)
-            playSound("coins");
+          // ✅ SON ADAPTATIF SELON LE MULTIPLICATEUR
+          // ✅ SON ADAPTATIF BASÉ SUR TON IMPACT PARFAIT
+          if (mult > 1) {
+              playSoundScoreMultiplied(100, mult);
           } else {
-            playSound("impact");  // Son normal pour les briques de base
+              playSound("impact"); // Ton son original parfait pour x1
           }
+
+
 
           showScoreBonusAnim(b.x + b.w / 2, b.y + b.h / 2, brickPoints);
         }
@@ -4013,6 +4289,14 @@ function autopilotMove(dt) {
                 cookies++; // On ajoute un cookie
                 playSound("life2");
           }
+          if (b.type === "cookiex2") {
+                cookies++; // On ajoute un cookie
+                TmpCook = cookies * 2
+                cookies--; // On ajoute un cookie
+                cookies = TmpCook ; // On ajoute un cookie
+                playSound("life2");
+                playSound("life2");
+          }
           if (b.type === "vie") {
                 vies++; // On ajoute une vie
                 playSound("life2");
@@ -4055,6 +4339,7 @@ function autopilotMove(dt) {
               // Sinon, on gagne les points normalement (multiplicateur inclus).
               playSound("bonus");
               let finalPoints = b.points * mult;
+              totalBonusPoints += b.points * mult;
 
               // ✅ CORRECTION : Ajouter les points immédiatement
               score += finalPoints;
@@ -4103,7 +4388,10 @@ function autopilotMove(dt) {
         ctx.font = a.size + "px "+EMOJI_FONT;
         ctx.globalAlpha = 0.9 - t*0.5;
         ctx.shadowColor = a.color;
-        ctx.shadowBlur = 10 + 10*Math.abs(Math.sin(t*6));
+
+//        ctx.shadowBlur = 10 + 10*Math.abs(Math.sin(t*6));
+        setOptimizedShadowBlur(ctx, 10 + 10*Math.abs(Math.sin(t*6)), "boss-flash");
+
         ctx.fillStyle = a.color;
         ctx.fillText(a.icon, 0, 0);
         ctx.shadowBlur=0;
@@ -4115,7 +4403,9 @@ function autopilotMove(dt) {
             ctx.arc(a.targetX + Math.cos(k*Math.PI/4)*18, a.targetY + Math.sin(k*Math.PI/4)*18, 3, 0, 2*Math.PI);
             ctx.fillStyle = COLORS[k%COLORS.length];
             ctx.shadowColor = COLORS[k%COLORS.length];
-            ctx.shadowBlur = 8;
+
+            setOptimizedShadowBlur(ctx, 8, "boss-flash");
+//            ctx.shadowBlur = 8;
             ctx.fill();
             ctx.restore();
           }
@@ -4129,7 +4419,8 @@ function autopilotMove(dt) {
             ctx.strokeStyle = k%2===0 ? "#ff0" : "#fff";
             ctx.lineWidth = 1.5+k;
             ctx.shadowColor = k%2===0 ? "#ff0" : "#fff";
-            ctx.shadowBlur = 8;
+//            ctx.shadowBlur = 8;
+            setOptimizedShadowBlur(ctx, 8, "boss-flash");
             ctx.stroke();
             ctx.restore();
           }
@@ -4268,6 +4559,7 @@ function autopilotMove(dt) {
               clearAllTimersEndLevel();
               changeGalaxyConfiguration();
               levelsPassed++;
+              panic = 0;
               vies += 1;
 
               // ✅ 8. GESTION DES OFFSETS (ORDRE CORRIGÉ)
@@ -4325,24 +4617,6 @@ function autopilotMove(dt) {
           spawnBonus();
       }
     }
-
-
-    // ✅ SYSTÈME D'INTERPOLATION POUR UNE FLUIDITÉ PARFAITE
-    function smoothMovement(object, targetX, targetY, smoothingFactor = 0.15) {
-        if (!object.smooth) {
-            object.smooth = { lastX: object.x, lastY: object.y };
-        }
-
-        // Interpolation linéaire vers la cible
-        object.x = object.smooth.lastX + (targetX - object.smooth.lastX) * smoothingFactor;
-        object.y = object.smooth.lastY + (targetY - object.smooth.lastY) * smoothingFactor;
-
-        // Mise à jour des positions précédentes
-        object.smooth.lastX = object.x;
-        object.smooth.lastY = object.y;
-    }
-
-
 
     // --- Fonctions utilitaires pour powerups, bonus, effets, etc. ---
 
@@ -4473,6 +4747,10 @@ function autopilotMove(dt) {
         let val = parseInt(p.type.replace("mult", ""));
         mult = Math.min(mult + val, multMax);
         multTimer += 30; // Si géré par un interval ailleurs, assurez-vous de le clearer si needed
+      }
+
+      if (mult >= 15) {
+        playSoundEuphoria();
       }
 
       if (p.type === "cookie") { // Correction : b.type -> p.type (assuming typo)
@@ -4621,7 +4899,8 @@ function autopilotMove(dt) {
           ctx.arc(0, 0, size, 0, 2*Math.PI);
           ctx.fillStyle = color;
           ctx.shadowColor = color;
-          ctx.shadowBlur = 40;
+          setOptimizedShadowBlur(ctx, 40, "bonus");
+//          ctx.shadowBlur = 40;
           ctx.fill();
           ctx.restore();
         }
@@ -4887,9 +5166,9 @@ function autopilotMove(dt) {
         ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
         // ✅ RENDU CONDITIONNEL DE LA GALAXIE
-        if (galaxyEnabled) {
-            renderGalaxy(ctx);
-        }
+        //if (galaxyEnabled) {
+        //    renderGalaxy(ctx);
+        //}
 
         // ✅ RENDU OPTIMISÉ DES BRIQUES (SEUL SYSTÈME ACTIF)
         renderBricksOptimized();
@@ -4936,7 +5215,8 @@ function autopilotMove(dt) {
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.shadowColor = b.color;
-                ctx.shadowBlur = 20;
+//                ctx.shadowBlur = 20;
+                setOptimizedShadowBlur(ctx, 20, "bonus");
                 ctx.fillStyle = b.color;
                 ctx.fillText(b.emoji, b.x, b.y);
                 ctx.shadowBlur = 0;
@@ -4975,24 +5255,29 @@ function autopilotMove(dt) {
 
             if (boss.hitFlash > 0) {
                 ctx.shadowColor = "#f00";
-                ctx.shadowBlur = 35;
+                setOptimizedShadowBlur(ctx, 35, "boss-flash");
+//                ctx.shadowBlur = 35;
                 ctx.fillStyle = "#fff";
                 boss.hitFlash--;
             } else if (bossInvulnerable) {
                 ctx.shadowColor = "#0ff";
-                ctx.shadowBlur = 30;
+//                ctx.shadowBlur = 30;
+                setOptimizedShadowBlur(ctx, 30, "boss-flash");
                 ctx.fillStyle = "#0ff";
             } else if (healthRatio <= 0.3) {
                 ctx.shadowColor = "#f00";
-                ctx.shadowBlur = 25;
+                setOptimizedShadowBlur(ctx, 25, "boss-flash");
+//                ctx.shadowBlur = 25;
                 ctx.fillStyle = "#f44";
             } else if (healthRatio <= 0.6) {
                 ctx.shadowColor = "#f80";
-                ctx.shadowBlur = 20;
+                setOptimizedShadowBlur(ctx, 35, "boss-flash");
+//                ctx.shadowBlur = 20;
                 ctx.fillStyle = "#fa0";
             } else {
                 ctx.shadowColor = "#ff0";
-                ctx.shadowBlur = 18;
+                setOptimizedShadowBlur(ctx, 18, "boss-flash");
+//                ctx.shadowBlur = 18;
                 ctx.fillStyle = "#fff";
             }
 
@@ -5111,7 +5396,8 @@ function autopilotMove(dt) {
         // === RENDU DE LA RAQUETTE ===
         ctx.save();
         ctx.shadowColor = "#0ff";
-        ctx.shadowBlur = 10;
+        setOptimizedShadowBlur(ctx, 10, "raquette"); // ✅ Valeur
+//        ctx.shadowBlur = 10;
         ctx.fillStyle = "#fff";
         ctx.fillRect(paddleX, paddleY, paddleW, paddleH);
         ctx.restore();
@@ -5119,7 +5405,8 @@ function autopilotMove(dt) {
         // === RENDU DE LA BALLE ===
         ctx.save();
         ctx.shadowColor = "#f0f";
-        ctx.shadowBlur = 18;
+        setOptimizedShadowBlur(ctx, 18, "raquette"); // ✅ Valeur
+//        ctx.shadowBlur = 18;
         ctx.fillStyle = "#ff0";
         ctx.beginPath();
         ctx.arc(ball.x, ball.y, ball.r, 0, 2 * Math.PI);
