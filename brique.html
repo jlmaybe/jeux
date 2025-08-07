@@ -2969,7 +2969,7 @@ function displayLeaderboard() {
       }
 
       function clearAllTimersEndLevel() {
-          console.log("🧹 Nettoyage ULTRA-COMPLET des timers de fin de niveau");
+          console.log("🧹 Nettoyage ultra-complet des timers de fin de niveau");
 
           // === NETTOYAGE DES TIMEOUTS CLASSIQUES ===
           const classicTimeouts = [
@@ -2988,33 +2988,45 @@ function displayLeaderboard() {
           // === NETTOYAGE COMPLET DU TIMEOUT MANAGER ===
           timeoutManager.clearAll();
 
-          // === NETTOYAGE DES TIMEOUTS BOSS (NOUVEAU) ===
+          // ✅ NOUVEAU : NETTOYAGE SPÉCIFIQUE BOSS
           for (let i = 0; i < 100; i++) {
               timeoutManager.clear(`bossVictory${i}`);
+              timeoutManager.clear(`bossVictoryClean${i}`);
               timeoutManager.clear(`bossAttack${i}`);
-              timeoutManager.clear(`impact_${i}`);
+              timeoutManager.clear(`bossProjectile${i}`);
+              timeoutManager.clear(`bossMovement${i}`);
           }
 
-          // === NETTOYAGE DES TIMEOUTS DE SONS PROGRESSIFS ===
-          for (let i = 0; i < 50; i++) {
-              timeoutManager.clear(`sound_${i}`);
-              timeoutManager.clear(`powerup_delay_${i}`);
-              timeoutManager.clear(`achievement_delay_${i}`);
+          // ✅ NETTOYAGE DES TIMEOUTS SPÉCIAUX BOSS
+          timeoutManager.clear('bossInvulnerable');
+          timeoutManager.clear('bossPhaseTransition');
+          timeoutManager.clear('bossSpecialAttack');
+
+          // ✅ NETTOYAGE IMMÉDIAT DES PROJECTILES BOSS
+          if (typeof powerups !== 'undefined') {
+              powerups = powerups.filter(p => p && p.type !== "boss_projectile");
+          }
+
+          // ✅ RESET COMPLET DES VARIABLES BOSS
+          if (typeof isBossLevel !== 'undefined' && isBossLevel) {
+              bossInvulnerable = false;
+              bossAttackTimer = 0;
+              bossMovementTimer = 0;
+              if (boss) {
+                  boss.hitFlash = 0;
+              }
           }
 
           // === REMISE À ZÉRO DES TIMERS GLOBAUX ===
           multTimer = 0;
           decrementTimer = 0;
           paddleTimer = 0;
-          bossAttackTimer = 0;
-          bossMovementTimer = 0;
           levelTransitionTimer = 0;
 
           // === RESET DES FLAGS DE TIMER ===
           paddleTimerActive = false;
           decrementActive = false;
           decrementEffect = false;
-          bossInvulnerable = false;
           levelTransition = false;
 
           // === RESET DES EFFETS VISUELS ===
@@ -3027,8 +3039,10 @@ function displayLeaderboard() {
           paddleSizeEffect = null;
           paddleVelocity = 0;
 
-          console.log("✅ Nettoyage ultra-complet terminé");
+          console.log("✅ Nettoyage ultra-complet terminé (boss inclus)");
       }
+      //Fin de fonction clearAllTimersEndLevel
+
       //Fin de fonction clearAllTimersEndLevel
 
 
@@ -4701,8 +4715,26 @@ function forceShadowBlurProfile(profileName) {
 
               // ✅ VÉRIFICATION DE DÉFAITE DU BOSS
               if (bossHP <= 0) {
-                  boss.alive = false;
-                  bossDefeated = true;
+
+                // ✅ 1. ARRÊT IMMÉDIAT DE TOUS LES TIMEOUTS BOSS
+                    for (let i = 0; i < 100; i++) {
+                        timeoutManager.clear(`bossVictory${i}`);
+                        timeoutManager.clear(`bossAttack${i}`);
+                        timeoutManager.clear(`bossProjectile${i}`);
+                        timeoutManager.clear('bossInvulnerable');
+                    }
+
+                    // ✅ 2. NETTOYAGE IMMÉDIAT DES PROJECTILES BOSS
+                    powerups = powerups.filter(p => p.type !== "boss_projectile");
+                    console.log("🧹 Projectiles de boss supprimés");
+
+                    // ✅ 3. RESET COMPLET DES VARIABLES BOSS
+                    boss.alive = false;
+                    bossDefeated = true;
+                    bossInvulnerable = false;
+                    bossAttackTimer = 0;
+                    bossMovementTimer = 0;
+
                   playSound("boss_death");
 
                   // Récompenses
