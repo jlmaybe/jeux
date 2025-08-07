@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>p ELYSIUM</title>
+  <title>BRICK BLITZ ELYSIUM</title>
   <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
   <style>
 
@@ -169,41 +169,40 @@
     }
 
     /* === STATSPANEL COUPLÉ AU CANVAS === */
+    /* === STATSPANEL COUPLÉ AU CANVAS === */
     #statsPanel {
-      /* ✅ NOUVEAU : Plus de position fixed - maintenant dans le flux */
-      position: static !important;
+        /* ✅ CORRECTION MAJEURE : Position relative pour permettre le positionnement absolu du copyright */
+        position: relative !important;
 
-      /* ✅ DIMENSIONS IDENTIQUES AU CANVAS */
-      width: 250px !important;
-      height: 900px !important; /* ✅ EXACTEMENT comme le canvas */
-      max-height: 900px !important;
-      min-height: 900px !important;
+        /* ✅ DIMENSIONS IDENTIQUES AU CANVAS */
+        width: 250px !important;
+        height: 900px !important;
+        max-height: 900px !important;
+        min-height: 900px !important;
 
-      /* ✅ STYLES VISUELS CONSERVÉS */
-      background: #111;
-      box-shadow: 0 0 40px #0ff, 0 0 80px #f0f;
-      border-radius: 12px;
-      z-index: 5;
-      overflow-y: auto;
-      overflow-x: hidden;
-      box-sizing: border-box !important;
+        /* ✅ STYLES VISUELS CONSERVÉS */
+        background: #111;
+        box-shadow: 0 0 40px #0ff, 0 0 80px #f0f;
+        border-radius: 12px;
+        z-index: 5;
+        overflow-y: auto;
+        overflow-x: hidden;
+        box-sizing: border-box !important;
 
-      /* ✅ FLEX : Pas de compression ni d'expansion */
-      flex-shrink: 0;
-      flex-grow: 0;
-
-      /* ✅ SUPPRIMÉ : left, top, transform - maintenant géré par flex */
+        /* ✅ FLEX : Pas de compression ni d'expansion */
+        flex-shrink: 0;
+        flex-grow: 0;
     }
 
     #bonusPanel {
       font-family: 'Press Start 2P', monospace;
       position: fixed;
-      top: 50%;
+      top: 52%;
       left: 50%;
       transform: translate(-50%, -50%);
       /* ✅ DIMENSIONS FIXES DE RÉFÉRENCE (comme le game-main-container) */
-      width: 600px;
-      height: 800px;
+      width: 650px;
+      height: 850px;
 
       display: flex;
       align-items: center;
@@ -677,6 +676,39 @@
       filter: drop-shadow(0 0 4px #0ff);
     }
 
+    /* ✅ NOUVEAU : Styles copyright corrigés pour le bas du panneau stats */
+    .copyright-line {
+        position: absolute !important; /* ✅ FORCE le positionnement absolu */
+        bottom: 5px !important;        /* ✅ TOUT EN BAS du panneau */
+        left: 0;
+        right: 0;
+
+        font-family: 'Courier New', monospace;
+        font-size: 8px;                /* ✅ Taille réduite comme demandé */
+        color: #555;
+        text-shadow: 1px 1px 0px rgba(0,0,0,0.6);
+        background: rgba(0,0,0,0.1);
+        border-top: 1px solid rgba(255,255,255,0.05);
+
+        text-align: center;
+        line-height: 1.2;
+        padding: 3px 0;
+        margin: 0;
+        z-index: 100;                  /* ✅ Au-dessus de tout */
+        white-space: nowrap;
+    }
+
+    .copyright-line:hover {
+        color: #777;
+        background: rgba(0,0,0,0.2);
+        transition: all 0.2s ease;
+    }
+
+    /* ✅ S'assurer que le panneau stats ait assez d'espace */
+    .stats-panel-content {
+        padding-bottom: 25px; /* ✅ Espace pour le copyright */
+    }
+
     /* Indicateur de danger pour les skulls */
     .danger-indicator {
       color: #f44 !important;
@@ -814,10 +846,12 @@
         <li><span class="bonus-emoji">🛸 🍉</span> <b>2000 pts Super bonus</li>
         <li><span class="bonus-emoji">🍑</span> <b>5000 pts Méga bonus</li>
         <li><span class="bonus-emoji">💝</span> <b>8000 pts Bonus de score</li>
+        <li><span class="bonus-emoji">🇫🇷</span> <b>10000 pts Méga bonus</li>
         <li><span class="bonus-emoji">💊</span> <b>15000 pts Méga bonus</li>
         <h2>POWER-UPS</h2>
-        <li><span class="bonus-emoji">🏳️</span> <b>Raquette longue</b> <span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b> <span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
+        <li><span class="bonus-emoji">️↔️</span> <b>Raquette longue</b> <span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b> <span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
         <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ 8️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
+        <li><span class="bonus-emoji">🍭</span> <b>MultiTimer +60s Multiplicateur, MaxMultiplier dévérouillé</li>
         <li><span class="bonus-emoji">🍪</span> <b>Cookies  Bouton autopilot</li>
         <li><span class="bonus-emoji">🇵🇸</span> <b>Cookies  x2</li>
         <li><span class="bonus-emoji">🌈</span> <b>Vie      Une vie</li>
@@ -825,11 +859,9 @@
         <li><span class="bonus-emoji">☠️</span>  <b>Malus    Score en décrémentation pendant 30s</li>
       </ul>
       <h2>ACTIONS</h2>
-      <li><span class="bonus-emoji">M</span>Bouton panique  <span class="bonus-emoji">P</span>Pause <span class="bonus-emoji">S</span>Son Marche/Arrêt <span class="bonus-emoji">z</span>Variables</li>
+      <li><span class="bonus-emoji">M</span>Bouton panique  <span class="bonus-emoji">P</span>Pause <span class="bonus-emoji">S</span>Son Marche/Arrêt</li>
       <ul>
       <button id="closeBonusPanel">OK</button>
-      <li><span></span></li>
-      <h3>(c) jean-luc faisans 2025     v1.01</h3>
     </div>
   </div>
 
@@ -895,6 +927,11 @@
 
     // === CONSTANTES GLOBALES ===
 
+    // ✅ NOUVEAU : Variable de version du jeu
+    const GAME_VERSION = "🇫🇷 1.20";
+    const COPYRIGHT_YEAR = "2025";
+    const AUTHOR_NAME = "🇫🇷 Jean-Luc Faisans";
+
     const COLORS = ["#0ff", "#f0f", "#ff0", "#0f0", "#fff"];
     const BRICK_GRADIENTS = [
       ["#0ff", "#0cf"],
@@ -903,7 +940,8 @@
       ["#0f0", "#0c8"],
       ["#fff", "#aaa"]
     ];
-    const SPECIAL_ICONS = ["🏳️","‍⚧️","🏴‍☠️","1️⃣","2️⃣","4️⃣","8️⃣","❤️‍🔥"];
+    const SPECIAL_ICONS = ["↔️️","🍭","🏴‍☠️","1️⃣","2️⃣","4️⃣","8️⃣","❤️‍🔥"];
+
     const BONUS_ICONS = [
       {emoji:"🍒", points:500, color:"#f06"},
       {emoji:"🍓", points:1000, color:"#f44"},
@@ -912,6 +950,7 @@
       {emoji:"🌸", points:500, color:"#f9f"},
       {emoji:"💝", points:8000, color:"#f44"},
       {emoji:"🍉", points:2000, color:"#0ff"},
+      {emoji:"🇫🇷", points:10000, color:"#0ff"},
       {emoji:"💊", points:15000, color:"#fa8"},
       {emoji:"🐲", points:15000, color:"#f9f"},
       {emoji:"🍇", points:2000, color:"#94f"},
@@ -949,9 +988,8 @@
     let paddleW = 150, paddleH = 18, paddleY = CANVAS_H-60;
     let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 18;
     let isMouseCaptured = false;
-    let perfFrameCount = 0;
     let perfLastTime = performance.now();
-
+    let MOVE_SPEED = 1000;
     let ballSpeed0 = 12; // IMPORTANT : avant son utilisation
     let LancementAutoPilote = 5;
     let brickRows = 8; //et autour de la ligne 700
@@ -997,7 +1035,7 @@
     let dernierUtilisateur = null;
 
     // === VARIABLE DE SENSIBILITÉ SOURIS ===
-    let mouseSensitivity = 1.1; // ✅ NOUVEAU : Facteur de démultiplication (1.8x plus sensible)
+    let mouseSensitivity = 1.50; // ✅ NOUVEAU : Facteur de démultiplication (1.8x plus sensible)
     let lastMouseX = null; // ✅ NOUVEAU : Position précédente de la souris pour calcul du delta
     //Fin de variables sensibilité souris
 
@@ -1005,11 +1043,11 @@
 let galaxyParticles = [];
 let galaxyTime = 0;
 let galaxyCenter = { x: CANVAS_W/2, y: CANVAS_H/2 };
-let galaxyRadius = 300;
+let galaxyRadius = 400;
 let galaxyParticleCount = 150; // Nombre de pixels lumineux
-let galaxyColorScheme = 0; // Schéma de couleur actuel (0-4)
-let galaxySpacing = 1.0; // Multiplicateur d'espacement (0.7-1.5)
-let galaxyRotationMode = 0; // Mode de rotation (0-2)
+let galaxyColorScheme = 2; // Schéma de couleur actuel (0-4)
+let galaxySpacing = 1.5; // Multiplicateur d'espacement (0.7-1.5)
+let galaxyRotationMode = 2; // Mode de rotation (0-2)
 
 // ✅ OPTIMISATION : Cache trigonométrique
 let trigCache = {
@@ -1059,6 +1097,38 @@ let gyroControls = {
     deadZone: 3
 };
 
+
+// === SYSTÈME D'APPRENTISSAGE AUTOPILOTE ULTRA-EFFICACE ===
+let autopilotAI = {
+    // Historique des tirs par zone (9 zones = 3x3)
+    zoneStats: new Array(9).fill().map(() => ({
+        attempts: 0,
+        hits: 0,
+        misses: 0,
+        avgError: 0,
+        correction: 0,
+        confidence: 0.5
+    })),
+
+    // Tir en cours
+    currentShot: null,
+
+    // Paramètres d'apprentissage
+    learningRate: 0.25,
+
+    // Historique récent (max 20 tirs)
+    recentShots: [],
+
+    // Vitesses de mouvement (petites saccades pour précision)
+    speeds: {
+        emergency: 1200,    // ← À REMPLACER
+        urgent: 900,       // ← À REMPLACER
+        precise: 500,       // ← À REMPLACER
+        collect: 400        // ← À REMPLACER
+    }
+};
+
+
 let frameCount = 0;
 let lastPerformanceCheck = 0;
 
@@ -1098,10 +1168,15 @@ let levelTransitionTimer = 0;
 let levelTransitionMessage = "";
 let levelTransitionDelay = 5000; // 4 secondes en millisecondes
 
+// === SYSTÈME DE CAPTURE DE SOURIS POUR LE CANVAS ===
+let isPointerLocked = false;
+let virtualMouseX = CANVAS_W / 2; // Position virtuelle de la souris
+
 
 let bricksHit = 0;
 let powerupsCaptured = {
   "long": 0,
+  "temps":0,
   "short": 0,
   "mult1": 0,
   "mult2": 0,
@@ -1119,6 +1194,7 @@ let bonusesCaptured = {
   "🌸": 0,   // +500 pts
   "💝": 0,   // +8000 pts
   "🍉": 0,   // +2000 pts
+  "🇫🇷": 0,   // +10000 pts
   "💊": 0,   // +15000 pts
   "🐲": 0,   // +15000 pts
   "🍇": 0,   // +2000 pts
@@ -1146,9 +1222,12 @@ let lastStatsState = {
     skulls: 0
 };
 
-
 // Variables manquantes pour le système de qualité
 let particleCountMax = 80; // Pour ajuster la qualité
+
+let perfFrameCount = 0;
+let harmonyResetTimer = null; // Variable globale pour la chaîne harmonique
+
 
 
     // === GESTIONNAIRE CENTRALISÉ DES TIMEOUTS ===
@@ -1172,12 +1251,22 @@ let particleCountMax = 80; // Pour ajuster la qualité
         },
 
         clearAll() {
+            console.log(`🧹 Nettoyage de ${this.timeouts.size} timeouts gérés`);
             for (let id of this.timeouts.values()) {
                 clearTimeout(id);
             }
             this.timeouts.clear();
+        },
+
+        // ✅ NOUVELLE MÉTHODE : Diagnostic des timeouts actifs
+        diagnose() {
+            console.log(`📊 Timeouts actifs : ${this.timeouts.size}`);
+            for (let [key, id] of this.timeouts.entries()) {
+                console.log(`  - ${key} : ID ${id}`);
+            }
         }
     };
+    //Fin de fonction timeoutManager
 
     const countdownRange = 10; // Le compte à rebours commence 5 briques AVANT l'activation.
     const TimerBonus = 15
@@ -1214,6 +1303,471 @@ let particleCountMax = 80; // Pour ajuster la qualité
     // === NOUVELLE VARIABLE GLOBALE (à ajouter en haut du fichier) ===
     let galaxyEnabled = true;
 
+    // ✅ CORRECTION : Initialisation copyright dans le panneau stats uniquement
+    function initializeCopyright() {
+        // ✅ CIBLER SPÉCIFIQUEMENT le panneau de statistiques
+        const statsPanel = document.querySelector('.stats-panel-content');
+
+        if (statsPanel) {
+            // Vérifier si le copyright existe déjà
+            let existingCopyright = statsPanel.querySelector('.copyright-line');
+
+            if (!existingCopyright) {
+                // ✅ CRÉER le copyright avec taille réduite
+                const copyrightDiv = document.createElement('div');
+                copyrightDiv.className = 'copyright-line';
+                copyrightDiv.innerHTML = `(c) ${AUTHOR_NAME} ${COPYRIGHT_YEAR} v${GAME_VERSION}`;
+
+                // ✅ L'ajouter à la fin du panneau de stats (pas ailleurs)
+                statsPanel.appendChild(copyrightDiv);
+
+                console.log(`✅ Copyright intégré au panneau stats : (c) ${AUTHOR_NAME} ${COPYRIGHT_YEAR} v${GAME_VERSION}`);
+            }
+        } else {
+            console.warn("⚠️ Panneau de statistiques non trouvé pour le copyright");
+        }
+    }
+    //Fin de fonction initializeCopyright
+
+    // Fonction pour obtenir la zone (0-8) d'une position
+    function getAIZone(x, y) {
+        let zoneX = Math.floor((x / CANVAS_W) * 3);
+        let zoneY = Math.floor((y / CANVAS_H) * 3);
+        return Math.min(8, zoneY * 3 + zoneX);
+    }
+    //Fin de fonction getAIZone
+
+    function calculatePerfectBallIntercept() {
+        if (ballDY <= 0) return null;
+
+        let timeToImpact = (paddleY - ball.y) / ballDY;
+        if (timeToImpact <= 0) return null;
+
+        let interceptX = ball.x + ballDX * timeToImpact;
+
+        // Gestion des rebonds (max 5 pour performance)
+        for (let i = 0; i < 5; i++) {
+            if (interceptX < 0) {
+                interceptX = Math.abs(interceptX);
+            } else if (interceptX > CANVAS_W) {
+                interceptX = CANVAS_W - (interceptX - CANVAS_W);
+            } else {
+                break;
+            }
+        }
+
+        return {
+            x: Math.max(paddleW/2, Math.min(CANVAS_W - paddleW/2, interceptX)),
+            timeToImpact: timeToImpact
+        };
+    }
+    //Fin de fonction calculatePerfectBallIntercept
+
+    function findSkullThreat() {
+        if (!skulls || skulls.length === 0) return null;
+
+        let maxDanger = 0;
+        let bestEscape = null;
+
+        skulls.forEach(skull => {
+            if (skull && skull.y < paddleY && skull.y > CANVAS_H * 0.3) {
+                let timeToImpact = (paddleY - skull.y) / (skull.speed || 7);
+                let dangerZone = paddleW + 20; // ✅ RÉDUIT : +20px au lieu de +40px
+                let distance = Math.abs(skull.x - (paddleX + paddleW/2));
+
+                if (distance < dangerZone && timeToImpact > 0) {
+                    let danger = dangerZone / (timeToImpact * distance * 0.01);
+
+                    if (danger > maxDanger) {
+                        maxDanger = danger;
+
+                        // Calcul d'échappatoire optimisé
+                        let leftSafe = skull.x - dangerZone;
+                        let rightSafe = skull.x + dangerZone;
+
+                        let currentCenter = paddleX + paddleW/2;
+                        let safeX = null;
+
+                        // Choisir le côté le plus proche ET accessible
+                        if (leftSafe >= paddleW/2 && rightSafe <= CANVAS_W - paddleW/2) {
+                            safeX = Math.abs(leftSafe - currentCenter) < Math.abs(rightSafe - currentCenter)
+                                ? leftSafe : rightSafe;
+                        } else if (leftSafe >= paddleW/2) {
+                            safeX = leftSafe;
+                        } else if (rightSafe <= CANVAS_W - paddleW/2) {
+                            safeX = rightSafe;
+                        }
+
+                        if (safeX) {
+                            bestEscape = { safeX: safeX, danger: danger };
+                        }
+                    }
+                }
+            }
+        });
+
+        return bestEscape;
+    }
+    //Fin de fonction findSkullThreat
+
+    function findAdaptiveBrickTarget() {
+        let aliveBricks = bricks.filter(b => b && b.alive);
+        if (aliveBricks.length === 0) return null;
+
+        let bestTarget = null;
+        let bestScore = -1;
+
+        aliveBricks.forEach(brick => {
+            let brickCenterX = brick.x + brick.w/2;
+            let brickCenterY = brick.y + brick.h/2;
+            let deltaX = brickCenterX - ball.x;
+            let deltaY = brickCenterY - ball.y;
+
+            if (deltaY >= 0) return; // Brique derrière
+
+            // ✅ NOUVEAU : Calcul avec angle de correction de 5°
+            let baseAngle = Math.atan2(deltaX, -deltaY);
+
+            // Ajouter 5° (converti en radians) avec variation selon la position
+            let correctionAngle = 5 * Math.PI / 180; // 5° en radians
+
+            // ✅ Varier l'angle selon la position horizontale de la brique
+            if (brickCenterX < CANVAS_W * 0.3) {
+                // Côté gauche : angle légèrement vers la droite
+                correctionAngle *= 1.2;
+            } else if (brickCenterX > CANVAS_W * 0.7) {
+                // Côté droit : angle légèrement vers la gauche
+                correctionAngle *= -1.2;
+            }
+
+            let adjustedAngle = baseAngle + correctionAngle;
+            let requiredPaddleX = ball.x + Math.tan(adjustedAngle) * (ball.y - paddleY);
+
+            if (requiredPaddleX < paddleW/2 || requiredPaddleX > CANVAS_W - paddleW/2) {
+                // ✅ NOUVEAU : Tentative avec angle opposé si impossible
+                adjustedAngle = baseAngle - correctionAngle;
+                requiredPaddleX = ball.x + Math.tan(adjustedAngle) * (ball.y - paddleY);
+
+                if (requiredPaddleX < paddleW/2 || requiredPaddleX > CANVAS_W - paddleW/2) {
+                    return; // Vraiment impossible
+                }
+            }
+
+            // Score de base (inchangé)
+            let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            let moveDistance = Math.abs(requiredPaddleX - (paddleX + paddleW/2));
+            let score = 1000 - distance * 0.8 - moveDistance * 1.2;
+
+            // Bonus spéciaux (inchangés)
+            if (aliveBricks.length === 1) score += 5000;
+            if (brick.special && !brick.special.includes("☠️")) score += 300;
+            if (brick.y > wallOffset + brickH * 4) score += 200;
+
+            // 🧠 APPRENTISSAGE avec correction d'angle
+            let zone = getAIZone(brickCenterX, brickCenterY);
+            let zoneData = autopilotAI.zoneStats[zone];
+
+            if (zoneData.attempts > 0) {
+                requiredPaddleX += zoneData.correction;
+                let confidence = zoneData.hits / zoneData.attempts;
+                score *= (0.3 + confidence * 0.7);
+
+                if (confidence > 0.7) {
+                    score += 400;
+                }
+            }
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestTarget = {
+                    brick: brick,
+                    paddleX: requiredPaddleX,
+                    zone: zone,
+                    confidence: zoneData.attempts > 0 ? zoneData.hits / zoneData.attempts : 0.5,
+                    usedAngleCorrection: correctionAngle // ✅ NOUVEAU : Mémoriser l'angle utilisé
+                };
+            }
+        });
+
+        return bestTarget;
+    }
+    //Fin de fonction findAdaptiveBrickTarget
+    //Fin de fonction findAdaptiveBrickTarget
+
+    function findSecurePowerup() {
+        // ✅ NOUVEAU : Sécurité moins stricte pour collecter plus
+        if (ballDY > 0 && ball.y > CANVAS_H * 0.75) return null; // Seuil abaissé de 0.6 à 0.75
+
+        let allItems = [...(powerups || []), ...(bonuses || [])];
+        let bestItem = null;
+        let bestScore = -1;
+
+        allItems.forEach(item => {
+            if (!item || item.caught || item.type === "skull") return;
+
+            // ✅ NOUVEAU : Zone de collecte élargie
+            if (item.y > 50 && item.y < paddleY + 150) { // Zone élargie de 80 à 150
+                let timeToCollect = (paddleY - item.y) / (item.speed || 6);
+                let distance = Math.abs(item.x - (paddleX + paddleW/2));
+
+                // ✅ NOUVEAU : Prédiction de position future de l'item
+                let futureItemX = item.x + (item.dx || 0) * timeToCollect;
+                let futurePaddleDistance = Math.abs(futureItemX - (paddleX + paddleW/2));
+
+                // ✅ CONDITIONS ASSOUPLIES pour collecter plus facilement
+                if (timeToCollect > 0.3 && futurePaddleDistance < 120) { // Seuils assouplis
+                    let score = 100;
+
+                    // ✅ PRIORISATION AMÉLIORÉE avec bonus pour proximité
+                    switch(item.type) {
+                        case "mult8": score = 1200; break;
+                        case "mult4": score = 1000; break;
+                        case "temps": score = 1500; break; // Priorité absolue
+                        case "mult2": score = 800; break;
+                        case "mult1": score = 600; break;
+                        case "huge": score = 700; break;
+                        case "long": score = 500; break;
+                        case "cookie": case "cookiex2": score = 400; break;
+                        case "vie": case "niveau": score = 900; break;
+                        default:
+                            if (item.points && item.points > 5000) score = 600;
+                            else if (item.points && item.points > 1000) score = 400;
+                            else score = 200;
+                    }
+
+                    // ✅ BONUS pour les items proches et faciles à atteindre
+                    score -= futurePaddleDistance * 0.3; // Réduit le malus distance
+                    score -= timeToCollect * 5; // Réduit le malus temps
+                    score += Math.max(0, 50 - distance) * 2; // Bonus proximité actuelle
+
+                    // ✅ BONUS spécial si l'item est dans le sens de déplacement
+                    let currentDirection = paddleVelocity ? Math.sign(paddleVelocity) : 0;
+                    let itemDirection = Math.sign(futureItemX - (paddleX + paddleW/2));
+                    if (currentDirection === itemDirection) score += 100;
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestItem = item;
+                    }
+                }
+            }
+        });
+
+        return bestItem;
+    }
+    //Fin de fonction findSecurePowerup
+
+    //Fin de fonction findSecurePowerup
+
+    function executeAutopilotMovement(targetX, priority, movementType, dt) {
+        // Contraintes sécurisées
+        targetX = Math.max(paddleW/2, Math.min(CANVAS_W - paddleW/2, targetX));
+        let targetPaddleX = targetX - paddleW/2;
+
+        let deltaX = targetPaddleX - paddleX;
+        let distance = Math.abs(deltaX);
+
+        if (distance > 1) {
+            let direction = deltaX > 0 ? 1 : -1;
+
+            // ✅ NOUVEAU : Système de vitesse progressive selon la distance
+            let baseSpeed = autopilotAI.speeds[movementType] * (megaspeed || 1);
+            let progressiveSpeed;
+
+            if (distance > 100) {
+                // Grande distance : vitesse maximale
+                progressiveSpeed = baseSpeed;
+            } else if (distance > 50) {
+                // Distance moyenne : vitesse réduite progressivement
+                progressiveSpeed = baseSpeed * (0.4 + (distance - 50) / 50 * 0.6);
+            } else {
+                // Petite distance : vitesse très réduite pour précision
+                progressiveSpeed = baseSpeed * (0.2 + distance / 50 * 0.2);
+            }
+
+            // ✅ NOUVEAU : Lissage du mouvement avec inertie
+            if (!paddleVelocity) paddleVelocity = 0;
+
+            let targetVelocity = direction * progressiveSpeed * dt;
+            let acceleration = 0.15; // Facteur d'inertie (plus petit = plus fluide)
+
+            paddleVelocity = paddleVelocity * (1 - acceleration) + targetVelocity * acceleration;
+
+            // ✅ Application du mouvement lissé
+            let maxMove = Math.min(distance, Math.abs(paddleVelocity));
+            paddleX += Math.sign(paddleVelocity) * maxMove;
+
+            // ✅ Gestion spéciale pour l'urgence (mais toujours lissée)
+            if (movementType === "emergency" && priority >= 4) {
+                let emergencyBoost = Math.min(distance * 0.3, baseSpeed * dt * 0.5);
+                paddleX += direction * emergencyBoost;
+            }
+
+            // Contrainte finale
+            paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX));
+        } else {
+            // ✅ Arrêt progressif quand on arrive à destination
+            if (paddleVelocity) {
+                paddleVelocity *= 0.8; // Décélération douce
+                if (Math.abs(paddleVelocity) < 0.1) paddleVelocity = 0;
+            }
+        }
+    }
+    //Fin de fonction executeAutopilotMovement
+
+    //Fin de fonction executeAutopilotMovement
+
+    function learnFromResult(success, hitBrick = null) {
+        if (!autopilotAI.currentShot) return;
+
+        let shot = autopilotAI.currentShot;
+
+        if (shot.type === "brick_shot" && shot.zone !== undefined) {
+            let zoneData = autopilotAI.zoneStats[shot.zone];
+            zoneData.attempts++;
+
+            if (success && hitBrick) {
+                // ✅ SUCCÈS
+                zoneData.hits++;
+                console.log(`🎯 Succès zone ${shot.zone}: ${zoneData.hits}/${zoneData.attempts} (${Math.round(zoneData.hits/zoneData.attempts*100)}%)`);
+
+            } else {
+                // ❌ ÉCHEC - Calculer correction
+                zoneData.misses++;
+
+                if (hitBrick) {
+                    // Calculer l'erreur de visée
+                    let expectedX = shot.targetBrick.x + shot.targetBrick.w/2;
+                    let actualX = hitBrick.x + hitBrick.w/2;
+                    let error = actualX - expectedX;
+
+                    // Apprentissage progressif
+                    zoneData.correction += error * autopilotAI.learningRate;
+                    zoneData.correction = Math.max(-40, Math.min(40, zoneData.correction));
+
+                    console.log(`📚 Apprentissage zone ${shot.zone}: erreur=${error.toFixed(1)}, correction=${zoneData.correction.toFixed(1)}`);
+                }
+            }
+
+            // Mise à jour confiance
+            zoneData.confidence = zoneData.hits / zoneData.attempts;
+
+            // Ajouter à l'historique récent
+            autopilotAI.recentShots.push({
+                zone: shot.zone,
+                success: success,
+                timestamp: performance.now()
+            });
+
+            // Limiter historique à 20 tirs
+            if (autopilotAI.recentShots.length > 20) {
+                autopilotAI.recentShots.shift();
+            }
+        }
+
+        autopilotAI.currentShot = null;
+    }
+    //Fin de fonction learnFromResult
+
+    // Fonction de diagnostic des performances
+    function diagnoseAutopilot() {
+        console.log("=== DIAGNOSTIC AUTOPILOTE ===");
+
+        let totalAttempts = 0;
+        let totalHits = 0;
+
+        autopilotAI.zoneStats.forEach((zone, i) => {
+            if (zone.attempts > 0) {
+                totalAttempts += zone.attempts;
+                totalHits += zone.hits;
+                let accuracy = (zone.hits / zone.attempts * 100).toFixed(1);
+                console.log(`Zone ${i}: ${zone.hits}/${zone.attempts} (${accuracy}%) - Correction: ${zone.correction.toFixed(1)}px`);
+            }
+        });
+
+        let globalAccuracy = totalAttempts > 0 ? (totalHits / totalAttempts * 100).toFixed(1) : 0;
+        console.log(`PRÉCISION GLOBALE: ${globalAccuracy}% (${totalHits}/${totalAttempts})`);
+
+        console.log("=== FIN DIAGNOSTIC ===");
+    }
+    //Fin de fonction diagnoseAutopilot
+
+
+    function autopilotMove(dt) {
+        if (!ball || !dt) return;
+
+        const paddleCenter = paddleX + paddleW/2;
+        let targetX = paddleCenter;
+        let priority = 0; // 0=idle, 1=powerup, 2=brick, 3=skull, 4=ball
+        let movementType = "idle";
+
+        // 🛡️ PRIORITÉ ABSOLUE 1 : SAUVEGARDE DE LA BALLE (JAMAIS RATÉE)
+        if (ballDY > 0 && ball.y > CANVAS_H * 0.5) {
+            let interceptResult = calculatePerfectBallIntercept();
+            if (interceptResult) {
+                targetX = interceptResult.x;
+                priority = 4;
+                movementType = "emergency";
+
+                // Enregistrer pour apprentissage si échec
+                autopilotAI.currentShot = {
+                    type: "ball_save",
+                    targetX: interceptResult.x,
+                    ballPos: {x: ball.x, y: ball.y},
+                    timestamp: performance.now()
+                };
+
+                console.log(`🛡️ Sauvegarde balle prioritaire vers X=${Math.floor(interceptResult.x)}`);
+            }
+        }
+
+        // ☠️ PRIORITÉ 2 : ÉVITEMENT SKULLS (DISTANCE RÉDUITE +20px)
+        if (priority < 3) {
+            let skullThreat = findSkullThreat();
+            if (skullThreat) {
+                targetX = skullThreat.safeX;
+                priority = 3;
+                movementType = "urgent";
+                console.log(`☠️ Évitement skull vers X=${Math.floor(skullThreat.safeX)}`);
+            }
+        }
+
+        // 🎯 PRIORITÉ 3 : VISÉE BRIQUES AVEC APPRENTISSAGE
+        if (priority < 2 && ballDY < 0) {
+            let brickTarget = findAdaptiveBrickTarget();
+            if (brickTarget) {
+                targetX = brickTarget.paddleX;
+                priority = 2;
+                movementType = "precise";
+
+                // Enregistrer le tir pour apprentissage
+                autopilotAI.currentShot = {
+                    type: "brick_shot",
+                    targetBrick: brickTarget.brick,
+                    targetX: brickTarget.paddleX,
+                    zone: brickTarget.zone,
+                    ballPos: {x: ball.x, y: ball.y},
+                    timestamp: performance.now(),
+                    confidence: brickTarget.confidence
+                };
+            }
+        }
+
+        // 🎁 PRIORITÉ 4 : POWERUPS SÉCURISÉS
+        if (priority < 1) {
+            let powerupTarget = findSecurePowerup();
+            if (powerupTarget) {
+                targetX = powerupTarget.x;
+                priority = 1;
+                movementType = "collect";
+            }
+        }
+
+        // 🚀 MOUVEMENT PRÉCIS AVEC PETITES SACCADES
+        executeAutopilotMovement(targetX, priority, movementType, dt);
+    }
+    //Fin de fonction autopilotMove
+
 
     // === SYSTÈME DE SCALE PROPORTIONNEL POUR END PANEL ===
     function calculateEndPanelScale() {
@@ -1236,6 +1790,69 @@ let particleCountMax = 80; // Pour ajuster la qualité
         return Math.max(0.3, Math.min(1.3, optimalScale));
     }
 
+    function initPointerLock() {
+        // Vérifier la compatibilité
+        if (!canvas.requestPointerLock) {
+            console.warn("⚠️ Pointer Lock non supporté - utilisation de la méthode alternative");
+            return false;
+        }
+
+        // Gestionnaire de capture
+        canvas.addEventListener('click', () => {
+            if (!isPointerLocked && !autopilot) {
+                canvas.requestPointerLock();
+            }
+        });
+
+        // Gestionnaires d'état
+        document.addEventListener('pointerlockchange', () => {
+            isPointerLocked = document.pointerLockElement === canvas;
+
+            if (isPointerLocked) {
+                console.log("🔒 Souris capturée - contrôle total activé");
+                canvas.style.cursor = 'none';
+            } else {
+                console.log("🔓 Souris libérée");
+                canvas.style.cursor = 'default';
+            }
+        });
+
+        // Gestionnaire de mouvement avec pointer lock
+        document.addEventListener('mousemove', (e) => {
+            if (!isPointerLocked || autopilot) return;
+
+            // Mouvement relatif avec pointer lock
+            virtualMouseX += e.movementX;
+
+            // ✅ CONTRAINTE : Maintenir la souris virtuelle dans les limites
+            virtualMouseX = Math.max(paddleW / 2, Math.min(CANVAS_W - paddleW / 2, virtualMouseX));
+
+            // ✅ MOUVEMENT FLUIDE de la raquette
+            paddleX = virtualMouseX - paddleW / 2;
+
+            // ✅ SÉCURITÉ : Contrainte finale de la raquette
+            const limits = getEffectiveCanvasLimits();
+            paddleX = Math.max(0, Math.min(limits.width - paddleW, paddleX));
+        });
+
+        return true;
+    }
+
+function lockPointer() {
+    if (canvas.requestPointerLock && !isPointerLocked) {
+        canvas.requestPointerLock();
+    }
+}
+
+function unlockPointer() {
+    if (document.exitPointerLock && isPointerLocked) {
+        document.exitPointerLock();
+    }
+}
+
+
+//Fin de fonction initPointerLock
+
     function applyEndPanelScale() {
         const endPanel = document.querySelector('#endPanel');
         if (endPanel) {
@@ -1247,21 +1864,38 @@ let particleCountMax = 80; // Pour ajuster la qualité
     }
     //Fin de fonction applyEndPanelScale
 
-    function adjustRenderQuality() {
+    function diagnosePerfomance() {
+        console.log("🔍 DIAGNOSTIC PERFORMANCE");
+        console.log("Animations actives:", animations.length);
+        console.log("Particules:", particles.length);
+        console.log("Powerups:", powerups.length);
+        console.log("Bonus:", bonuses.length);
+        console.log("Skulls:", skulls.length);
+        console.log("GameLoop ID:", gameLoopId);
+        console.log("Psy Animation ID:", psyAnimId);
+        timeoutManager.diagnose();
+    }
 
+
+    function adjustRenderQuality() {
+        // ✅ NOUVEAU : Calcul des FPS manquant
+        if (perfFrameCount >= PERF_CONFIG.measureIntervalFrames) {
+            const now = performance.now();
+            const avgFrameTime = (now - perfLastTime) / perfFrameCount;
+            const estimatedFPS = 1000 / avgFrameTime;
 
             // ✅ ADAPTATION AUTOMATIQUE DE LA QUALITÉ
             if (estimatedFPS < 30) {
                 renderQuality = "low";
                 brickCacheRadius = 0; // Coins moins arrondis = plus rapide
 
-              } else if (estimatedFPS < 35) {
-                  renderQuality = "medium";
-                  brickCacheRadius = 0;
+            } else if (estimatedFPS < 35) {
+                renderQuality = "medium";
+                brickCacheRadius = 0;
 
-                } else if (estimatedFPS < 40) {
-                    renderQuality = "medium";
-                    brickCacheRadius = 2;
+            } else if (estimatedFPS < 40) {
+                renderQuality = "medium";
+                brickCacheRadius = 2;
 
             } else if (estimatedFPS < 45) {
                 renderQuality = "medium";
@@ -1274,8 +1908,13 @@ let particleCountMax = 80; // Pour ajuster la qualité
             // ✅ RECRÉER LE CACHE avec le nouveau rayon
             brickShapeCache = null;
 
-
+            // ✅ RESET DES COMPTEURS
+            perfFrameCount = 0;
+            perfLastTime = now;
+        }
     }
+    //Fin de fonction adjustRenderQuality
+
     //Fin de fonction adjustRenderQuality
 
     // === SYSTÈME DE SCALE PROPORTIONNEL POUR BONUS PANEL ===
@@ -1313,20 +1952,47 @@ let particleCountMax = 80; // Pour ajuster la qualité
 
 
     function clearAllAnimations() {
-      // Arrêter la boucle principale
+      console.log("🧹 Nettoyage de toutes les animations");
+
+      // ✅ ARRÊTER LA BOUCLE PRINCIPALE
       if (gameLoopId) {
         cancelAnimationFrame(gameLoopId);
         gameLoopId = null;
+        console.log("🔄 Boucle principale arrêtée");
       }
 
-      // Arrêter l'animation psychédélique
+      // ✅ ARRÊTER L'ANIMATION PSYCHÉDÉLIQUE
       if (psyAnimId) {
         cancelAnimationFrame(psyAnimId);
         psyAnimId = null;
+        console.log("🌈 Animation psychédélique arrêtée");
       }
 
-      console.log("Toutes les animations ont été nettoyées");
+      // ✅ NETTOYER TOUS LES TIMEOUTS INDIVIDUELS
+      const timeoutsToClean = [
+        'bonusAnimTimeout',
+        'paddleHugeTimeout',
+        'longTimeout',
+        'shortTimeout',
+        'impactTimeout'
+      ];
+
+      timeoutsToClean.forEach(timeoutName => {
+        let timeoutVar = eval(timeoutName);
+        if (timeoutVar) {
+          clearTimeout(timeoutVar);
+          eval(timeoutName + ' = null');
+          console.log(`⏰ ${timeoutName} nettoyé`);
+        }
+      });
+
+      // ✅ VIDER LES COLLECTIONS D'OBJETS ANIMÉS
+      animations = [];
+      particles = [];
+
+      console.log("✅ Toutes les animations ont été nettoyées");
     }
+    //Fin de fonction clearAllAnimations
 
     // === INITIALISATION DE LA GALAXIE ===
     // === INITIALISATION DE LA GALAXIE (VERSION AMÉLIORÉE) ===
@@ -1468,25 +2134,50 @@ let particleCountMax = 80; // Pour ajuster la qualité
     function closeEndPanel() {
       console.log("Fermeture du panneau de fin");
 
+      // ✅ NETTOYAGE COMPLET AVANT RESET
+      clearAllAnimations();
+      stopPsychedelicBg();
+      clearAllTimersEndLevel();
+
+
       // ✅ NOUVEAU : Reset des sections de score
       document.getElementById('playerNameSection').style.display = 'none';
       document.getElementById('leaderboardSection').style.display = 'none';
       document.getElementById('playerNameInput').value = '';
-
       document.getElementById('endPanel').style.display = "none";
       document.getElementById('statsPanel').style.display = 'block'; // ✅ AJOUT
 
       stopPsychedelicBg();
 
-      // ✅ SÉQUENCE SIMPLIFIÉE
-      resetGame(); // Ceci va mettre gameStarted = true et pause = false
+      // ✅ ATTENDRE UN PEU AVANT DE REDÉMARRER (évite les conflits)
+      setTimeout(() => {
+        resetGame();
 
-      console.log("Redémarrage du jeu - États:", {
-        gameStarted: gameStarted,
-        pause: pause,
-        gameOver: gameOver
-      });
+        // ✅ NOUVEAU : Force le redémarrage de la boucle de jeu
+        if (gameLoopId) {
+          cancelAnimationFrame(gameLoopId);
+          gameLoopId = null;
+        }
+
+        // ✅ Relancer la boucle après un court délai
+        setTimeout(() => {
+          if (!gameLoopId && gameStarted && !pause && !gameOver) {
+            lastFrame = 0; // Reset du timer
+            gameLoopId = requestAnimationFrame(gameLoop);
+            console.log("🚀 Boucle de jeu relancée après reset");
+          }
+        }, 50);
+
+        console.log("Redémarrage du jeu - États:", {
+          gameStarted: gameStarted,
+          pause: pause,
+          gameOver: gameOver
+        });
+      }, 100);
     }
+    //Fin de fonction closeEndPanel
+
+      //Fin de fonction closeEndPanel
 
 
 
@@ -1576,6 +2267,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
           case "🛸": case "🍉": case "🍇": points = 2000; break;
           case "🍑": points = 5000; break;
           case "💝": points = 8000; break;
+          case "🇫🇷": points = 10000; break;
           case "💊": case "🐲": points = 15000; break;
           case "🍪": points = 0; break; // Cookies ne donnent pas de points
           case "🇵🇸": points = 50000; break; // Cookies ne donnent pas de points
@@ -1620,6 +2312,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
       const powerupNames = {
         "long": "🏳️ Raquette longue",
         "short": "🏴‍☠️ Raquette courte",
+        "temps": "🍭‍ Plus de temps",
         "mult1": "1️⃣ Multiplicateur x2",
         "mult2": "2️⃣ Multiplicateur x3",
         "mult4": "4️⃣ Multiplicateur x4",
@@ -1675,6 +2368,8 @@ let particleCountMax = 80; // Pour ajuster la qualité
               </div>
             `;
           }
+
+
         });
       }
 
@@ -1696,7 +2391,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
         </div>
         <div class="stats-item">
           <span class="stats-item-label">🚀 Multiplicateur:</span>
-          <span class="stats-item-value ${multValue > 1 ? 'positive-indicator' : ''}">x${multValue}</span>
+          <span class="stats-item-value ${multValue > 1 ? 'positive-indicator' : ''}">x${multValue}/${multMax}</span>
         </div>
       `;
 
@@ -1737,7 +2432,10 @@ let particleCountMax = 80; // Pour ajuster la qualité
             <span class="stats-item-value danger-indicator">${bossHP}/${bossMaxHP}</span>
           </div>
         `;
+
       }
+
+
 
       gameStateStatsEl.innerHTML = gameStateHtml;
     }
@@ -1757,7 +2455,7 @@ let particleCountMax = 80; // Pour ajuster la qualité
 
         // On prend le plus petit ratio pour que TOUT rentre
         // avec une marge de sécurité de 5%
-        const optimalScale = Math.min(scaleX, scaleY) * 0.95;
+        const optimalScale = Math.min(scaleX, scaleY) * 0.85;
 
         // Limites de sécurité (éviter trop petit ou trop grand)
         return Math.max(0.3, Math.min(1.4, optimalScale));
@@ -2218,27 +2916,14 @@ function displayLeaderboard() {
     leaderboardList.innerHTML = html;
 }
 
-    function closeEndPanel2() {
-        console.log("Fermeture du panneau de fin"); // Débogage
-        document.getElementById('endPanel').style.display = "none";
-        clearAllAnimations();
-        stopPsychedelicBg();
-
-        // Réinitialiser avant de relancer
-        // resetGame();
-        gameStarted = true; // Changez à true si nécessaire pour activer la boucle
-        pause = false;
-        resetGame();
-        // console.log("États réinitialisés - gameStarted:", gameStarted);
-        // Relancer la boucle
-        if (gameLoopId) cancelAnimationFrame(gameLoopId); // Arrêter toute boucle précédente
-        gameLoopId = requestAnimationFrame(gameLoop);
-        // console.log("Boucle relancée");
-    }
-
     function gameLoop(ts) {
       if (Debug === true) {
         showDebugPopup();
+      }
+      // ✅ NOUVEAU : Vérification critique de l'état du jeu
+      if (gameOver) {
+          console.log("🛑 Boucle arrêtée : gameOver = true");
+          return; // ✅ Arrêter la boucle si gameOver
       }
 
       if (!lastFrame) lastFrame = ts;
@@ -2252,106 +2937,99 @@ function displayLeaderboard() {
           return;
       }
 
+      // ✅ NOUVEAU : Vérification de l'existence de la balle
+      if (!ball || typeof ball.x === 'undefined') {
+        console.warn("⚠️ Balle manquante - recréation");
+        resetBall();
+      }
+
+
       lastFrame = ts;
 
       if (!pause && !gameOver) {
         update(dt, elapsed_ms);
       }
 
-      if (PERF_CONFIG.enabled) {
 
-          adjustShadowBlurQuality();
+          if (PERF_CONFIG.enabled) {
+              // ✅ CORRECTION : Appel de la fonction corrigée
+              adjustRenderQuality();
 
-          perfFrameCount++;
+              // Galaxie selon performance
+              const now = performance.now();
+              if (perfFrameCount === 0) perfLastTime = now;
+              const avgFrameTime = perfFrameCount > 0 ? (now - perfLastTime) / perfFrameCount : 16.7;
+              const estimatedFPS = 1000 / avgFrameTime;
 
-          if (perfFrameCount >= PERF_CONFIG.measureIntervalFrames) {
-            const now = performance.now();
-            const avgFrameTime = (now - perfLastTime) / perfFrameCount;
-            const fps = 1000 / avgFrameTime;
-
-            // Qualité
-            if (fps < PERF_CONFIG.fpsThresholdLow) {
-              renderQuality = "low";
-              brickCacheRadius = 0;
-            } else {
-              renderQuality = "high";
-              brickCacheRadius = 6;
-            }
-
-            // Galaxie
-            galaxyEnabled = fps >= PERF_CONFIG.fpsThresholdDisable;
-
-            // Réinitialiser
-            perfFrameCount = 0;
-            perfLastTime = now;
+              galaxyEnabled = estimatedFPS >= PERF_CONFIG.fpsThresholdDisable;
           }
-        }
-        render(); // ✅ AJOUTÉ !
-        gameLoopId = requestAnimationFrame(gameLoop);
+
+          render();
+          gameLoopId = requestAnimationFrame(gameLoop);
       }
 
+      function clearAllTimersEndLevel() {
+          console.log("🧹 Nettoyage ULTRA-COMPLET des timers de fin de niveau");
 
-    function clearAllTimersEndLevel() {
-        console.log("🧹 Nettoyage complet des timers de fin de niveau");
+          // === NETTOYAGE DES TIMEOUTS CLASSIQUES ===
+          const classicTimeouts = [
+              'bonusAnimTimeout', 'paddleHugeTimeout', 'longTimeout',
+              'shortTimeout', 'impactTimeout', 'harmonyResetTimer'
+          ];
 
-        // === NETTOYAGE DES TIMEOUTS CLASSIQUES ===
-        if (bonusAnimTimeout) {
-            clearTimeout(bonusAnimTimeout);
-            bonusAnimTimeout = null;
-        }
-        if (paddleHugeTimeout) {
-            clearTimeout(paddleHugeTimeout);
-            paddleHugeTimeout = null;
-        }
-        if (longTimeout) {
-            clearTimeout(longTimeout);
-            longTimeout = null;
-        }
-        if (shortTimeout) {
-            clearTimeout(shortTimeout);
-            shortTimeout = null;
-        }
-        if (impactTimeout) {
-            clearTimeout(impactTimeout);
-            impactTimeout = null;
-        }
+          classicTimeouts.forEach(timeoutName => {
+              if (window[timeoutName]) {
+                  clearTimeout(window[timeoutName]);
+                  window[timeoutName] = null;
+                  console.log(`⏰ ${timeoutName} nettoyé`);
+              }
+          });
 
-        // === NETTOYAGE COMPLET DU TIMEOUT MANAGER ===
-        timeoutManager.clearAll(); // ✅ NOUVEAU : Nettoie TOUS les timeouts gérés
+          // === NETTOYAGE COMPLET DU TIMEOUT MANAGER ===
+          timeoutManager.clearAll();
 
-        // === REMISE À ZÉRO DES TIMERS ===
-        // multTimer = 0;
-        decrementTimer = 0;
-        paddleTimer = 0;
-        bossAttackTimer = 0;
-        bossMovementTimer = 0;
+          // === NETTOYAGE DES TIMEOUTS BOSS (NOUVEAU) ===
+          for (let i = 0; i < 100; i++) {
+              timeoutManager.clear(`bossVictory${i}`);
+              timeoutManager.clear(`bossAttack${i}`);
+              timeoutManager.clear(`impact_${i}`);
+          }
 
-        // === RESET DES FLAGS DE TIMER ===
-        paddleTimerActive = false;
-        decrementActive = false;
-        decrementEffect = false;
-        bossInvulnerable = false;
+          // === NETTOYAGE DES TIMEOUTS DE SONS PROGRESSIFS ===
+          for (let i = 0; i < 50; i++) {
+              timeoutManager.clear(`sound_${i}`);
+              timeoutManager.clear(`powerup_delay_${i}`);
+              timeoutManager.clear(`achievement_delay_${i}`);
+          }
 
-        // === RESET DES EFFETS VISUELS ===
-        elDec.style.display = "none";
-        updateMultDisplay(1); // Reset multiplicateur visuel
-        elBonusAnim.style.opacity = 0;
-        elBonusAnim.style.transform = "translate(-50%,-50%) scale(1.2)";
+          // === REMISE À ZÉRO DES TIMERS GLOBAUX ===
+          multTimer = 0;
+          decrementTimer = 0;
+          paddleTimer = 0;
+          bossAttackTimer = 0;
+          bossMovementTimer = 0;
+          levelTransitionTimer = 0;
 
-        // === RESET DES TAILLES DE RAQUETTE ===
-        paddleW = paddleBaseW; // ✅ IMPORTANT : Retour à la taille de base
-        paddleSizeEffect = null;
+          // === RESET DES FLAGS DE TIMER ===
+          paddleTimerActive = false;
+          decrementActive = false;
+          decrementEffect = false;
+          bossInvulnerable = false;
+          levelTransition = false;
 
-        // === RESET DES MULTIPLICATEURS ===
-        // mult = 1;
+          // === RESET DES EFFETS VISUELS ===
+          elDec.style.display = "none";
+          elBonusAnim.style.opacity = 0;
+          elBonusAnim.style.transform = "translate(-50%,-50%) scale(1.2)";
 
-        // === RESET DES VARIABLES DE TRANSITION ===
-        levelTransition = false;
-        levelTransitionTimer = 0;
-        levelTransitionMessage = "";
+          // === RESET DES VARIABLES DE RAQUETTE ===
+          paddleW = paddleBaseW;
+          paddleSizeEffect = null;
+          paddleVelocity = 0;
 
-        console.log("✅ Variables de transition remises à zéro");
-    }
+          console.log("✅ Nettoyage ultra-complet terminé");
+      }
+      //Fin de fonction clearAllTimersEndLevel
 
 
 
@@ -2588,40 +3266,96 @@ function displayLeaderboard() {
 
     // === INITIALISATION DU JEU ===
     function resetGame() {
+      console.log("🔄 Reset complet du jeu - nettoyage des timers");
+
+      // ✅ RESET DES STATISTIQUES D'APPRENTISSAGE
+      autopilotAI.zoneStats.forEach(zone => {
+          zone.attempts = 0;
+          zone.hits = 0;
+          zone.misses = 0;
+          zone.avgError = 0;
+          zone.correction = 0;
+          zone.confidence = 0.5;
+      });
+      autopilotAI.recentShots = [];
+      autopilotAI.currentShot = null;
+      console.log("🧠 Statistiques autopilote réinitialisées");
+
+
+      // ✅ ÉTAPE 1 : ARRÊTER TOUTES LES ANIMATIONS EN COURS
+      clearAllAnimations();
+
+      // ✅ ÉTAPE 2 : NETTOYER TOUS LES TIMEOUTS
+      clearAllTimersEndLevel();
+
+      // ✅ ÉTAPE 3 : RESET DES VARIABLES DE TIMER
+      multTimer = 0;
+      decrementTimer = 0;
+      paddleTimer = 0;
+      bossAttackTimer = 0;
+      bossMovementTimer = 0;
+      levelTransitionTimer = 0;
+
+      // ✅ ÉTAPE 4 : RESET DES FLAGS DE TIMER
+      paddleTimerActive = false;
+      decrementActive = false;
+      decrementEffect = false;
+      bossInvulnerable = false;
+      levelTransition = false;
+
+      // ✅ ÉTAPE 5 : RESET CRITIQUE DE GAME OVER
+      gameOver = false; // ✅ CRUCIAL : Réinitialiser gameOver
+      isEndGame = false; // ✅ NOUVEAU : Reset du flag endgame
+
+      // ✅ ÉTAPE 6 : VARIABLES DE JEU (ordre important)
       playSound("startGame");
-
-      vies = 4; niveau = 1; score = 0; mult = 1; multTimer = 0; lastMult = 1;
+      vies = 4;
+      niveau = 1;
+      score = 0;
+      mult = 1;
       displayScore = 0;
-      paddleW = paddleBaseW; paddleX = (CANVAS_W-paddleW)/2;
-      ballSpeed = ballSpeed0; gameOver = false;
-      wallOffset = 60; brickRows = 8;levelsPassed = 0;
+      paddleW = paddleBaseW;
+      paddleX = (CANVAS_W-paddleW)/2;
+      ballSpeed = ballSpeed0;
+      wallOffset = 60;
+      brickRows = 8;
+      levelsPassed = 0;
 
-      compensationStep = 5;
+      // ✅ ÉTAPE 7 : ARRAYS ET COLLECTIONS
+      particles = [];
+      powerups = [];
+      bonuses = [];
+      animations = [];
+      skulls = [];
       shotHistory = [];
-      lastTargetBrick = null;
-      totalBonusPoints = 0;
 
+      // ✅ ÉTAPE 8 : RESET DES VARIABLES BOSS
+      isBossLevel = false;
+      boss = null;
+      bossDefeated = false;
+      bossHP = 0;
+      bossInvulnerable = false;
+      bossAttackTimer = 0;
+      bossMovementTimer = 0;
+
+      // ✅ ÉTAPE 9 : INITIALISATION DE LA GALAXIE
       clearAllTimersEndLevel();
       createBricks();
       resetBall();
-
-      // ✅ NOUVEAU : Initialisation de la galaxie
       initGalaxy();
 
-      // ✅ ORDRE CORRIGÉ : État du jeu à la fin
+
+      // ✅ ÉTAPE 10 : ÉTATS FINAUX CRITIQUES
       pause = false;
-      gameStarted = true;
+      gameStarted = true; // ✅ CRUCIAL : Activer le jeu
       emailSent = false;
 
-      paddleW = paddleBaseW;
-      particles = []; powerups = []; bonuses = []; animations = [];
-      paddleTimer = 0; paddleTimerActive = false;
-      decrementTimer = 0; decrementActive = false; decrementEffect = false;
+      // ✅ ÉTAPE 11 : MISE À JOUR DE L'AFFICHAGE
       elDec.style.display = "none";
       updateHUD();
       updateMultDisplay(mult);
 
-      // Statistiques
+      // ✅ ÉTAPE 12 : STATISTIQUES
       bricksHit = 0;
       for(let k in bonusesCaptured) bonusesCaptured[k]=0;
       for(let k in powerupsCaptured) powerupsCaptured[k]=0;
@@ -2630,14 +3364,25 @@ function displayLeaderboard() {
       elapsedTime = 0;
       document.getElementById('endPanel').style.display = "none";
 
+      console.log("✅ Reset terminé - États finaux:", {
+        gameOver: gameOver,
+        gameStarted: gameStarted,
+        pause: pause,
+        ballExists: !!ball
+      });
     }
+    //Fin de fonction resetGame
+
+
 
     // ✅ NOUVELLE FONCTION : Démarrage contrôlé du jeu
     function startGame() {
         console.log("Démarrage du jeu après clic sur OK");
 
         try {
-            // 1. Réinitialiser complètement
+            // ✅ NOUVEAU : NETTOYAGE PRÉVENTIF COMPLET
+            clearAllAnimations();
+            clearAllTimersEndLevel();
             resetGame();
 
             // ✅ CORRECTION : Vérifier que les éléments DOM existent
@@ -2789,13 +3534,13 @@ function displayLeaderboard() {
 
         formations.forEach((pos, idx) => {
             if (pos.x >= 0 && pos.x + brickW <= CANVAS_W) {
-                let specialChance = 0.4; // 40% de chance d'avoir un special
+                let specialChance = 0.5; // 50% de chance d'avoir un special
                 let isSpecial = Math.random() < specialChance;
                 let special = null;
 
                 if (isSpecial) {
                     // ✅ PLUS DE MULTIPLICATEURS DANS LES BRIQUES BOSS
-                    let specials = ["1️⃣", "2️⃣", "4️⃣", "8️⃣", "🏳️", "❤️‍🔥"];
+                    let specials = ["💊", "2️⃣", "4️⃣", "8️⃣", "🇫🇷", "❤️‍🔥","🍭"];
                     if (Math.random() < 0.3) specials.push("☠️"); // Quelques skulls
                     special = specials[Math.floor(Math.random() * specials.length)];
                 }
@@ -2826,7 +3571,7 @@ function displayLeaderboard() {
       isBossLevel = false;
       let specials = [];
       let AutopilotBanner = false
-      let nbSpecials = 10;
+      let nbSpecials = 15;
       while(specials.length < nbSpecials) {
         let idx = Math.floor(Math.random()*brickRows*brickCols);
         if(!specials.includes(idx)) specials.push(idx);
@@ -2930,13 +3675,12 @@ function displayLeaderboard() {
       }
 
       // L'ancien système de "flash" lors du changement est conservé
-      //if (newMult !== lastMult) {
-      //  elMult.classList.add("flash");
-      //  setTimeout(() => elMult.classList.remove("flash"), 250);
-      //  lastMult = newMult;
-      //}
-
-    }
+      if (newMult !== lastMult) {
+        elMult.classList.add("flash");
+        setTimeout(() => elMult.classList.remove("flash"), 250);
+        lastMult = newMult;
+      }
+   }
 
     // === CONTRÔLES CLAVIER & SOURIS ===
 
@@ -2955,6 +3699,14 @@ function displayLeaderboard() {
 
       if ((e.key==="n" || e.key==="N") && !autopilot) {
 //          niveau +=1 ; updateHUD();
+      }
+      if ((e.key==="x" || e.key==="X") && !autopilot) {
+//          mult +=1 ; updateHUD();
+          multTimer +=60 ; updateHUD();
+      }
+      if ((e.key==="w" || e.key==="W") && !autopilot) {
+//          mult -=1 ; updateHUD();
+//          multTimer +=60 ; updateHUD();
       }
 
       // ✅ TOUCHE DEBUG : Z (simple et sans conflit)
@@ -2989,31 +3741,74 @@ function displayLeaderboard() {
         // Empêche la souris de prendre le contrôle si l'autopilote est actif
         if (autopilot) return;
 
-        // Calcul des coordonnées relatives au canvas même si souris à l'extérieur
-        const rect = canvas.getBoundingClientRect();
-        const scaleFactor = getCurrentScaleFactor();
+        // ✅ NOUVEAU : Utiliser pointer lock si disponible
+           if (isPointerLocked) {
+               // Déjà géré dans initPointerLock()
+               return;
+           }
 
-        let canvasX = (e.clientX - rect.left) / scaleFactor;
-        let canvasY = (e.clientY - rect.top) / scaleFactor;
+           // ✅ CALCUL DES COORDONNÉES DE BASE
+            const rect = canvas.getBoundingClientRect();
+            const scaleFactor = getCurrentScaleFactor();
 
-        // ✅ NOUVEAU : Contraindre les coordonnées dans les limites du canvas
-        canvasX = Math.max(0, Math.min(CANVAS_W, canvasX));
+            let canvasX = (e.clientX - rect.left) / scaleFactor;
 
-        // Système de démultiplication du mouvement (votre code existant)
-        if (lastMouseX !== null) {
-            let deltaX = canvasX - lastMouseX;
-            let amplifiedDelta = deltaX * mouseSensitivity;
-            let targetX = paddleX + paddleW/2 + amplifiedDelta - paddleW/2;
+            // ✅ NOUVELLE APPROCHE : Contrainte progressive selon la zone
+            if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                // ✅ SOURIS DANS LE CANVAS : Position normale contrainte
+                canvasX = Math.max(0, Math.min(CANVAS_W, canvasX));
 
-            const limits = getEffectiveCanvasLimits();
-            paddleX = Math.max(0, Math.min(limits.width - paddleW, targetX));
-        } else {
-            const limits = getEffectiveCanvasLimits();
-            paddleX = Math.max(0, Math.min(limits.width - paddleW, canvasX - paddleW / 2));
-        }
+            } else {
+                // ✅ SOURIS HORS CANVAS : Extension contrôlée des limites
 
-        lastMouseX = canvasX;
-    });
+                if (e.clientX < rect.left) {
+                    // ✅ SOURIS À GAUCHE DU CANVAS
+                    let overshoot = (rect.left - e.clientX) / scaleFactor;
+                    canvasX = Math.max(-paddleW, -overshoot * 0.5); // Extension limitée à gauche
+
+                } else if (e.clientX > rect.right) {
+                    // ✅ SOURIS À DROITE DU CANVAS
+                    let overshoot = (e.clientX - rect.right) / scaleFactor;
+                    canvasX = Math.min(CANVAS_W + paddleW, CANVAS_W + overshoot * 0.5); // Extension limitée à droite
+
+                } else {
+                    // ✅ SOURIS AU-DESSUS OU EN-DESSOUS : Garder la position X actuelle
+                    canvasX = Math.max(0, Math.min(CANVAS_W, canvasX));
+                }
+
+                // ✅ SÉCURITÉ ABSOLUE : Limites extrêmes pour éviter les sauts
+                canvasX = Math.max(-CANVAS_W, Math.min(CANVAS_W * 2, canvasX));
+
+                if (Debug) {
+                    console.log(`🖱️ Souris hors canvas - clientX: ${e.clientX}, canvasX: ${canvasX.toFixed(0)}`);
+                }
+            }
+
+            // ✅ SYSTÈME DE DÉMULTIPLICATION (version sécurisée)
+            if (lastMouseX !== null) {
+                let deltaX = canvasX - lastMouseX;
+
+                // ✅ NOUVEAU : Limiter les deltas extrêmes qui causent les sauts
+                deltaX = Math.max(-100, Math.min(100, deltaX)); // Limite le delta à ±100 pixels
+
+                let amplifiedDelta = deltaX * mouseSensitivity;
+                let targetX = paddleX + paddleW/2 + amplifiedDelta - paddleW/2;
+
+                // ✅ CONTRAINTE FINALE DE LA RAQUETTE
+                const limits = getEffectiveCanvasLimits();
+                paddleX = Math.max(0, Math.min(limits.width - paddleW, targetX));
+
+            } else {
+                // ✅ PREMIÈRE POSITION : Centrer sur la souris
+                const limits = getEffectiveCanvasLimits();
+                let targetX = canvasX - paddleW / 2;
+                paddleX = Math.max(0, Math.min(limits.width - paddleW, targetX));
+            }
+
+            // ✅ MISE À JOUR SÉCURISÉE DE LA POSITION PRÉCÉDENTE
+            lastMouseX = canvasX;
+        });
     //Fin de fonction mousemove_demultiplie
 
 
@@ -3051,380 +3846,207 @@ function displayLeaderboard() {
     //Fin de fonction wheel_corrected
 
 
-function autopilotMove(dt) {
-    if (!ball) return;
 
-    let finalTargetX = paddleX;
-    let moveSpeed = 600; // ✅ VITESSE DE BASE AUGMENTÉE
-    let urgency = 1;
 
-    // === VARIABLES DE PERFORMANCE ===
-    const paddleCenter = paddleX + paddleW/2;
-    const remainingBricks = bricks.filter(b => b.alive);
-    const isEndGame = remainingBricks.length <= 8;
 
-    // ✅ NOUVEAU : DÉTECTION ULTRA-AGRESSIVE DES POWER-UPS
-    let bestPowerup = null;
-    let bestPowerupScore = -1;
-    let powerupUrgency = 1;
+  // 🎯 CALCUL D'INTERCEPTION PARFAIT (100% fiable)
+  function calculatePerfectIntercept() {
+      if (ballDY <= 0) return null;
 
-    // === 1. PHASE COLLECTE POWER-UPS - PRIORITÉ ABSOLUE ===
-    powerups.forEach(p => {
-        // ✅ ZONE DE DÉTECTION MASSIMENT ÉLARGIE
-        if (p.y > 50 && p.y < paddleY + 200 && !p.caught) { // Zone énorme !
+      let timeToImpact = (paddleY - ball.y) / ballDY;
+      if (timeToImpact <= 0) return null;
 
-            // ✅ CALCUL PRÉDICTIF DE LA TRAJECTOIRE
-            let timeToIntercept = Math.max(0.1, (paddleY - p.y) / (p.speed || 6));
-            let futureX = p.x + (p.dx || 0) * timeToIntercept;
-            let currentDistance = Math.abs(futureX - paddleCenter);
+      let interceptX = ball.x + ballDX * timeToImpact;
 
-            // ✅ NOUVEAU : Test si c'est atteignable
-            let maxReachDistance = Math.min(CANVAS_W, paddleW * 4 + timeToIntercept * 1000);
-
-            if (currentDistance <= maxReachDistance && timeToIntercept < 5) {
-                let score = 5000; // Score de base énorme !
-
-                // ✅ PRIORISATION RÉVOLUTIONNAIRE DES MULTIPLICATEURS
-                if (p.type === "mult8") {
-                    score = 50000;  // ✅ PRIORITÉ MAXIMALE ABSOLUE
-                    powerupUrgency = 5;
-                } else if (p.type === "mult4") {
-                    score = 40000;  // ✅ ULTRA PRIORITAIRE
-                    powerupUrgency = 4.5;
-                } else if (p.type === "mult2") {
-                    score = 30000;  // ✅ TRÈS PRIORITAIRE
-                    powerupUrgency = 4;
-                } else if (p.type === "mult1") {
-                    score = 25000;  // ✅ PRIORITAIRE
-                    powerupUrgency = 3.5;
-                } else if (p.type === "huge") {
-                    score = 20000;  // ✅ Raquette géante importante
-                    powerupUrgency = 3;
-                } else if (p.type === "long") {
-                    score = 15000;  // ✅ Raquette longue importante
-                    powerupUrgency = 2.5;
-                } else if (p.type !== "skull") {
-                    score = 10000;  // ✅ Autres power-ups importants
-                    powerupUrgency = 2;
-                }
-
-                // ✅ BONUS TEMPOREL MASSIF
-                let timeBonus = Math.max(0, 10000 - timeToIntercept * 2000);
-                score += timeBonus;
-
-                // ✅ BONUS PROXIMITÉ ÉNORME
-                let proximityBonus = Math.max(0, 8000 - currentDistance * 20);
-                score += proximityBonus;
-
-                // ✅ BONUS D'URGENCE selon la hauteur
-                if (p.y > paddleY - 150) {
-                    score += 15000; // Bonus énorme si proche !
-                    powerupUrgency += 2;
-                }
-
-                // ✅ SÉLECTION DU MEILLEUR POWER-UP
-                if (score > bestPowerupScore) {
-                    bestPowerupScore = score;
-                    bestPowerup = {
-                        x: futureX,
-                        originalX: p.x,
-                        y: p.y,
-                        timeToIntercept: timeToIntercept,
-                        type: p.type,
-                        urgency: powerupUrgency,
-                        score: score
-                    };
-                }
-            }
-        }
-    });
-
-    // ✅ SI POWER-UP TROUVÉ : MODE COLLECTE ULTRA-AGRESSIF
-    if (bestPowerup) {
-        console.log(`🎯 POWER-UP CIBLÉ : ${bestPowerup.type} (Score: ${bestPowerup.score}) à ${Math.floor(bestPowerup.x)}`);
-
-        finalTargetX = bestPowerup.x - paddleW/2;
-        moveSpeed = 1200 + bestPowerup.urgency * 200; // ✅ VITESSE ÉNORME !
-        urgency = bestPowerup.urgency;
-
-        // ✅ BOOST SUPPLÉMENTAIRE SI TRÈS PROCHE
-        if (bestPowerup.timeToIntercept < 1) {
-            moveSpeed *= 2; // DOUBLE LA VITESSE !
-            urgency *= 2;
-        }
-
-        // ✅ CORRECTION PRÉDICTIVE AVANCÉE
-        let horizontalSpeed = Math.abs(finalTargetX - paddleCenter);
-        let correctionFactor = Math.min(2, horizontalSpeed / 100);
-        finalTargetX += (finalTargetX > paddleCenter ? 1 : -1) * correctionFactor * 20;
-
-    // === 2. SI PAS DE POWER-UP : LOGIQUE DÉFENSIVE/OFFENSIVE ===
-    } else {
-        // ✅ ÉVITEMENT SKULLS (inchangé - fonctionne bien)
-        let dangerousSkull = null;
-        let minDanger = Infinity;
-
-        skulls.forEach(skull => {
-            if (skull.y < paddleY && skull.y > CANVAS_H * 0.4) {
-                let timeToImpact = (paddleY - skull.y) / skull.speed;
-                if (timeToImpact < minDanger && timeToImpact > 0.3) {
-                    minDanger = timeToImpact;
-                    dangerousSkull = skull;
-                }
-            }
-        });
-
-        if (dangerousSkull) {
-            let skullCenter = dangerousSkull.x;
-            let safeDistance = paddleW * 0.8;
-
-            if (skullCenter - safeDistance > paddleW/2) {
-                finalTargetX = skullCenter - safeDistance - paddleW/2;
-            } else if (skullCenter + safeDistance < CANVAS_W - paddleW/2) {
-                finalTargetX = skullCenter + safeDistance - paddleW/2;
-            } else {
-                finalTargetX = (paddleCenter < CANVAS_W/2) ? 0 : CANVAS_W - paddleW;
-            }
-            moveSpeed = 800;
-            urgency = 3;
-
-        // ✅ DÉFENSE (si balle descend)
-        } else if (ballDY > 0 && ball.y > CANVAS_H * 0.6) {
-            let timeToImpact = (paddleY - ball.y) / ballDY;
-            let impactX = ball.x + ballDX * timeToImpact;
-
-            // Gestion des rebonds
-            while (impactX < 0 || impactX > CANVAS_W) {
-                if (impactX < 0) impactX = -impactX;
-                if (impactX > CANVAS_W) impactX = CANVAS_W - (impactX - CANVAS_W);
-            }
-
-            finalTargetX = impactX - paddleW/2;
-            moveSpeed = 700;
-            urgency = 2;
-
-        // ✅ COLLECTE BONUS SECONDAIRE
-        } else {
-            let bestBonus = null;
-            let bestBonusScore = -1;
-
-            bonuses.forEach(b => {
-                if (b.y > CANVAS_H * 0.2 && b.y < paddleY - 10) {
-                    let timeToIntercept = (paddleY - b.y) / (b.speed || 6);
-                    let distance = Math.abs(b.x - paddleCenter);
-
-                    if (timeToIntercept > 0.2 && timeToIntercept < 3 && distance < CANVAS_W * 0.7) {
-                        let score = (b.points || 100) * 10 + Math.max(0, 500 - distance);
-
-                        if (score > bestBonusScore) {
-                            bestBonusScore = score;
-                            bestBonus = {x: b.x, timeToIntercept: timeToIntercept};
-                        }
-                    }
-                }
-            });
-
-            if (bestBonus) {
-                finalTargetX = bestBonus.x - paddleW/2;
-                moveSpeed = 600;
-                urgency = 1.5;
-
-            // ✅ PHASE OFFENSIVE (attaque des briques)
-            } else if (ballDY < 0 && ball.y < CANVAS_H * 0.7) {
-                // Logique de ciblage des briques simplifiée mais efficace
-                let targetBrick = null;
-                let bestBrickScore = -1;
-
-                remainingBricks.forEach(brick => {
-                    let distance = Math.abs(brick.x + brick.w/2 - ball.x) + Math.abs(brick.y - ball.y);
-                    let score = 1000 - distance;
-
-                    // Bonus pour briques accessibles
-                    if (brick.y > wallOffset + brickH * 2) score += 300;
-
-                    // Bonus pour briques spéciales
-                    if (brick.special && brick.special.includes("️⃣")) score += 500;
-
-                    if (score > bestBrickScore) {
-                        bestBrickScore = score;
-                        targetBrick = brick;
-                    }
-                });
-
-                if (targetBrick) {
-                    let targetX = targetBrick.x + targetBrick.w/2;
-                    let deltaX = targetX - ball.x;
-                    let deltaY = targetBrick.y - ball.y;
-                    let requiredAngle = Math.atan2(deltaX, -deltaY);
-                    let paddleOffset = Math.sin(requiredAngle) * paddleW * 0.4;
-                    finalTargetX = ball.x - paddleW/2 + paddleOffset;
-                    moveSpeed = 650;
-                    urgency = 1.8;
-                } else {
-                    finalTargetX = (CANVAS_W - paddleW) / 2;
-                    moveSpeed = 400;
-                }
-            }
-        }
-    }
-
-    // === 3. MOUVEMENT ULTRA-OPTIMISÉ ET FLUIDE ===
-    finalTargetX = Math.max(0, Math.min(CANVAS_W - paddleW, finalTargetX));
-
-    let currentX = paddleX;
-    let deltaX = finalTargetX - currentX;
-    let distance = Math.abs(deltaX);
-
-    if (distance > 1) { // Seuil ultra-fin
-        let direction = deltaX > 0 ? 1 : -1;
-
-        // ✅ VITESSE ADAPTATIVE RÉVOLUTIONNAIRE
-        let adaptiveSpeed = moveSpeed * urgency;
-
-        // ✅ BOOST MASSIF pour les power-ups
-        if (bestPowerup) {
-            adaptiveSpeed *= 2.5; // Boost énorme !
-        }
-
-        // Boost selon distance
-        if (distance > paddleW * 2) adaptiveSpeed *= 1.8;
-        else if (distance > paddleW) adaptiveSpeed *= 1.4;
-
-        // ✅ MOUVEMENT FLUIDE AVEC INERTIE AMÉLIORÉE
-        let maxMove = Math.min(distance, adaptiveSpeed * dt * megaspeed * 3);
-
-        // Lissage près de la cible
-        if (distance < 30) {
-            maxMove *= (0.5 + (distance / 30) * 0.5);
-        }
-
-        // ✅ SYSTÈME D'INERTIE NATURELLE
-        if (!paddleVelocity) paddleVelocity = 0;
-        let targetVelocity = direction * maxMove;
-        paddleVelocity += (targetVelocity - paddleVelocity) * 0.4; // Inertie plus réactive
-
-        paddleX += paddleVelocity;
-    } else {
-        // Arrêt en douceur
-        if (paddleVelocity) paddleVelocity *= 0.9;
-        paddleX += paddleVelocity;
-    }
-
-    // Contraintes finales
-    //  paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX));
-
-    const limits = getEffectiveCanvasLimits();
-    paddleX = Math.max(0, Math.min(limits.width - paddleW, paddleX));
-
-    // ✅ CONTRÔLE VITESSE BALLE ENDGAME (inchangé)
-    if (isEndGame && Math.sqrt(ballDX * ballDX + ballDY * ballDY) < 16) {
-        let currentSpeed = Math.sqrt(ballDX * ballDX + ballDY * ballDY);
-        let targetSpeed = Math.min(18, 16 + (8 - remainingBricks.length));
-        if (currentSpeed > 0) {
-            let ratio = targetSpeed / currentSpeed;
-            ballDX *= ratio;
-            ballDY *= ratio;
-        }
-    }
-}
-
-    /**
-     * Calcule le point d'impact précis pour la défense (fonction conservée car elle est parfaite).
-     */
-    function calculateDefensiveinterceptionPoint() {
-      if (ballDY < 0) return ball.x;
-      const timeToImpact = (paddleY - ball.y) / ballDY;
-      let impactX = ball.x + ballDX * timeToImpact;
-      while (impactX < 0 || impactX > CANVAS_W) {
-        if (impactX < 0) impactX = -impactX;
-        if (impactX > CANVAS_W) impactX = CANVAS_W - (impactX - CANVAS_W);
+      // Gestion des rebonds sur les murs
+      let bounces = 0;
+      while ((interceptX < 0 || interceptX > CANVAS_W) && bounces < 10) {
+          if (interceptX < 0) {
+              interceptX = Math.abs(interceptX);
+          } else if (interceptX > CANVAS_W) {
+              interceptX = CANVAS_W - (interceptX - CANVAS_W);
+          }
+          bounces++;
       }
-      return impactX;
-    }
 
-    function calculateTrajectory(ball, dx, dy, brick, maxBounces) {
-        let testX = ball.x;
-        let testY = ball.y;
-        let testDX = dx;
-        let testDY = dy;
-        let bounces = 0;
-        let time = 0;
+      return (interceptX >= 0 && interceptX <= CANVAS_W) ? interceptX : ball.x;
+  }
 
-        // Simulation de trajectoire
-        for (let i = 0; i < 200 && time < 300; i++) {
-            let nextX = testX + testDX;
-            let nextY = testY + testDY;
-            time++;
+  // ☠️ ÉVITEMENT INTELLIGENT DES SKULLS
+  function findNearestSkull() {
+      let nearest = null;
+      let minDanger = Infinity;
 
-            // Vérification collision avec la brique cible
-            if (nextY >= brick.y && nextY <= brick.y + brick.h &&
-                nextX >= brick.x && nextX <= brick.x + brick.w) {
+      skulls.forEach(skull => {
+          if (skull.y < paddleY && skull.y > CANVAS_H * 0.3) {
+              let timeToImpact = (paddleY - skull.y) / (skull.speed || 7);
+              let dangerLevel = 1 / timeToImpact; // Plus c'est proche, plus c'est dangereux
 
-                // Calculer la position de raquette requise
-                let ballReturnTime = (paddleY - nextY) / Math.abs(testDY);
-                let ballReturnX = nextX + testDX * ballReturnTime;
+              if (dangerLevel > 0.1 && dangerLevel < minDanger) {
+                  minDanger = dangerLevel;
+                  nearest = skull;
+              }
+          }
+      });
 
-                // Gérer les rebonds sur le retour
-                while (ballReturnX < 0 || ballReturnX > CANVAS_W) {
-                    if (ballReturnX < 0) ballReturnX = -ballReturnX;
-                    if (ballReturnX > CANVAS_W) ballReturnX = CANVAS_W - (ballReturnX - CANVAS_W);
-                }
+      return nearest;
+  }
 
-                return {
-                    canHit: true,
-                    impactX: nextX,
-                    impactY: nextY,
-                    requiredPaddleX: ballReturnX - paddleW/2,
-                    timeToHit: time,
-                    bounces: bounces
-                };
-            }
+  function calculateSkullAvoidance(skull) {
+      let skullX = skull.x;
+      let safeDistance = paddleW + 40; // Marge de sécurité
 
-            // Gestion des rebonds sur les murs
-            if (nextX <= 0 || nextX >= CANVAS_W) {
-                testDX = -testDX;
-                bounces++;
-                if (bounces > maxBounces) break;
-            }
-            if (nextY <= 0) {
-                testDY = -testDY;
-                bounces++;
-                if (bounces > maxBounces) break;
-            }
+      // Choisir le côté le plus proche et sûr
+      let leftSafe = skullX - safeDistance;
+      let rightSafe = skullX + safeDistance;
 
-            testX = nextX;
-            testY = nextY;
-        }
+      let currentCenter = paddleX + paddleW/2;
 
-        return { canHit: false };
-    }
+      // Prioriser le côté le plus proche
+      if (Math.abs(leftSafe - currentCenter) < Math.abs(rightSafe - currentCenter)) {
+          if (leftSafe >= paddleW/2) return leftSafe;
+          if (rightSafe <= CANVAS_W - paddleW/2) return rightSafe;
+      } else {
+          if (rightSafe <= CANVAS_W - paddleW/2) return rightSafe;
+          if (leftSafe >= paddleW/2) return leftSafe;
+      }
 
-    // ✅ FONCTION UTILITAIRE : Trouver la brique la plus accessible
-    function findMostAccessibleBrick() {
-        let closestBrick = null;
-        let minDistance = Infinity;
+      return null;
+  }
 
-        bricks.forEach(brick => {
-            if (!brick.alive) return;
+  // 🎯 VISÉE OPTIMALE DES BRIQUES (angle parfait)
+  function findOptimalBrickShot() {
+      let aliveBricks = bricks.filter(b => b.alive);
+      if (aliveBricks.length === 0) return null;
 
-            let distance = Math.sqrt(
-                Math.pow(brick.x + brick.w/2 - ball.x, 2) +
-                Math.pow(brick.y + brick.h/2 - ball.y, 2)
-            );
+      let bestShot = null;
+      let bestScore = -1;
 
-            // Bonus pour les briques du bas (plus faciles à atteindre)
-            if (brick.y > wallOffset + brickH * 2) {
-                distance *= 0.8;
-            }
+      aliveBricks.forEach(brick => {
+          // Calcul de l'angle optimal pour toucher cette brique
+          let brickCenterX = brick.x + brick.w/2;
+          let brickCenterY = brick.y + brick.h/2;
 
-            if (distance < minDistance) {
-                minDistance = distance;
-                closestBrick = brick;
-            }
-        });
+          // Angle direct vers la brique
+          let deltaX = brickCenterX - ball.x;
+          let deltaY = brickCenterY - ball.y;
 
-        return closestBrick;
-    }
+          if (deltaY >= 0) return; // Brique derrière la balle
+
+          // Calcul de la position raquette nécessaire
+          let angleToTarget = Math.atan2(deltaX, -deltaY);
+          let requiredPaddleOffset = Math.tan(angleToTarget) * (ball.y - paddleY);
+          let requiredPaddleX = ball.x + requiredPaddleOffset;
+
+          // Vérifier la faisabilité
+          if (requiredPaddleX < paddleW/2 || requiredPaddleX > CANVAS_W - paddleW/2) {
+              return; // Position impossible
+          }
+
+          // Score basé sur proximité et facilité
+          let distance = Math.abs(deltaX) + Math.abs(deltaY);
+          let moveDistance = Math.abs(requiredPaddleX - (paddleX + paddleW/2));
+          let score = 1000 - distance - moveDistance * 2;
+
+          // Bonus pour les briques du bas (plus faciles)
+          if (brick.y > wallOffset + brickH * 4) score += 200;
+
+          // Bonus pour briques spéciales
+          if (brick.special && !brick.special.includes("☠️")) score += 300;
+
+          if (score > bestScore) {
+              bestScore = score;
+              bestShot = {
+                  paddleX: requiredPaddleX,
+                  brick: brick,
+                  score: score
+              };
+          }
+      });
+
+      return bestShot;
+  }
+
+  // 🎁 COLLECTE SÉCURISÉE DES POWERUPS
+  function findSafestPowerup() {
+      let safest = null;
+      let bestScore = -1;
+
+      // Analyser tous les powerups ET bonus
+      let allCollectibles = [...powerups, ...bonuses];
+
+      allCollectibles.forEach(item => {
+          // Exclusions absolues
+          if (!item || item.caught || item.type === "skull" || item.type === "boss_projectile") {
+              return;
+          }
+
+          // Vérifier si atteignable
+          if (item.y > 50 && item.y < paddleY + 100) {
+              let timeToCollect = (paddleY - item.y) / (item.speed || 6);
+              let futureX = item.x + (item.dx || 0) * timeToCollect;
+
+              // Contraindre dans les limites
+              futureX = Math.max(paddleW/2, Math.min(CANVAS_W - paddleW/2, futureX));
+
+              let moveDistance = Math.abs(futureX - (paddleX + paddleW/2));
+              let maxReachDistance = timeToCollect * MOVE_SPEED * 0.8; // Marge de sécurité
+
+              if (moveDistance <= maxReachDistance && timeToCollect > 0.5) {
+                  let score = 100;
+
+                  // Priorisation intelligente
+                  if (item.type === "mult8") score = 1000;
+                  else if (item.type === "mult4") score = 800;
+                  else if (item.type === "mult2") score = 600;
+                  else if (item.type === "mult1") score = 500;
+                  else if (item.type === "temps") score = 1200; // PRIORITÉ MAXIMALE
+                  else if (item.type === "huge") score = 700;
+                  else if (item.type === "long") score = 400;
+                  else if (item.points && item.points > 1000) score = 300; // Bonus à points
+                  else if (item.type !== "short") score = 200;
+                  else score = 50; // Short paddle moins prioritaire
+
+                  // Malus pour distance et temps
+                  score -= moveDistance * 0.5;
+                  score -= timeToCollect * 10;
+
+                  if (score > bestScore) {
+                      bestScore = score;
+                      safest = item;
+                  }
+              }
+          }
+      });
+
+      return safest;
+  }
+
+  // 🚀 MOUVEMENT ULTRA-PRÉCIS
+  function movePaddleToTarget(targetX, urgency, dt) {
+      targetX = Math.max(0, Math.min(CANVAS_W - paddleW, targetX));
+
+      let deltaX = targetX - paddleX;
+      let distance = Math.abs(deltaX);
+
+      if (distance > 1) {
+          let direction = deltaX > 0 ? 1 : -1;
+          let speed = MOVE_SPEED * urgency * megaspeed;
+
+          // Mouvement instantané pour urgence maximale
+          if (urgency >= 10) {
+              paddleX = targetX;
+          } else {
+              let maxMove = Math.min(distance, speed * dt);
+              paddleX += direction * maxMove;
+          }
+
+          // Contrainte finale
+          paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX));
+      }
+  }
+
+
 
     // ✅ FONCTION CENTRALE DE GESTION DE LA VITESSE
     function calculateGameSpeed() {
@@ -3512,155 +4134,186 @@ const SHADOWBLUR_PROFILES = {
 
 // Variable globale pour le profil actuel
 let currentShadowBlurProfile = "high";
-
 /**
- * Fonction principale d'optimisation des shadowBlur selon les performances
- * À intégrer dans ta boucle de mesure de performances existante
+ * Son addictif inspiré du système de récompense de Subway Surfers
+ * Plus le multiplicateur augmente, plus l'euphorie sonore devient intense
  */
+function playSoundScoreMultiplied(basePoints, multiplier) {
+    if (!audioCtx) return;
+    let now = audioCtx.currentTime;
 
- /**
-  * Son addictif basé sur le son "impact" avec profondeur progressive
-  * Plus le multiplicateur est élevé, plus le son gagne en profondeur et durée
-  */
- function playSoundScoreMultiplied(basePoints, multiplier) {
-     if (!audioCtx) return;
+    // ✅ CALCUL DU FACTEUR D'EUPHORIE (limité pour éviter la saturation)
+    let euphoriaLevel = Math.min(multiplier / 50, 1); // Progression douce sur 8 niveaux
+    let numCoins = Math.min(multiplier, basePoints); // Maximum 5 "pièces" simultanées
 
-     let now = audioCtx.currentTime;
+    // ✅ SON PRINCIPAL : SÉRIE DE "PIÈCES" RAPIDES
+    for (let i = 0; i < numCoins; i++) {
+        let coinOsc = audioCtx.createOscillator();
+        let coinGain = audioCtx.createGain();
 
-     // ✅ TON SON "IMPACT" COMME BASE PARFAITE (x1 à x2)
-     let baseFreq = 420;
-     let targetFreq = 220;
-     let baseDuration = 0.1;
-     let baseGain = 0.13;
+        // Fréquences optimisées style Subway Surfers (gamme majeure)
+        let coinFreqs = [1047, 1175, 1319, 1568, 1760]; // Do-Ré-Mi-Sol-La aigus
+        let coinFreq = coinFreqs[i % coinFreqs.length];
 
-     // ✅ PROGRESSION TRÈS SUBTILE DE LA PROFONDEUR selon le multiplicateur
-     let depthMultiplier = 1 + (multiplier - 1) * 0.3; // +30% de profondeur par niveau
-     let durationExtension = Math.min(2, 1 + (multiplier - 1) * 0.15); // Durée max x2
+        let startTime = now + i * 0.04; // Très rapide : 30ms entre chaque pièce
+        let duration = 0.08 + i * 0.007; // Durée légèrement croissante
 
-     // ✅ SON PRINCIPAL (ton impact original étendu)
-     let mainOsc = audioCtx.createOscillator();
-     let mainGain = audioCtx.createGain();
+        coinOsc.type = "square";
+        coinOsc.frequency.setValueAtTime(coinFreq, startTime);
+        coinOsc.frequency.exponentialRampToValueAtTime(coinFreq * 0.7, startTime + duration * 0.6);
 
-     let extendedDuration = baseDuration * durationExtension;
-     let extendedGain = Math.min(0.18, baseGain * depthMultiplier);
+        // Volume dégressif pour éviter la saturation
+        let volume = Math.max(0.04, 0.15 - i * 0.024);
+        coinGain.gain.setValueAtTime(volume, startTime);
+        coinGain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
 
-     mainOsc.frequency.setValueAtTime(baseFreq, now);
-     mainOsc.frequency.linearRampToValueAtTime(targetFreq, now + 0.08);
-     mainGain.gain.setValueAtTime(extendedGain, now);
-     mainGain.gain.linearRampToValueAtTime(0, now + extendedDuration - 0.01);
+        coinOsc.connect(coinGain).connect(audioCtx.destination);
+        coinOsc.start(startTime);
+        coinOsc.stop(startTime + duration + 0.01);
+    }
 
-     mainOsc.connect(mainGain).connect(audioCtx.destination);
-     mainOsc.start(now);
-     mainOsc.stop(now + extendedDuration);
+    // ✅ BONUS "POWER-UP" SUBWAY SURFERS (mult 4+)
+    if (multiplier >= 1) {
+        let powerUpDelay = numCoins * 30 + 20; // Juste après les pièces
 
-     // ✅ AJOUT PROGRESSIF DE PROFONDEUR (seulement pour mult 3+)
-     if (multiplier >= 3) {
-         // Harmonique grave pour la profondeur (très subtile)
-         let depthOsc = audioCtx.createOscillator();
-         let depthGain = audioCtx.createGain();
+        setTimeout(() => {
+            let powerOsc = audioCtx.createOscillator();
+            let powerGain = audioCtx.createGain();
+            let powerNow = audioCtx.currentTime;
 
-         depthOsc.type = "sine"; // Plus doux que square
-         depthOsc.frequency.setValueAtTime(baseFreq * 0.5, now + 0.02); // Octave grave
-         depthOsc.frequency.linearRampToValueAtTime(targetFreq * 0.5, now + 0.1);
+            powerOsc.type = "square"; // Plus incisif que triangle
+            powerOsc.frequency.setValueAtTime(2093, powerNow); // Do7 très aigu
+            powerOsc.frequency.exponentialRampToValueAtTime(1047, powerNow + 0.12);
 
-         // Volume très subtil qui augmente avec le multiplicateur
-         let depthVolume = Math.min(0.08, 0.02 + (multiplier - 3) * 0.01);
-         depthGain.gain.setValueAtTime(depthVolume, now + 0.02);
-         depthGain.gain.linearRampToValueAtTime(0, now + extendedDuration);
+            let powerVolume = 0.08 + euphoriaLevel * 0.04;
+            powerGain.gain.setValueAtTime(powerVolume, powerNow);
+            powerGain.gain.exponentialRampToValueAtTime(0.001, powerNow + 0.12);
 
-         depthOsc.connect(depthGain).connect(audioCtx.destination);
-         depthOsc.start(now + 0.02);
-         depthOsc.stop(now + extendedDuration);
-     }
+            powerOsc.connect(powerGain).connect(audioCtx.destination);
+            powerOsc.start(powerNow);
+            powerOsc.stop(powerNow + 0.13);
+        }, powerUpDelay);
+    }
 
-     // ✅ RÉSONANCE SUPPLÉMENTAIRE (seulement pour mult 5+)
-     if (multiplier >= 5) {
-         // Écho très léger pour plus de richesse
-         setTimeout(() => {
-             let echoOsc = audioCtx.createOscillator();
-             let echoGain = audioCtx.createGain();
-             let echoNow = audioCtx.currentTime;
+    // ✅ "ACHIEVEMENT UNLOCK" STYLE SUBWAY SURFERS (mult 7+)
+    if (multiplier >= 3) {
+        let achievementDelay = numCoins * 30 + 80;
 
-             echoOsc.type = "triangle";
-             echoOsc.frequency.setValueAtTime(baseFreq * 0.75, echoNow);
-             echoOsc.frequency.linearRampToValueAtTime(targetFreq * 0.75, echoNow + 0.06);
+        setTimeout(() => {
+            // Triade majeure ascendante ultra-satisfaisante
+            let achievementChord = [1047, 1319, 1568]; // Do-Mi-Sol
+            let achNow = audioCtx.currentTime;
 
-             let echoVolume = Math.min(0.06, 0.015 + (multiplier - 5) * 0.008);
-             echoGain.gain.setValueAtTime(echoVolume, echoNow);
-             echoGain.gain.exponentialRampToValueAtTime(0.001, echoNow + 0.08);
+            achievementChord.forEach((freq, index) => {
+                let achOsc = audioCtx.createOscillator();
+                let achGain = audioCtx.createGain();
 
-             echoOsc.connect(echoGain).connect(audioCtx.destination);
-             echoOsc.start(echoNow);
-             echoOsc.stop(echoNow + 0.09);
-         }, 60); // Délai de 60ms pour l'effet d'écho
-     }
+                achOsc.type = "sine"; // Son pur et cristallin
+                achOsc.frequency.setValueAtTime(freq, achNow + index * 0.02);
+                achOsc.frequency.exponentialRampToValueAtTime(freq * 0.85, achNow + index * 0.02 + 0.15);
 
-     // ✅ RICHESSE HARMONIQUE MAXIMALE (seulement pour mult 8+)
-     if (multiplier >= 8) {
-         // Harmonique aiguë très subtile pour la brillance
-         setTimeout(() => {
-             let sparkleOsc = audioCtx.createOscillator();
-             let sparkleGain = audioCtx.createGain();
-             let sparkleNow = audioCtx.currentTime;
+                let achVolume = (0.06 - index * 0.01) * (1 + euphoriaLevel * 0.5);
+                achGain.gain.setValueAtTime(achVolume, achNow + index * 0.02);
+                achGain.gain.exponentialRampToValueAtTime(0.001, achNow + index * 0.02 + 0.15);
 
-             sparkleOsc.type = "sine";
-             sparkleOsc.frequency.setValueAtTime(baseFreq * 1.5, sparkleNow);
-             sparkleOsc.frequency.linearRampToValueAtTime(targetFreq * 1.5, sparkleNow + 0.04);
+                achOsc.connect(achGain).connect(audioCtx.destination);
+                achOsc.start(achNow + index * 0.02);
+                achOsc.stop(achNow + index * 0.02 + 0.16);
+            });
+        }, achievementDelay);
+    }
 
-             sparkleGain.gain.setValueAtTime(0.03, sparkleNow);
-             sparkleGain.gain.exponentialRampToValueAtTime(0.001, sparkleNow + 0.05);
+    // ✅ "EPIC COMBO" FINALE (mult 12+)
+    if (multiplier >= 12) {
+        let epicDelay = numCoins * 30 + 180;
 
-             sparkleOsc.connect(sparkleGain).connect(audioCtx.destination);
-             sparkleOsc.start(sparkleNow);
-             sparkleOsc.stop(sparkleNow + 0.06);
-         }, 30); // Délai de 30ms pour l'effet de brillance
-     }
- }
- //Fin de fonction playSoundScoreMultiplied
-  /**
-   * Système de progression addictive par accumulation harmonique
-   * Plus tu enchaînes, plus c'est satisfaisant
-   */
-  let harmonyChain = 0; // Variable globale à ajouter en haut du fichier
+        setTimeout(() => {
+            // Arpège descendant cristallin (signature Subway Surfers)
+            let epicNotes = [2093, 1760, 1568, 1319, 1047]; // Do7→La→Sol→Mi→Do
+            let epicNow = audioCtx.currentTime;
 
-  function playAddictiveChain(multiplier) {
-      if (!audioCtx) return;
+            epicNotes.forEach((freq, index) => {
+                let epicOsc = audioCtx.createOscillator();
+                let epicGain = audioCtx.createGain();
 
-      // ✅ INCRÉMENT DE LA CHAÎNE HARMONIQUE
-      harmonyChain = Math.min(harmonyChain + 1, 8); // Max 8 notes
+                epicOsc.type = "triangle";
+                epicOsc.frequency.setValueAtTime(freq, epicNow + index * 0.025);
 
-      let now = audioCtx.currentTime;
+                let epicVolume = Math.max(0.03, 0.1 - index * 0.015);
+                epicGain.gain.setValueAtTime(epicVolume, epicNow + index * 0.025);
+                epicGain.gain.exponentialRampToValueAtTime(0.001, epicNow + index * 0.025 + 0.08);
 
-      // ✅ ÉCHELLE PENTATONIQUE (universellement agréable)
-      let scale = [220, 247, 277, 311, 370, 415, 466, 523]; // Pentatonique en La
+                epicOsc.connect(epicGain).connect(audioCtx.destination);
+                epicOsc.start(epicNow + index * 0.025);
+                epicOsc.stop(epicNow + index * 0.025 + 0.09);
+            });
+        }, epicDelay);
+    }
 
-      // ✅ JOUER LA PROGRESSION ACCUMULÉE
-      for (let i = 0; i < harmonyChain; i++) {
-          let note = scale[i % scale.length];
-          let osc = audioCtx.createOscillator();
-          let gain = audioCtx.createGain();
+    // ✅ "LEGENDARY COMBO" TRANSCENDANTAL (mult 20+)
+        if (multiplier >= 20) {
+            let legendaryDelay = numCoins * 30 + 320; // Après l'EPIC COMBO
 
-          osc.type = "sine";
-          osc.frequency.setValueAtTime(note, now + i * 0.05);
+            setTimeout(() => {
+                // Premier arpège : Gamme mixolydienne descendante cristalline
+                let legendaryNotes1 = [1976, 1760, 1568, 1397, 1319, 1175, 1047]; // Si→La→Sol→Fa→Mi→Ré→Do
+                let legend1Now = audioCtx.currentTime;
 
-          // Volume dégressif pour ne pas saturer
-          let volume = 0.08 * Math.pow(0.8, i);
-          gain.gain.setValueAtTime(volume, now + i * 0.05);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.15);
+                legendaryNotes1.forEach((freq, index) => {
+                    let leg1Osc = audioCtx.createOscillator();
+                    let leg1Gain = audioCtx.createGain();
 
-          osc.connect(gain).connect(audioCtx.destination);
-          osc.start(now + i * 0.05);
-          osc.stop(now + i * 0.05 + 0.16);
-      }
+                    leg1Osc.type = "sine"; // Son cristallin pur
+                    leg1Osc.frequency.setValueAtTime(freq, legend1Now + index * 0.022);
 
-      // ✅ RESET DE LA CHAÎNE si pas d'activité pendant 3 secondes
-      clearTimeout(harmonyResetTimer);
-      harmonyResetTimer = setTimeout(() => {
-          harmonyChain = 0;
-      }, 3000);
-  }
+                    // Volume avec crescendo-decrescendo naturel
+                    let leg1Volume = 0.04 + Math.sin(index / legendaryNotes1.length * Math.PI) * 0.03;
+                    leg1Gain.gain.setValueAtTime(leg1Volume, legend1Now + index * 0.022);
+                    leg1Gain.gain.exponentialRampToValueAtTime(0.001, legend1Now + index * 0.022 + 0.1);
 
-  let harmonyResetTimer = null; // Variable globale
+                    leg1Osc.connect(leg1Gain).connect(audioCtx.destination);
+                    leg1Osc.start(legend1Now + index * 0.022);
+                    leg1Osc.stop(legend1Now + index * 0.022 + 0.11);
+                });
+            }, legendaryDelay);
+
+            // Deuxième arpège superposé : Harmoniques supérieures (mult 25+)
+            if (multiplier >= 25) {
+                let celestialDelay = numCoins * 30 + 400;
+
+                setTimeout(() => {
+                    let celestialNotes = [2349, 2093, 1865, 1760, 1568, 1397, 1319]; // Ré8→Do8→Si7→La7→Sol7→Fa7→Mi7
+                    let celestialNow = audioCtx.currentTime;
+
+                    celestialNotes.forEach((freq, index) => {
+                        let celOsc = audioCtx.createOscillator();
+                        let celGain = audioCtx.createGain();
+
+                        celOsc.type = "triangle"; // Brillance cristalline
+                        celOsc.frequency.setValueAtTime(freq, celestialNow + index * 0.03);
+
+                        // Volume très doux pour harmonie parfaite
+                        let celVolume = Math.max(0.02, 0.06 - index * 0.008);
+                        celGain.gain.setValueAtTime(celVolume, celestialNow + index * 0.03);
+                        celGain.gain.exponentialRampToValueAtTime(0.001, celestialNow + index * 0.03 + 0.095);
+
+                        celOsc.connect(celGain).connect(audioCtx.destination);
+                        celOsc.start(celestialNow + index * 0.03);
+                        celOsc.stop(celestialNow + index * 0.03 + 0.105);
+                    });
+                }, celestialDelay);
+            }
+        }
+
+        // ✅ LOG DE DEBUG ÉTENDU
+        if (Debug) {
+            let comboLevel = multiplier >= 30 ? "GODLIKE" : multiplier >= 25 ? "CELESTIAL" : multiplier >= 20 ? "LEGENDARY" : "EPIC";
+            console.log(`🎮 Subway ${comboLevel}: mult=${multiplier}, pièces=${numCoins}, euphorie=${(euphoriaLevel*100).toFixed(0)}%`);
+        }
+
+}
+//Fin de fonction playSoundScoreMultiplied
+
   //Fin de fonction playAddictiveChain
 
 function adjustShadowBlurQuality() {
@@ -3757,7 +4410,7 @@ function forceShadowBlurProfile(profileName) {
       let briquesRestantes = bricks.filter(b => b.alive).length;
 
       // ✅ NOUVEAU : Spawn automatique du powerup niveau à 2 briques restantes
-      if (briquesRestantes === 2) {
+      if (briquesRestantes == 2) {
           // Vérifier qu'il n'y a pas déjà un powerup niveau actif
           let powerupNiveauExiste = bonuses.some(bonus => bonus.type === "niveau" && !bonus.caught);
 
@@ -4088,38 +4741,15 @@ function forceShadowBlurProfile(profileName) {
         if(ball.x+ball.r>b.x && ball.x-ball.r<b.x+b.w && ball.y+ball.r>b.y && ball.y-ball.r<b.y+b.h) {
           b.alive=false;
 
-          if (autopilot && lastTargetBrick === b) {
-              // Succès ! On mémorise cette stratégie
-              shotHistory.push({
-                  targetBrick: b,
-                  paddlePosition: paddleX,
-                  ballPosition: {x: ball.x, y: ball.y},
-                  hit: true,
-                  timestamp: performance.now()
-              });
-
-              // Nettoyer l'historique (garder seulement les 10 derniers)
-              if (shotHistory.length > 10) {
-                  shotHistory.shift();
-              }
-          } else if (autopilot && lastTargetBrick && lastTargetBrick.alive) {
-              // Raté ! On mémorise l'échec pour ajuster
-              shotHistory.push({
-                  targetBrick: lastTargetBrick,
-                  paddlePosition: paddleX,
-                  ballPosition: {x: ball.x, y: ball.y},
-                  hit: false,
-                  timestamp: performance.now()
-              });
+          if (autopilot && autopilotAI.currentShot && autopilotAI.currentShot.type === "brick_shot") {
+              learnFromResult(true, b);
+          } else if (autopilot && autopilotAI.currentShot) {
+              learnFromResult(false, b);
           }
-
-          // Reset des variables de ciblage
-          lastTargetBrick = null;
-          lastPaddleTarget = 0;
 
 
           bricksHit++; // Incrémentation ici
-          playSound("impact");
+          // playSound("impact");
           // --- Collision briques (vérification de l'appel) ---
           // Collision briques (vers ligne 1000)
 
@@ -4137,15 +4767,8 @@ function forceShadowBlurProfile(profileName) {
           // ✅ NOUVEAU : Son de pièces pour les hauts scores
           // ✅ SON ADAPTATIF SELON LE MULTIPLICATEUR
           // ✅ SON ADAPTATIF BASÉ SUR TON IMPACT PARFAIT
-          if (mult > 1) {
-              playSoundScoreMultiplied(100, mult);
-          } else {
-              playSound("impact"); // Ton son original parfait pour x1
-          }
-
-
-
-          showScoreBonusAnim(b.x + b.w / 2, b.y + b.h / 2, brickPoints);
+            playSoundScoreMultiplied(10, mult);
+            showScoreBonusAnim(b.x + b.w / 2, b.y + b.h / 2, brickPoints);
         }
 
           for(let j=0;j<16;j++) {
@@ -4306,9 +4929,11 @@ function forceShadowBlurProfile(profileName) {
                   boss.alive = false;
                   bossDefeated = true;
                   bossHP = 0;
+
                 }
                 bricks.forEach(b => b.alive = false);
                 vies++; // On ajoute une vie
+                score += 20000 * mult
                 //levelComplete = true
 //              playSound("life2");
                 playSound("boss_death");
@@ -4337,13 +4962,13 @@ function forceShadowBlurProfile(profileName) {
 
           } else {
               // Sinon, on gagne les points normalement (multiplicateur inclus).
-              playSound("bonus");
+//              playSound("bonus");
+              playSoundScoreMultiplied(12, mult+12);
+              playSoundScoreMultiplied(12, mult+12);
               let finalPoints = b.points * mult;
               totalBonusPoints += b.points * mult;
-
               // ✅ CORRECTION : Ajouter les points immédiatement
               score += finalPoints;
-
               // Animation visuelle (sans délai pour les points)
               showScoreBonusAnim(b.x, b.y, finalPoints);
 
@@ -4479,6 +5104,12 @@ function forceShadowBlurProfile(profileName) {
 
 
       if(ball.y-ball.r>CANVAS_H) {
+
+        if (autopilot && autopilotAI.currentShot && autopilotAI.currentShot.type === "ball_save") {
+            learnFromResult(false);
+            console.log("💀 Échec sauvegarde balle - amélioration nécessaire");
+        }
+
         vies--; mult = 1; multTimer = 0;
 
         playSound("life");
@@ -4513,6 +5144,7 @@ function forceShadowBlurProfile(profileName) {
       // ✅ NOUVEAU : Gestion de la transition avec délai
       if (levelComplete && !levelTransition) {
           // ✅ 1. DÉMARRER LA TRANSITION
+          playSound("coins");
           levelTransition = true;
           levelTransitionTimer = performance.now();
 
@@ -4532,7 +5164,6 @@ function forceShadowBlurProfile(profileName) {
           console.log(`🎯 Transition démarrée : ${levelTransitionMessage}`);
       }
 
-      // ✅ 4. GESTION DU DÉLAI DE TRANSITION
       // ✅ 4. GESTION DU DÉLAI DE TRANSITION
       if (levelTransition) {
           let elapsed = performance.now() - levelTransitionTimer;
@@ -4626,6 +5257,7 @@ function forceShadowBlurProfile(profileName) {
       let color="#fff";
       if(icon==="🏳️") type="long";  // ✅ CORRIGÉ
       if(icon==="🏴‍☠️") type="short";
+      if(icon==="🍭") type="temps"; // ✅ COHÉRENT maintenant
       if(icon==="1️⃣") type="mult1";  // ✅ CORRIGÉ
       if(icon==="2️⃣") type="mult2";
       if(icon==="4️⃣") type="mult4";
@@ -4636,6 +5268,8 @@ function forceShadowBlurProfile(profileName) {
         x, y, icon, type, color, speed:6+Math.random()*2, caught:false, drop:true
       });
     }
+    //Fin de fonction spawnPowerup
+
 
     function spawnSkull(b) {
       let x=b.x+b.w/2, y=b.y+b.h/2;
@@ -4704,6 +5338,27 @@ function forceShadowBlurProfile(profileName) {
 
     function applyPowerup(p) {
 
+      // ✅ NOUVEAU : Gestion spécifique du powerup TEMPS
+
+        if (p.type === "temps") {
+          multMax = 80;
+          // ✅ AUGMENTATION MASSIVE DU MULTIPLICATEUR
+          let oldMult = mult;
+          mult = Math.min(mult + 10, multMax); // Ajoute 11, plafonné à multMax
+          // ✅ AJOUT DE TEMPS (cumule avec le temps restant)
+          multTimer += 30; // Ajoute toujours 4 minutes
+          // ✅ LOG DE VÉRIFICATION
+          console.log(`🍭 Powerup TEMPS appliqué ! Mult: ${oldMult} → ${mult}, Timer: ${multTimer}s`);
+          // ✅ MISE À JOUR IMMÉDIATE DE L'AFFICHAGE
+          updateHUD();
+          updateMultDisplay(mult);
+
+          // ✅ SON SPÉCIAL POUR CE POWERUP PUISSANT
+          playSound("bonus");
+
+          return; // ✅ SORTIE IMMÉDIATE pour éviter les autres traitements
+        }
+
 
       if (p.type === "long") {
           // ✅ ANNULATION de l'effet précédent
@@ -4749,9 +5404,9 @@ function forceShadowBlurProfile(profileName) {
         multTimer += 30; // Si géré par un interval ailleurs, assurez-vous de le clearer si needed
       }
 
-      if (mult >= 15) {
-        playSoundEuphoria();
-      }
+//      if (mult >= 15) {
+//        playSoundEuphoria();
+//      }
 
       if (p.type === "cookie") { // Correction : b.type -> p.type (assuming typo)
         cookies++;
@@ -4771,7 +5426,7 @@ function forceShadowBlurProfile(profileName) {
 
           paddleSizeEffect = "huge";
           paddleOriginalSize = paddleBaseW; // ✅ Toujours partir de la base
-          paddleTimer = 10;
+          paddleTimer = 30;
           paddleTimerActive = true;
 
           // ✅ CALCUL BASÉ SUR LA TAILLE DE BASE, pas la taille actuelle
@@ -4783,7 +5438,7 @@ function forceShadowBlurProfile(profileName) {
               paddleTimerActive = false;
               paddleHugeTimeout = null;
               playSound("raquettenormale");
-          }, 15000);
+          }, 30000);
 
         // Génération de particules (inchangé)
         for (let j = 0; j < 36; j++) {
@@ -5163,14 +5818,17 @@ function forceShadowBlurProfile(profileName) {
     }
 
     function render() {
+
         ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
         // ✅ RENDU CONDITIONNEL DE LA GALAXIE
-        //if (galaxyEnabled) {
-        //    renderGalaxy(ctx);
-        //}
-
+        if (galaxyEnabled) {
+            renderGalaxy(ctx);
+        }
         // ✅ RENDU OPTIMISÉ DES BRIQUES (SEUL SYSTÈME ACTIF)
+
+        let fontSize = 50;
+
         renderBricksOptimized();
 
         // Rendu des particules
@@ -5187,13 +5845,13 @@ function forceShadowBlurProfile(profileName) {
         // ✅ RENDU DES POWER-UPS
         powerups.forEach(p => {
             if (p.drop && !p.caught) {
-                let fontSize = 50;
-                let shadowBlur = 18;
+                //fontSize = 50;
+                setOptimizedShadowBlur(ctx, 18, "bonus");
                 let shadowColor = "#fff";
 
                 if (p.type === "boss_projectile") {
                     fontSize = 80;
-                    shadowBlur = 25;
+                    setOptimizedShadowBlur(ctx, 30, "bonus");
                     shadowColor = p.color || "#f00";
                 }
 
@@ -5201,7 +5859,8 @@ function forceShadowBlurProfile(profileName) {
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.shadowColor = shadowColor;
-                ctx.shadowBlur = shadowBlur;
+//                ctx.shadowBlur = shadowBlur;
+                setOptimizedShadowBlur(ctx, 20, "bonus");
                 ctx.fillStyle = p.color || "#fff";
                 ctx.fillText(p.icon, p.x, p.y);
                 ctx.shadowBlur = 0;
@@ -5211,7 +5870,8 @@ function forceShadowBlurProfile(profileName) {
         // Rendu des bonus
         bonuses.forEach(b => {
             if (!b.caught) {
-                ctx.font = "50px " + EMOJI_FONT;
+                fontSize =50;
+                ctx.font = fontSize + "px " + EMOJI_FONT;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.shadowColor = b.color;
@@ -5226,11 +5886,11 @@ function forceShadowBlurProfile(profileName) {
         // Rendu des skulls
         skulls.forEach(s => {
             if (!s.caught) {
-                ctx.font = "50px " + EMOJI_FONT;
+                ctx.font = fontSize + "px " + EMOJI_FONT;
                 ctx.textAlign = "center";
                 ctx.textBaseline = "middle";
                 ctx.shadowColor = "#fff";
-                ctx.shadowBlur = 18;
+                setOptimizedShadowBlur(ctx, 20, "bonus");
                 ctx.fillStyle = "#fff";
                 ctx.fillText(s.icon, s.x, s.y);
                 ctx.shadowBlur = 0;
@@ -5419,6 +6079,14 @@ function forceShadowBlurProfile(profileName) {
     // Panneau d'explication des bonus
     document.addEventListener('DOMContentLoaded', function() {
         console.log("DOM chargé - Initialisation du jeu");
+
+        // ✅ NOUVEAU : Initialiser le système de capture de souris
+        const pointerLockSupported = initPointerLock();
+        if (!pointerLockSupported) {
+          console.log("📝 Utilisation du système de mapping étendu");
+        }
+
+        initializeCopyright();
 
         // Application au chargement et redimensionnement
         window.addEventListener('load', applyResponsiveScale);
