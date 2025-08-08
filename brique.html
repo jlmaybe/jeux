@@ -850,7 +850,8 @@
         <li><span class="bonus-emoji">💊</span> <b>15000 pts Méga bonus</li>
         <h2>POWER-UPS</h2>
         <li><span class="bonus-emoji">️↔️</span> <b>Raquette longue</b> <span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b> <span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
-        <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ 8️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
+        <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
+//        <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ 8️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
         <li><span class="bonus-emoji">🍭</span> <b>MultiTimer +60s Multiplicateur, MaxMultiplier dévérouillé</li>
         <li><span class="bonus-emoji">🍪</span> <b>Cookies  Bouton autopilot</li>
         <li><span class="bonus-emoji">🇵🇸</span> <b>Cookies  x2</li>
@@ -940,7 +941,8 @@
       ["#0f0", "#0c8"],
       ["#fff", "#aaa"]
     ];
-    const SPECIAL_ICONS = ["↔️️","🍭","🏴‍☠️","1️⃣","2️⃣","4️⃣","8️⃣","❤️‍🔥"];
+//    const SPECIAL_ICONS = ["↔️️","🍭","🏴‍☠️","1️⃣","2️⃣","4️⃣","8️⃣","❤️‍🔥"];
+    const SPECIAL_ICONS = ["↔️️","🍭","🏴‍☠️","1️⃣","2️⃣","4️⃣","❤️‍🔥"];
 
     const BONUS_ICONS = [
       {emoji:"🍒", points:500, color:"#f06"},
@@ -3018,9 +3020,9 @@ function displayLeaderboard() {
           }
 
           // === REMISE À ZÉRO DES TIMERS GLOBAUX ===
-          multTimer = 0;
-          decrementTimer = 0;
-          paddleTimer = 0;
+          // multTimer = 0;
+          // decrementTimer = 0;
+          // paddleTimer = 0;
           levelTransitionTimer = 0;
 
           // === RESET DES FLAGS DE TIMER ===
@@ -3042,9 +3044,6 @@ function displayLeaderboard() {
           console.log("✅ Nettoyage ultra-complet terminé (boss inclus)");
       }
       //Fin de fonction clearAllTimersEndLevel
-
-      //Fin de fonction clearAllTimersEndLevel
-
 
 
     function playSound(type) {
@@ -3548,13 +3547,14 @@ function displayLeaderboard() {
 
         formations.forEach((pos, idx) => {
             if (pos.x >= 0 && pos.x + brickW <= CANVAS_W) {
-                let specialChance = 0.5; // 50% de chance d'avoir un special
+                let specialChance = 0.4; // 50% de chance d'avoir un special
                 let isSpecial = Math.random() < specialChance;
                 let special = null;
 
                 if (isSpecial) {
                     // ✅ PLUS DE MULTIPLICATEURS DANS LES BRIQUES BOSS
-                    let specials = ["💊", "2️⃣", "4️⃣", "8️⃣", "🇫🇷", "❤️‍🔥","🍭"];
+                    let specials = ["💊", "2️⃣", "4️⃣", "🇫🇷", "❤️‍🔥"];
+//                    let specials = ["💊", "2️⃣", "4️⃣", "8️⃣", "🇫🇷", "❤️‍🔥","🍭"];
                     if (Math.random() < 0.3) specials.push("☠️"); // Quelques skulls
                     special = specials[Math.floor(Math.random() * specials.length)];
                 }
@@ -3585,7 +3585,7 @@ function displayLeaderboard() {
       isBossLevel = false;
       let specials = [];
       let AutopilotBanner = false
-      let nbSpecials = 15;
+      let nbSpecials = 11;
       while(specials.length < nbSpecials) {
         let idx = Math.floor(Math.random()*brickRows*brickCols);
         if(!specials.includes(idx)) specials.push(idx);
@@ -4740,7 +4740,7 @@ function forceShadowBlurProfile(profileName) {
                   // Récompenses
 
                   score += 20000 * niveau;
-                  cookies += 3;
+                  cookies += 1;
                   vies += 1;
 
                   // ✅ NOUVEAU : Animation du gain qui monte vers le score
@@ -5221,9 +5221,12 @@ function forceShadowBlurProfile(profileName) {
               niveau++;
               clearAllTimersEndLevel();
               changeGalaxyConfiguration();
+              playSoundScoreMultiplied(12, mult+12);
               levelsPassed++;
               panic = 0;
+              score += 40000 * niveau;
               vies += 1;
+              cookies += 1;
 
               // ✅ 8. GESTION DES OFFSETS (ORDRE CORRIGÉ)
               wallOffset += 3;
