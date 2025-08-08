@@ -5376,7 +5376,7 @@ function forceShadowBlurProfile(profileName) {
           multMax = 80;
           // ✅ AUGMENTATION MASSIVE DU MULTIPLICATEUR
           let oldMult = mult;
-          mult = Math.min(mult + 10, multMax); // Ajoute 11, plafonné à multMax
+          mult = Math.min(mult + 1, multMax); // Ajoute 11, plafonné à multMax
           // ✅ AJOUT DE TEMPS (cumule avec le temps restant)
           multTimer += 30; // Ajoute toujours 4 minutes
           // ✅ LOG DE VÉRIFICATION
