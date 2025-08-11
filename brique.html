@@ -9,12 +9,10 @@
 
 
   /* ✅ OPTIMISATION POUR NOUVELLE FENÊTRE */
-
-
   {
-      margin: 0 !important;
-      padding: 0 !important;
-      box-sizing: border-box;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box;
   }
 
   html, body {
@@ -109,7 +107,6 @@
       color: #ff0;
       /* ✅ NOUVEAU : Effet visuel alternatif sans changement de taille */
       text-shadow:
-//        0 0 12px #ff0,
         0 0 24px #ff0,
         0 0 36px #fef,
         0 0 48px #fff;
@@ -233,7 +230,6 @@
     bottom: 0;
     z-index: -1;
 
-    //background: rgba(0, 0, 0, 0.85);
     Background: rgba(0, 0, 0, 0.40);
     border-radius: 18px;
 
@@ -370,7 +366,6 @@
 
 
     .bonus-panel-content {
-//      background: rgba(30, 40, 60, 0.99);
       background: rgba(30, 40, 60, 0.75);
       color: #fff;
       border-radius: clamp(12px, 2vw, 18px);
@@ -850,13 +845,15 @@
         <li><span class="bonus-emoji">💊</span> <b>15000 pts Méga bonus</li>
         <h2>POWER-UPS</h2>
         <li><span class="bonus-emoji">️↔️</span> <b>Raquette longue</b> <span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b> <span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
-        <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
-//        <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ 8️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
+        <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ 6️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
+        <li><span class="bonus-emoji">️🦁</span> <b>Multiplicateur à vie</li>
         <li><span class="bonus-emoji">🍭</span> <b>MultiTimer +60s Multiplicateur, MaxMultiplier dévérouillé</li>
         <li><span class="bonus-emoji">🍪</span> <b>Cookies  Bouton autopilot</li>
         <li><span class="bonus-emoji">🇵🇸</span> <b>Cookies  x2</li>
         <li><span class="bonus-emoji">🌈</span> <b>Vie      Une vie</li>
         <li><span class="bonus-emoji">🏖️</span> <b>Niveau   Niveau suivant</li>
+
+
         <li><span class="bonus-emoji">☠️</span>  <b>Malus    Score en décrémentation pendant 30s</li>
       </ul>
       <h2>ACTIONS</h2>
@@ -942,7 +939,7 @@
       ["#fff", "#aaa"]
     ];
 //    const SPECIAL_ICONS = ["↔️️","🍭","🏴‍☠️","1️⃣","2️⃣","4️⃣","8️⃣","❤️‍🔥"];
-    const SPECIAL_ICONS = ["↔️️","🍭","🏴‍☠️","1️⃣","2️⃣","4️⃣","❤️‍🔥"];
+    const SPECIAL_ICONS = ["↔️️","🍭","🏴‍☠️","1️⃣","2️⃣","4️⃣","❤️‍🔥","6️⃣"];
 
     const BONUS_ICONS = [
       {emoji:"🍒", points:500, color:"#f06"},
@@ -960,6 +957,7 @@
       {emoji:"🇵🇸", points:0, color:"#A67B5B", type:"cookiex2"},
       {emoji:"🌈", points:0, color:"#A67B5B", type:"vie"},
       {emoji:"🏖", points:0, color:"#A67B5B", type:"niveau"},
+      {emoji:"🦁", points:0, color:"#A67B5B", type:"XultX"},
       {emoji:"🍌", points:500, color:"#ff4"},
     ];
 
@@ -978,23 +976,22 @@
     const EMOJI_FONT = "'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Press Start 2P', monospace";
     const CANVAS_W = 875, CANVAS_H = 900;
 
-    // === VARIABLES D'ÉTAT DU JEU ===
-
-    // Ligne corrigée
     let vies = 4, niveau = 1, score = 0, displayScore = 0;
-    let mult = 1, multTimer = 0, multMax = 40, lastMult = 1;
+    let mult = 1, multTimer = 0, lastMult = 1;
     let bricks = [], particles = [], powerups = [], bonuses = [], animations = [];
-    brickCols = 14;
+    let brickCols = 14;
     let wallOffset = 50;
+    let multX = 0;
+    multX = loadMultX(); //Fin de variable multX
     let brickW = 61, brickH = 28; brickGap = 2;
     let paddleW = 150, paddleH = 18, paddleY = CANVAS_H-60;
     let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 18;
     let isMouseCaptured = false;
     let perfLastTime = performance.now();
-    let MOVE_SPEED = 1000;
+//    let MOVE_SPEED = 1000;
     let ballSpeed0 = 12; // IMPORTANT : avant son utilisation
-    let LancementAutoPilote = 5;
-    let brickRows = 8; //et autour de la ligne 700
+    let LancementAutoPilote = 0;
+    let brickRows = 7; //et autour de la ligne 700
     let isEndGame = false;
     let ball = null, ballSpeed = ballSpeed0, ballR = 13;
     let ballDX = 0, ballDY = 0;
@@ -1015,7 +1012,11 @@
     let autopilot = false;
     let aimingError = 0;      // AJOUT : Mémorise l'erreur de placement du coup précédent.
     let desiredPaddleX = 0;   // AJOUT : Stocke la position cible calculée par l'IA.
-    let AutopilotBanner = false
+//    let AutopilotBanner = false
+    let targetX = 0;
+    let priority = 0;
+    let movementType = 0;
+    let dt = 0;
     let panic = false
     let PanicButon = false
     let cookies = 0;
@@ -1027,7 +1028,6 @@
     let impactTimeout = null;
     let paddleVelocity = 0;
     let Debug = false;
-    let wheelVelocity = 0;
     let skulls = [];
     let shotHistory = [];
     let lastTargetBrick = null;
@@ -1035,8 +1035,36 @@
     let paddleSizeEffect = null;
     let paddleOriginalSize = paddleBaseW;
     let dernierUtilisateur = null;
+    let autopilotLock = { type: null, until: 0, targetX: 0 };
+    let shotLock = { until: 0, target: null }; // verrou de tir
+    let remaining = 0;
+    let multiTMP = 0;
+    multX = loadMultX();
 
-    // === VARIABLE DE SENSIBILITÉ SOURIS ===
+    const MULTX_STORAGE_KEY = "ELYSIUM_multX";
+      function loadMultX() {
+        try {
+          const raw = localStorage.getItem(MULTX_STORAGE_KEY);
+          if (raw === null) return 0;
+          const val = parseInt(raw, 10);
+          if (!isFinite(val) || val < 0) return 0; // borne simple: pas de négatif
+            return Math.min(val, 999); // sécurité: borne haute
+          } catch (e) {
+            console.warn("Impossible de charger multX:", e);
+            return 0;
+      }
+    } //Fin de fonction loadMultX
+
+    function saveMultX(value) {
+      try {
+        const v = Math.max(0, Math.min(999, parseInt(value, 10) || 0));
+        localStorage.setItem(MULTX_STORAGE_KEY, String(v));
+      } catch (e) {
+        console.warn("Impossible d’enregistrer multX:", e);
+      }
+    } //Fin de fonction saveMultX
+
+      // === VARIABLE DE SENSIBILITÉ SOURIS ===
     let mouseSensitivity = 1.50; // ✅ NOUVEAU : Facteur de démultiplication (1.8x plus sensible)
     let lastMouseX = null; // ✅ NOUVEAU : Position précédente de la souris pour calcul du delta
     //Fin de variables sensibilité souris
@@ -1050,6 +1078,20 @@ let galaxyParticleCount = 150; // Nombre de pixels lumineux
 let galaxyColorScheme = 2; // Schéma de couleur actuel (0-4)
 let galaxySpacing = 1.5; // Multiplicateur d'espacement (0.7-1.5)
 let galaxyRotationMode = 2; // Mode de rotation (0-2)
+let reqX = 0;
+let vv = false;
+let ballDXballDX = 0;
+let ballDXballDY = 0;
+let multMax = 30 + multX;
+
+const AIM = {
+  active: false,
+  targetX: 0,
+  targetY: 0,
+  impactRel: 0,
+  until: 0
+}; //Fin de variable AIM
+
 
 // ✅ OPTIMISATION : Cache trigonométrique
 let trigCache = {
@@ -1071,12 +1113,7 @@ let trigCache = {
 };
 trigCache.init();
 
-
-
-let targetVelocity = 0;
-let adaptiveCompensation = 0;
-let compensationStep = 5;
-
+let MultTMP = 0;
 let isBossLevel = false;
 let boss = null;
 let bossPhase = 1;
@@ -1091,16 +1128,25 @@ let emailSent = false; // Pour éviter les envois multiples
 let gameSessionId = null; // ID unique de la session de jeu
 let levelComplete = false;
 
-let gyroControls = {
-    active: false,
-    supported: false,
-    permission: false,
-    sensitivity: 1.5,
-    deadZone: 3
-};
-
 
 // === SYSTÈME D'APPRENTISSAGE AUTOPILOTE ULTRA-EFFICACE ===
+
+function getZoneDataSafe(zoneIndex) {
+let z = Number.isInteger(zoneIndex) ? Math.max(0, Math.min(8, zoneIndex)) : null;
+if (z === null) return null;
+
+if (!Array.isArray(autopilotAI.zoneStats)) {
+autopilotAI.zoneStats = new Array(9).fill().map(() => ({
+attempts: 0, hits: 0, misses: 0, avgError: 0, correction: 0, confidence: 0.5
+}));
+}
+if (!autopilotAI.zoneStats[z]) {
+autopilotAI.zoneStats[z] = { attempts: 0, hits: 0, misses: 0, avgError: 0, correction: 0, confidence: 0.5 };
+}
+return autopilotAI.zoneStats[z];
+} //Fin de fonction getZoneDataSafe
+
+
 let autopilotAI = {
     // Historique des tirs par zone (9 zones = 3x3)
     zoneStats: new Array(9).fill().map(() => ({
@@ -1123,16 +1169,16 @@ let autopilotAI = {
 
     // Vitesses de mouvement (petites saccades pour précision)
     speeds: {
-        emergency: 1200,    // ← À REMPLACER
-        urgent: 900,       // ← À REMPLACER
-        precise: 500,       // ← À REMPLACER
-        collect: 400        // ← À REMPLACER
-    }
+    emergency: 1250,
+    urgent: 1000,
+    precise: 520,
+    collect: 520
+    } //Fin de propriété speeds
 };
 
 
-let frameCount = 0;
-let lastPerformanceCheck = 0;
+//let frameCount = 0;
+//let lastPerformanceCheck = 0;
 
 const EMAILJS_CONFIG = {
     publicKey: "S4SodZJrD9Ftqor5s",
@@ -1144,12 +1190,12 @@ const EMAILJS_CONFIG = {
 
 let totalBonusPoints = 0;
 let gyroActive = false;
-let gyroSupported = false;
-let gyroPermission = false;
-let touchStartX = 0;
-let touchStartY = 0;
-let isTouching = false;
-let touchControlZone = null; // 'left', 'right', ou null
+//let gyroSupported = false;
+//let gyroPermission = false;
+//let touchStartX = 0;
+//let touchStartY = 0;
+//let isTouching = false;
+//let touchControlZone = null; // 'left', 'right', ou null
 
 // === SYSTÈME DE QUALITÉ DYNAMIQUE ===
 let renderQuality = "low"; // "high", "medium", "low"
@@ -1158,7 +1204,7 @@ let renderQuality = "low"; // "high", "medium", "low"
 
 let baseGameSpeed = 12;
 let currentGameSpeed = 12;
-let levelSpeedBonus = 0;
+//let levelSpeedBonus = 0;
 let brickSpeedBonus = 0;
 let speedIncreasePerBrick = 0.001; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
 let speedIncreasePerLevel = 0.025;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
@@ -1225,10 +1271,10 @@ let lastStatsState = {
 };
 
 // Variables manquantes pour le système de qualité
-let particleCountMax = 80; // Pour ajuster la qualité
+//let particleCountMax = 80; // Pour ajuster la qualité
 
 let perfFrameCount = 0;
-let harmonyResetTimer = null; // Variable globale pour la chaîne harmonique
+//let harmonyResetTimer = null; // Variable globale pour la chaîne harmonique
 
 
 
@@ -1330,6 +1376,36 @@ let harmonyResetTimer = null; // Variable globale pour la chaîne harmonique
         }
     }
     //Fin de fonction initializeCopyright
+    function computePaddleBounce(ballDX, ballDY, impactRel, maxBounceAngle = 4 * Math.PI / 12, aimTilt = 0.0) {
+    // Garde-fous numériques
+    if (!isFinite(ballDX)) ballDX = 0;
+    if (!isFinite(ballDY)) ballDY = -1; // vers le haut par défaut
+    if (!isFinite(impactRel)) impactRel = 0;
+    if (!isFinite(maxBounceAngle) || maxBounceAngle <= 0) maxBounceAngle = 4 * Math.PI / 12;
+
+    // 1) Clamp dur de l’impact relatif
+    let rel = Math.max(-1, Math.min(1, impactRel + (isFinite(aimTilt) ? aimTilt : 0)));
+
+    // 2) Courbe “S” douce
+    const s = 0.85;
+    rel = Math.sign(rel) * Math.pow(Math.abs(rel), s);
+
+    // 3) Angle max constant
+    const newAngle = rel * maxBounceAngle;
+
+    // 4) Vitesse scalaire conservée (avec plancher)
+    let speed = Math.hypot(ballDX, ballDY);
+    if (!isFinite(speed) || speed < 0.0001) speed = 10; // repli sûr
+
+    const dx = speed * Math.sin(newAngle);
+    const dy = -speed * Math.cos(newAngle); // vers le haut
+
+    // Dernier filet de sécurité
+    return {
+    dx: isFinite(dx) ? dx : 0,
+    dy: isFinite(dy) ? dy : -Math.abs(speed)
+    };
+    } //Fin de fonction computePaddleBounce
 
     // Fonction pour obtenir la zone (0-8) d'une position
     function getAIZone(x, y) {
@@ -1366,51 +1442,48 @@ let harmonyResetTimer = null; // Variable globale pour la chaîne harmonique
     //Fin de fonction calculatePerfectBallIntercept
 
     function findSkullThreat() {
-        if (!skulls || skulls.length === 0) return null;
+    if (!skulls || skulls.length === 0) return null;
 
-        let maxDanger = 0;
-        let bestEscape = null;
+    let maxDanger = 0;
+    let bestEscape = null;
 
-        skulls.forEach(skull => {
-            if (skull && skull.y < paddleY && skull.y > CANVAS_H * 0.3) {
-                let timeToImpact = (paddleY - skull.y) / (skull.speed || 7);
-                let dangerZone = paddleW + 20; // ✅ RÉDUIT : +20px au lieu de +40px
-                let distance = Math.abs(skull.x - (paddleX + paddleW/2));
+    skulls.forEach(skull => {
+    if (skull && skull.y < paddleY && skull.y > CANVAS_H * 0.3) {
+    let timeToImpact = (paddleY - skull.y) / (skull.speed || 7);
+    let dangerZone = paddleW + 20;
+    let distance = Math.abs(skull.x - (paddleX + paddleW/2));
 
-                if (distance < dangerZone && timeToImpact > 0) {
-                    let danger = dangerZone / (timeToImpact * distance * 0.01);
+    if (distance < dangerZone && timeToImpact > 0) {
+      let danger = dangerZone / (timeToImpact * distance * 0.01);
 
-                    if (danger > maxDanger) {
-                        maxDanger = danger;
+      if (danger > maxDanger) {
+        maxDanger = danger;
+        let leftSafe = skull.x - dangerZone;
+        let rightSafe = skull.x + dangerZone;
+        let currentCenter = paddleX + paddleW/2;
+        let safeX = null;
 
-                        // Calcul d'échappatoire optimisé
-                        let leftSafe = skull.x - dangerZone;
-                        let rightSafe = skull.x + dangerZone;
+        if (leftSafe >= paddleW/2 && rightSafe <= CANVAS_W - paddleW/2) {
+          safeX = Math.abs(leftSafe - currentCenter) < Math.abs(rightSafe - currentCenter) ? leftSafe : rightSafe;
+        } else if (leftSafe >= paddleW/2) {
+          safeX = leftSafe;
+        } else if (rightSafe <= CANVAS_W - paddleW/2) {
+          safeX = rightSafe;
+        }
 
-                        let currentCenter = paddleX + paddleW/2;
-                        let safeX = null;
-
-                        // Choisir le côté le plus proche ET accessible
-                        if (leftSafe >= paddleW/2 && rightSafe <= CANVAS_W - paddleW/2) {
-                            safeX = Math.abs(leftSafe - currentCenter) < Math.abs(rightSafe - currentCenter)
-                                ? leftSafe : rightSafe;
-                        } else if (leftSafe >= paddleW/2) {
-                            safeX = leftSafe;
-                        } else if (rightSafe <= CANVAS_W - paddleW/2) {
-                            safeX = rightSafe;
-                        }
-
-                        if (safeX) {
-                            bestEscape = { safeX: safeX, danger: danger };
-                        }
-                    }
-                }
-            }
-        });
-
-        return bestEscape;
+        if (safeX !== null) bestEscape = { safeX, danger };
+      }
     }
-    //Fin de fonction findSkullThreat
+  }
+
+  });
+
+  if (bestEscape && (bestEscape.safeX < paddleW/2 || bestEscape.safeX > CANVAS_W - paddleW/2)) {
+  bestEscape.safeX = Math.max(paddleW/2, Math.min(CANVAS_W - paddleW/2, bestEscape.safeX));
+  }
+  return bestEscape;
+  } //Fin de fonction findSkullThreat
+
 
     function findAdaptiveBrickTarget() {
         let aliveBricks = bricks.filter(b => b && b.alive);
@@ -1467,7 +1540,13 @@ let harmonyResetTimer = null; // Variable globale pour la chaîne harmonique
 
             // 🧠 APPRENTISSAGE avec correction d'angle
             let zone = getAIZone(brickCenterX, brickCenterY);
-            let zoneData = autopilotAI.zoneStats[zone];
+            let zoneData = getZoneDataSafe(zone);
+            if (zoneData && zoneData.attempts > 0) {
+            requiredPaddleX += zoneData.correction;
+            let confidence = zoneData.hits / Math.max(1, zoneData.attempts);
+            score *= (0.3 + confidence * 0.7);
+            if (confidence > 0.7) score += 400;
+            }
 
             if (zoneData.attempts > 0) {
                 requiredPaddleX += zoneData.correction;
@@ -1531,6 +1610,8 @@ let harmonyResetTimer = null; // Variable globale pour la chaîne harmonique
                         case "long": score = 500; break;
                         case "cookie": case "cookiex2": score = 400; break;
                         case "vie": case "niveau": score = 900; break;
+                        case "XultX": case "XultX": score =1500; break;
+
                         default:
                             if (item.points && item.points > 5000) score = 600;
                             else if (item.points && item.points > 1000) score = 400;
@@ -1620,56 +1701,67 @@ let harmonyResetTimer = null; // Variable globale pour la chaîne harmonique
     //Fin de fonction executeAutopilotMovement
 
     function learnFromResult(success, hitBrick = null) {
-        if (!autopilotAI.currentShot) return;
+    // Garde-fous de base
+    if (!autopilotAI || typeof autopilotAI !== 'object') return;
+    if (!autopilotAI.currentShot) return;
 
-        let shot = autopilotAI.currentShot;
+    // Sûreté des structures
+    if (!Array.isArray(autopilotAI.recentShots)) autopilotAI.recentShots = [];
+    if (!isFinite(autopilotAI.learningRate)) autopilotAI.learningRate = 0.1;
 
-        if (shot.type === "brick_shot" && shot.zone !== undefined) {
-            let zoneData = autopilotAI.zoneStats[shot.zone];
-            zoneData.attempts++;
+    const shot = autopilotAI.currentShot;
 
-            if (success && hitBrick) {
-                // ✅ SUCCÈS
-                zoneData.hits++;
-                console.log(`🎯 Succès zone ${shot.zone}: ${zoneData.hits}/${zoneData.attempts} (${Math.round(zoneData.hits/zoneData.attempts*100)}%)`);
-
-            } else {
-                // ❌ ÉCHEC - Calculer correction
-                zoneData.misses++;
-
-                if (hitBrick) {
-                    // Calculer l'erreur de visée
-                    let expectedX = shot.targetBrick.x + shot.targetBrick.w/2;
-                    let actualX = hitBrick.x + hitBrick.w/2;
-                    let error = actualX - expectedX;
-
-                    // Apprentissage progressif
-                    zoneData.correction += error * autopilotAI.learningRate;
-                    zoneData.correction = Math.max(-40, Math.min(40, zoneData.correction));
-
-                    console.log(`📚 Apprentissage zone ${shot.zone}: erreur=${error.toFixed(1)}, correction=${zoneData.correction.toFixed(1)}`);
-                }
-            }
-
-            // Mise à jour confiance
-            zoneData.confidence = zoneData.hits / zoneData.attempts;
-
-            // Ajouter à l'historique récent
-            autopilotAI.recentShots.push({
-                zone: shot.zone,
-                success: success,
-                timestamp: performance.now()
-            });
-
-            // Limiter historique à 20 tirs
-            if (autopilotAI.recentShots.length > 20) {
-                autopilotAI.recentShots.shift();
-            }
-        }
-
-        autopilotAI.currentShot = null;
+    // On ne traite que les tirs de type brick_shot avec zone valide
+    if (shot.type === "brick_shot" && Number.isInteger(shot.zone)) {
+    // Clamp zone 0..8
+    let z = Math.max(0, Math.min(8, shot.zone));
+    // Récupération sécurisée des stats
+    if (!Array.isArray(autopilotAI.zoneStats)) {
+      autopilotAI.zoneStats = new Array(9).fill().map(() => ({
+        attempts: 0, hits: 0, misses: 0, avgError: 0, correction: 0, confidence: 0.5
+      }));
     }
-    //Fin de fonction learnFromResult
+    if (!autopilotAI.zoneStats[z]) {
+      autopilotAI.zoneStats[z] = { attempts: 0, hits: 0, misses: 0, avgError: 0, correction: 0, confidence: 0.5 };
+    }
+
+    let zoneData = autopilotAI.zoneStats[z];
+
+    // Compteurs
+    zoneData.attempts = (zoneData.attempts | 0) + 1;
+
+    if (success && hitBrick) {
+      zoneData.hits = (zoneData.hits | 0) + 1;
+    } else {
+      zoneData.misses = (zoneData.misses | 0) + 1;
+
+      // Correction si brique prévue vs brique touchée
+      if (hitBrick && shot.targetBrick && isFinite(autopilotAI.learningRate)) {
+        const expectedX = shot.targetBrick.x + shot.targetBrick.w / 2;
+        const actualX = hitBrick.x + hitBrick.w / 2;
+        const error = actualX - expectedX;
+
+        if (isFinite(error)) {
+          const lr = Math.max(0, Math.min(1, autopilotAI.learningRate));
+          const newCorr = (zoneData.correction || 0) + error * lr;
+          zoneData.correction = Math.max(-40, Math.min(40, newCorr));
+        }
+      }
+    }
+
+    // Confiance
+    zoneData.confidence = zoneData.hits / Math.max(1, zoneData.attempts);
+
+    // Historique
+    autopilotAI.recentShots.push({ zone: z, success: !!success, timestamp: performance.now() });
+    if (autopilotAI.recentShots.length > 20) {
+      autopilotAI.recentShots.shift();
+    }
+  }
+
+  // Toujours nettoyer
+  autopilotAI.currentShot = null;
+  } //Fin de fonction learnFromResult
 
     // Fonction de diagnostic des performances
     function diagnoseAutopilot() {
@@ -1696,80 +1788,483 @@ let harmonyResetTimer = null; // Variable globale pour la chaîne harmonique
 
 
     function autopilotMove(dt) {
+
+
         if (!ball || !dt) return;
+
+        // Hystérésis: si un lock est actif, on le respecte tant qu'il est valable
+        if (autopilotLock.type && performance.now() < autopilotLock.until) {
+        executeAutopilotMovementTight(autopilotLock.targetX, 5, "urgent", dt);
+        return;
+        }
 
         const paddleCenter = paddleX + paddleW/2;
         let targetX = paddleCenter;
         let priority = 0; // 0=idle, 1=powerup, 2=brick, 3=skull, 4=ball
         let movementType = "idle";
 
-        // 🛡️ PRIORITÉ ABSOLUE 1 : SAUVEGARDE DE LA BALLE (JAMAIS RATÉE)
-        if (ballDY > 0 && ball.y > CANVAS_H * 0.5) {
+        // 0) Préemption vitaux powerups si atteignables (avant tout)
+        //    On utilise une version "vital first" de findSecurePowerup ci‑dessous.
+        let vital = findSecurePowerupVitalFirst();
+        if (vital && ballDY < 0) {
+            // Si la balle monte, on peut collecter sans risque
+//            targetX = vital.x;
+            targetX = predictItemX(vital);
+            priority = 1;
+            movementType = "collect";
+        }
+
+        // Fenêtre vitale même si la balle descend mais loin/temps long
+        if (!vital && ballDY > 0) {
+            let interceptResult = calculatePerfectBallIntercept();
+            if (interceptResult && interceptResult.timeToImpact > 0.45) {
+              let vital2 = findSecurePowerupVitalFirst();
+                if (vital2) {
+                  const px = predictItemX(vital2);
+                  const distP = Math.abs(px - (paddleX + paddleW/2));
+                  if (distP < Math.max(160, paddleW)) {
+                      targetX = px;
+                      priority = 1;
+                      movementType = "collect";
+                      autopilotLock = { type: "powerup", until: performance.now() + 140, targetX };
+                  }
+                }
+            }
+        }
+
+        // 1) Sauvegarde balle (priorité absolue)
+        if (ballDY > 0 && ball.y > CANVAS_H * 0.48) {
             let interceptResult = calculatePerfectBallIntercept();
             if (interceptResult) {
                 targetX = interceptResult.x;
                 priority = 4;
                 movementType = "emergency";
-
-                // Enregistrer pour apprentissage si échec
                 autopilotAI.currentShot = {
                     type: "ball_save",
                     targetX: interceptResult.x,
                     ballPos: {x: ball.x, y: ball.y},
                     timestamp: performance.now()
                 };
-
-                console.log(`🛡️ Sauvegarde balle prioritaire vers X=${Math.floor(interceptResult.x)}`);
             }
         }
 
-        // ☠️ PRIORITÉ 2 : ÉVITEMENT SKULLS (DISTANCE RÉDUITE +20px)
+        // 2) Évitement skull
         if (priority < 3) {
             let skullThreat = findSkullThreat();
             if (skullThreat) {
                 targetX = skullThreat.safeX;
                 priority = 3;
                 movementType = "urgent";
-                console.log(`☠️ Évitement skull vers X=${Math.floor(skullThreat.safeX)}`);
             }
         }
 
-        // 🎯 PRIORITÉ 3 : VISÉE BRIQUES AVEC APPRENTISSAGE
+        // 3) Powerups (seconde passe non vitale, si rien d’urgent)
+        const shotActive = (autopilotAI.currentShot && autopilotAI.currentShot.type === "brick_shot") ||
+        (shotLock.target && performance.now() < shotLock.until);
+        if (priority < 1 && !shotActive && ballDY < 0) {
+        const pu = findSecurePowerupRelaxed();
+        if (pu) {
+        targetX = predictItemX(pu);
+        priority = 1;
+        movementType = "collect";
+        }
+        }
+
+        if (shotLock.target && performance.now() < shotLock.until) {
+        // On conserve la cible verrouillée tant que la fenêtre court
+        const t = shotLock.target;
+        // Recompute la solution d’impact au besoin, sinon conserve targetX
+        const solved = solveImpactForTarget(ball, t.bx, t.by, paddleY, paddleW);
+        if (solved) {
+        const desiredCenter = Math.max(paddleW/2, Math.min(CANVAS_W - paddleW/2, solved.paddleCenterX));
+        targetX = desiredCenter;
+        priority = 2;
+        movementType = "precise";
+        // Maintenir currentShot cohérent
+        autopilotAI.currentShot = {
+        type: "brick_shot",
+        targetBrick: t.brick,
+        targetX: desiredCenter,
+        zone: getAIZone(t.bx, t.by),
+        ballPos: {x: ball.x, y: ball.y},
+        timestamp: performance.now(),
+        confidence: t.confidence || 0.5
+        };
+        // Armer AIM sûr
+        AIM.active = false;
+        if (isFinite(solved.impactRel)) {
+        AIM.impactRel = Math.max(-1, Math.min(1, solved.impactRel));
+        AIM.until = performance.now() + 900;
+        AIM.active = true;
+        }
+        // Et on sort de la section “choix brique”
+        }
+        }
+        executeAutopilotMovementTight(targetX, 2, "precise", dt);
+        return;
+        //Fin de verrou shotLock (entrée)
+
+
+        // 4) Vise brique si la balle monte et si tir faisable (version unifiée)
         if (priority < 2 && ballDY < 0) {
-            let brickTarget = findAdaptiveBrickTarget();
-            if (brickTarget) {
-                targetX = brickTarget.paddleX;
-                priority = 2;
-                movementType = "precise";
+        let brickTarget = null;
 
-                // Enregistrer le tir pour apprentissage
-                autopilotAI.currentShot = {
-                    type: "brick_shot",
-                    targetBrick: brickTarget.brick,
-                    targetX: brickTarget.paddleX,
-                    zone: brickTarget.zone,
-                    ballPos: {x: ball.x, y: ball.y},
-                    timestamp: performance.now(),
-                    confidence: brickTarget.confidence
-                };
-            }
+        if (remaining <= 5) {
+        // vise la brique la plus proche verticalement de la balle (rapide à finir)
+        const alive = bricks.filter(b => b && b.alive && (b.y + b.h/2) < ball.y);
+        if (alive.length) {
+        alive.sort((a,b) => {
+        const ay = ball.y - (a.y + a.h/2);
+        const by = ball.y - (b.y + b.h/2);
+        const ax = Math.abs((a.x + a.w/2) - ball.x);
+        const bx = Math.abs((b.x + b.w/2) - ball.x);
+        return (ay - by) || (ax - bx);
+        });
+        const tgt = alive;
+        const bx = tgt.x + tgt.w/2, by = tgt.y + tgt.h/2;
+        const solved = solveImpactForTarget(ball, bx, by, paddleY, paddleW);
+        if (solved) {
+        brickTarget = { brick: tgt, paddleX: solved.paddleCenterX, zone: getAIZone(bx, by), confidence: 0.6 };
+        }
+        }
         }
 
-        // 🎁 PRIORITÉ 4 : POWERUPS SÉCURISÉS
-        if (priority < 1) {
-            let powerupTarget = findSecurePowerup();
-            if (powerupTarget) {
-                targetX = powerupTarget.x;
-                priority = 1;
-                movementType = "collect";
-            }
+        if (!brickTarget) {
+        brickTarget = findAdaptiveBrickTargetFeasible();
+        }
+        if (!brickTarget) {
+        const likely = findLikelyTarget();
+        if (likely && likely.brick) {
+        const bx = likely.brick.x + likely.brick.w/2;
+        const by = likely.brick.y + likely.brick.h/2;
+        const solved = solveImpactForTarget(ball, bx, by, paddleY, paddleW);
+        if (solved) brickTarget = { brick: likely.brick, paddleX: solved.paddleCenterX, zone: getAIZone(bx, by), confidence: 0.5 };
+        }
         }
 
-        // 🚀 MOUVEMENT PRÉCIS AVEC PETITES SACCADES
-        executeAutopilotMovement(targetX, priority, movementType, dt);
-    }
+      } //Fin de fonction autopilotMove (partie armement)
+        } //Fin de bloc vise brique simplifié
+
+        // 5) Mouvement
+        executeAutopilotMovementTight(targetX, priority, movementType, dt);
+
+        // Si priorité très basse (rien) on relâche
+        if (priority === 0) autopilotLock.type = null;
+
     //Fin de fonction autopilotMove
 
+    function predictItemX(item) {
+    if (!item) return paddleX + paddleW/2;
+    const vy = (item.speed || 6);
+    const dy = Math.max(0, (paddleY - item.y));
+    const t = dy / (vy + 1e-6);
+    const futureX = item.x + (item.dx || 0) * t;
+    return Math.max(paddleW/2, Math.min(CANVAS_W - paddleW/2, futureX));
+    } //Fin de fonction predictItemX
+
+
+
+    function isVitalPowerup(item) {
+    if (!item) return false;
+    // Types critiques (à adapter si tu veux durcir/alléger)
+    return item.type === "temps" || item.type === "mult4" || item.type === "mult8" ||
+    item.type === "vie" || item.type === "niveau" ||
+    // Cookie utile si bouton panic envisagé:
+    (item.type === "cookie" && cookies === 0);
+    } //Fin de fonction isVitalPowerup
+
+    function findSecurePowerupVitalFirst() {
+
+      // Version stricte: vitaux clairement atteignables
+      let best = null;
+      let bestScore = -1;
+
+      let all = [...(powerups || []), ...(bonuses || [])];
+      all.forEach(item => {
+      if (!item || item.caught || item.type === "skull" || item.type === "boss_projectile") return;
+      if (!isVitalPowerup(item)) return;
+
+
+      if (item.y > 40 && item.y < paddleY + 160) {
+        const vy = (item.speed || 6);
+        const dy = Math.max(0, paddleY - item.y);
+        const t = dy / (vy + 0.0001);
+
+        // prédiction future
+        const futureX = item.x + (item.dx || 0) * t;
+        const dist = Math.abs(futureX - (paddleX + paddleW/2));
+
+        // Fenêtre dynamique
+        const speedCollect = (autopilotAI && autopilotAI.speeds ? autopilotAI.speeds.collect : 520) * (megaspeed || 1);
+        const minWindow = 0.18 + Math.min(0.17, dist / Math.max(200, paddleW) * 0.25);
+        if (t <= minWindow) return;
+
+        // Distance atteignable raisonnable
+        if (dist < Math.max(140, paddleW * 0.9)) {
+          let base = 1000;
+          if (item.type === "temps") base += 900;
+          else if (item.type === "mult8") base += 700;
+          else if (item.type === "mult4") base += 550;
+          else if (item.type === "vie") base += 500;
+          else if (item.type === "niveau") base += 450;
+          else if (item.type === "cookie") base += 200;
+
+          const score = base - dist * 0.6 - t * 120;
+
+          if (autopilotAI.currentShot && autopilotAI.currentShot.type === "brick_shot" && autopilotAI.currentShot.targetBrick) {
+          if (autopilotAI.currentShot.targetBrick !== brick) {
+          // Pénalité d’inertie pour éviter de sauter de cible en cible
+          score -= 120; // petit frein au “change d’avis”
+          }
+        }
+
+
+          if (score > bestScore) { bestScore = score; best = item; }
+        }
+      }
+
+      });
+
+      return best;
+      } //Fin de fonction findSecurePowerupVitalFirst
+
+function findSecurePowerupRelaxed() {
+      // Version plus permissive: on considère aussi bonus à points
+      let best = null;
+      let bestScore = -1;
+      let all = [...(powerups || []), ...(bonuses || [])];
+      all.forEach(item => {
+          if (!item || item.caught || item.type === "skull" || item.type === "boss_projectile") return;
+
+          if (item.y > 50 && item.y < paddleY + 170) {
+              let timeToCollect = (paddleY - item.y) / ((item.speed || 6) + 0.0001);
+              if (timeToCollect <= 0.16) return; // trop tard
+
+              let futureX = item.x + (item.dx || 0) * timeToCollect;
+              let dist = Math.abs(futureX - (paddleX + paddleW/2));
+
+              if (dist < Math.max(170, paddleW)) {
+                  // Pondération par type
+                  let score = 100;
+                  if (isVitalPowerup(item)) score += 400;
+                  else if (item.points && item.points >= 5000) score += 220;
+                  else if (item.points && item.points >= 1000) score += 160;
+                  else score += 80;
+
+                  // Bonus si le mouvement actuel est dans le bon sens
+                  let currentDir = paddleVelocity ? Math.sign(paddleVelocity) : 0;
+                  let itemDir = Math.sign(futureX - (paddleX + paddleW/2));
+                  if (currentDir === itemDir) score += 60;
+
+                  score -= dist * 0.4;
+                  score -= timeToCollect * 90;
+
+                  if (score > bestScore) { bestScore = score; best = item; }
+              }
+          }
+      });
+
+      return best;
+
+      } //Fin de fonction findSecurePowerupRelaxed
+
+
+      function findAdaptiveBrickTargetFeasible() {
+      const aliveBricks = bricks.filter(b => b && b.alive && !b.animating);
+      if (aliveBricks.length === 0) return null;
+
+      let best = null;
+      let bestScore = -1;
+
+      aliveBricks.forEach(brick => {
+      const cx = brick.x + brick.w/2;
+      const cy = brick.y + brick.h/2;
+      const dx = cx - ball.x;
+      const dy = cy - ball.y;
+      if (dy >= 0) return; // brique derrière la balle (la balle monte)
+
+      // Correction latérale douce 5°
+      let corr = 5 * Math.PI / 180;
+      if (cx < CANVAS_W * 0.3) corr *= 1.2;
+      else if (cx > CANVAS_W * 0.7) corr *= -1.2;
+
+      // Pente horizontale vers la raquette, repère unifié
+      const dYabs = Math.max(1, (ball.y - paddleY)); // distance verticale positive jusqu’à la raquette
+      let slope = (dx / Math.abs(dy)) + Math.tan(corr);
+
+      // Position requise du centre de la raquette
+      let reqXcenter = ball.x + slope * dYabs;
+
+      // Si hors-limites, essaie corr dans l’autre sens (petit repli)
+      if (reqXcenter < paddleW/2 || reqXcenter > CANVAS_W - paddleW/2) {
+        slope = (dx / Math.abs(dy)) - Math.tan(corr);
+        reqXcenter = ball.x + slope * dYabs;
+        if (reqXcenter < paddleW/2 || reqXcenter > CANVAS_W - paddleW/2) return;
+      }
+
+      // Faisabilité en temps réel
+      const moveDist = Math.abs(reqXcenter - (paddleX + paddleW/2));
+      const vy = Math.abs(ballDY) + 1e-3;
+      const timeBeforeDown = Math.max(0.05, Math.abs(dy) / vy);
+      const vx = (autopilotAI && autopilotAI.speeds ? autopilotAI.speeds.precise : 520) * (megaspeed || 1);
+      const maxReach = vx * timeBeforeDown * 0.85;
+//      const feasible = moveDist <= Math.max(120, maxReach);
+      let feasible = moveDist <= Math.max(120, maxReach);
+
+      if (!findAdaptiveBrickTargetFeasible._hys) {
+      findAdaptiveBrickTargetFeasible._hys = { lastOk: 0, lastId: null };
+      }
+      const hys = findAdaptiveBrickTargetFeasible._hys;
+      const id = brick._id || (brick._id = `${cx|0}_${cy|0}`);
+
+      const recentlyOk = (hys.lastId === id) && (performance.now() - hys.lastOk < 250);
+      if (!feasible && recentlyOk) {
+      const relaxedReach = Math.max(120, maxReach * 1.12);
+      if (moveDist <= relaxedReach) feasible = true;
+      }
+      if (feasible) { hys.lastOk = performance.now(); hys.lastId = id; }
+
+
+      if (!feasible && aliveBricks.length > 2) return;
+
+      // Score
+      const distance = Math.sqrt(dx*dx + dy*dy);
+      const remain = aliveBricks.length;
+      let score = 1000;
+
+      if (remain <= 3) score += 1200;
+      if (remain === 1) score += 2500;
+
+      score += Math.min(400, timeBeforeDown * 600);
+      score -= distance * 0.6;
+      score -= moveDist * 0.8;
+
+      if (brick.special && !brick.special.includes("☠️")) score += 300;
+
+      // Apprentissage par zone
+      const zone = getAIZone(cx, cy);
+//      const z = autopilotAI.zoneStats[zone];
+      const z = getZoneDataSafe(zone);
+      if (z && z.attempts > 2) {
+        reqXcenter += z.correction;
+        const conf = z.hits / z.attempts;
+        score *= (0.35 + conf * 0.65);
+        if (conf > 0.7) score += 400;
+      }
+
+      // Fin de niveau: favoriser brique basse et proche latéralement
+      if (remain <= 2) {
+        score += (CANVAS_H - cy) * 0.5;
+        score -= Math.abs((paddleX + paddleW/2) - cx) * 0.35;
+      }
+
+      const lateral = Math.abs(cx - ball.x);
+      score -= lateral * 0.15; // léger malus latéral (évite cibles opposées)
+      if (aliveBricks.length <= 4) {
+      score += Math.max(0, (CANVAS_H - cy)) * 0.25; // favorise briques basses en fin
+      }
+
+
+      if (score > bestScore) {
+        bestScore = score;
+        best = { brick, paddleX: reqXcenter, zone, confidence: (z && z.attempts ? z.hits/z.attempts : 0.5) };
+      }
+
+      });
+
+      return best;
+      } //Fin de fonction findAdaptiveBrickTargetFeasible
+
+      // Cible probable simple: prend une brique vivante proche de l'axe vertical de la balle et en avant (y plus haut)
+      function findLikelyTarget() {
+        const alive = bricks.filter(b => b && b.alive);
+        if (alive.length === 0) return null;
+
+        // Pondère par proximité latérale et par "être sous la balle" (ty < ball.y)
+        let best = null;
+        let bestScore = -Infinity;
+
+        alive.forEach(b => {
+          const cx = b.x + b.w / 2;
+          const cy = b.y + b.h / 2;
+          if (cy > ball.y) return; // on ne vise que vers le haut
+
+          const lateral = Math.abs(cx - ball.x);
+          const vertical = ball.y - cy;
+
+          // Score très simple: bas vertical = mieux, latéral faible = mieux
+          let score = vertical * 1.0 - lateral * 0.6;
+
+          // Légers bonus si brique spéciale non skull
+          if (b.special && !b.special.includes("☠️")) score += 120;
+
+          if (score > bestScore) {
+            bestScore = score;
+            best = b;
+          }
+        });
+
+        return best ? { brick: best } : null;
+      } //Fin de fonction findLikelyTarget
+
+
+      function executeAutopilotMovementTight(targetX, priority, movementType, dt) {
+      targetX = Math.max(paddleW/2, Math.min(CANVAS_W - paddleW/2, targetX));
+      let targetPaddleX = targetX - paddleW/2;
+      let deltaX = targetPaddleX - paddleX;
+      let distance = Math.abs(deltaX);
+
+      if (distance > 0.5) {
+      let direction = deltaX > 0 ? 1 : -1;
+      let base = (autopilotAI && autopilotAI.speeds ? autopilotAI.speeds[movementType] : 500);
+      let maxSpeed = base * (megaspeed || 1);
+
+      // Progression
+    let progressive = distance > 120 ? maxSpeed
+                   : distance > 60 ? maxSpeed * (0.55 + (distance - 60)/60 * 0.45)
+                   : maxSpeed * (0.25 + distance/60 * 0.25);
+
+     if (bricks.filter(b => b && b.alive).length <= 5) {
+       progressive *= 1.15;
+     } //Fin de renfort finishing
+
+    // Inertie plus nerveuse
+    if (!paddleVelocity) paddleVelocity = 0;
+    let targetVel = direction * progressive * dt;
+    let alpha = 0.25;
+    paddleVelocity = paddleVelocity * (1 - alpha) + targetVel * alpha;
+
+    // Cap mouvement
+    let maxMove = Math.min(distance, Math.abs(paddleVelocity));
+    paddleX += Math.sign(paddleVelocity) * maxMove;
+
+    // Boost urgence si sauvetage balle
+    if (movementType === "emergency" && priority >= 4) {
+      let boost = Math.min(distance * 0.45, maxSpeed * dt * 0.65);
+      paddleX += direction * boost;
+    }
+
+    // Contrainte
+    paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX));
+
+    } else {
+    // Snap si la cible est quasi-stable
+    if (!executeAutopilotMovementTight.prevTarget) {
+    executeAutopilotMovementTight.prevTarget = targetPaddleX;
+    }
+    const drift = Math.abs(executeAutopilotMovementTight.prevTarget - targetPaddleX);
+    if (drift < 4.5 && priority >= 2) {
+    paddleX = targetPaddleX;
+    }
+
+    executeAutopilotMovementTight.prevTarget = targetPaddleX;
+
+    if (paddleVelocity) {
+      paddleVelocity *= 0.6;
+      if (Math.abs(paddleVelocity) < 0.05) paddleVelocity = 0;
+    }
+    }
+    } //Fin de fonction executeAutopilotMovementTight
 
     // === SYSTÈME DE SCALE PROPORTIONNEL POUR END PANEL ===
     function calculateEndPanelScale() {
@@ -2318,7 +2813,9 @@ function unlockPointer() {
         "mult1": "1️⃣ Multiplicateur x2",
         "mult2": "2️⃣ Multiplicateur x3",
         "mult4": "4️⃣ Multiplicateur x4",
+        "mult6": "6️⃣⃣ Multiplicateur x8",
         "mult8": "8️⃣ Multiplicateur x8",
+//        "XultX": "🦁⃣ Multiplicateur universel",
         "huge": "❤️‍🔥 Raquette géante",
         "skull": "☠️ Malus"
       };
@@ -2406,6 +2903,15 @@ function unlockPointer() {
           </div>
         `;
       }
+
+      // ✅ NOUVEAU : Multiplicateur à vie (multX)
+      gameStateHtml += `
+      <div class="stats-item">
+      <span class="stats-item-label">🦁 Multiplicateur à vie</span>
+      <span class="stats-item-value positive-indicator">x${Math.max(0, multX | 0)}</span>
+      </div>
+      `;
+
 
       if (decrementActive && decrementTimer && decrementStartTime) {
         const timeLeft = Math.max(0, decrementTimer - (performance.now() - decrementStartTime) / 1000);
@@ -2799,17 +3305,9 @@ function unlockPointer() {
     }
     //Fin de fonction getEffectiveCanvasLimits
 
-    // ✅ NOUVEAU SYSTÈME DE SCORES MULTIPLES
-    function getBestScore() {
-      return parseInt(localStorage.getItem("akranoid_best_score") || "0");
-    }
-    function setBestScore(val) {
-      localStorage.setItem("akranoid_best_score", val);
-    }
-
     function getLeaderboard() {
         try {
-            let data = localStorage.getItem("arkanoid_leaderboard");
+            let data = localStorage.getItem("ELYSIUM_leaderboard");
             return data ? JSON.parse(data) : [];
         } catch (e) {
             console.warn("Erreur lecture leaderboard:", e);
@@ -2819,7 +3317,7 @@ function unlockPointer() {
 
     function saveLeaderboard(leaderboard) {
     try {
-        localStorage.setItem("arkanoid_leaderboard", JSON.stringify(leaderboard));
+        localStorage.setItem("ELYSIUM_leaderboard", JSON.stringify(leaderboard));
         return true;
     } catch (e) {
         console.error("Erreur sauvegarde leaderboard:", e);
@@ -2851,7 +3349,7 @@ function addScoreToLeaderboard(playerName, score) {
 
 function getDernierNom() {
     try {
-        let leaderboard = JSON.parse(localStorage.getItem("arkanoid_leaderboard") || '[]');
+        let leaderboard = JSON.parse(localStorage.getItem("ELYSIUM_leaderboard") || '[]');
 
         if (leaderboard.length === 0) {
             console.log("Aucun score enregistré");
@@ -2976,7 +3474,7 @@ function displayLeaderboard() {
           // === NETTOYAGE DES TIMEOUTS CLASSIQUES ===
           const classicTimeouts = [
               'bonusAnimTimeout', 'paddleHugeTimeout', 'longTimeout',
-              'shortTimeout', 'impactTimeout', 'harmonyResetTimer'
+              'shortTimeout', 'impactTimeout'
           ];
 
           classicTimeouts.forEach(timeoutName => {
@@ -3105,7 +3603,79 @@ function displayLeaderboard() {
         return;
       }
 
+      if(type === "boss_victory_alt") {
+                  // Variante courte et percussive, différente de boss_death
+                  // Partie 1: triade majeure ascendante (Do5–Mi5–Sol5) en triangle
+                  const now = audioCtx.currentTime;
+                  const triad = [523.25, 659.25, 783.99]; // C5, E5, G5
+                  triad.forEach((freq, i) => {
+                      const osc = audioCtx.createOscillator();
+                      const gain = audioCtx.createGain();
+                      osc.type = "triangle";
+                      osc.frequency.setValueAtTime(freq, now + i * 0.06);
+                      gain.gain.setValueAtTime(0.18, now + i * 0.06);
+                      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.14);
+                      osc.connect(gain).connect(audioCtx.destination);
+                      osc.start(now + i * 0.06);
+                      osc.stop(now + i * 0.06 + 0.16);
+                  });
 
+                  // Partie 2: accent percussif en saw (brillance arcade) sur la dominante
+                  {
+                      const t1 = now + 0.22; // après la triade
+                      const osc = audioCtx.createOscillator();
+                      const gain = audioCtx.createGain();
+                      osc.type = "sawtooth";
+                      osc.frequency.setValueAtTime(1046.5, t1); // C6
+                      osc.frequency.exponentialRampToValueAtTime(880, t1 + 0.12);
+                      gain.gain.setValueAtTime(0.12, t1);
+                      gain.gain.exponentialRampToValueAtTime(0.001, t1 + 0.13);
+                      osc.connect(gain).connect(audioCtx.destination);
+                      osc.start(t1);
+                      osc.stop(t1 + 0.14);
+                  }
+
+                  // Partie 3: petite dissonance contrôlée (2e majeure) très brève pour relief
+                  {
+                      const t2 = now + 0.34;
+                      const osc = audioCtx.createOscillator();
+                      const gain = audioCtx.createGain();
+                      osc.type = "triangle";
+                      osc.frequency.setValueAtTime(587.33, t2); // D5
+                      gain.gain.setValueAtTime(0.08, t2);
+                      gain.gain.exponentialRampToValueAtTime(0.001, t2 + 0.08);
+                      osc.connect(gain).connect(audioCtx.destination);
+                      osc.start(t2);
+                      osc.stop(t2 + 0.09);
+                  }
+
+                  // Partie 4: chute héroïque rapide (arpège descendant) pour signature distincte
+                  const tail = [
+                      { f: 987.77, d: 0.07 }, // B5
+                      { f: 880.00, d: 0.07 }, // A5
+                      { f: 783.99, d: 0.07 }, // G5
+                      { f: 659.25, d: 0.08 }, // E5
+                      { f: 523.25, d: 0.10 }  // C5
+                  ];
+                  let t = now + 0.42;
+                  tail.forEach((note, i) => {
+                      const osc = audioCtx.createOscillator();
+                      const gain = audioCtx.createGain();
+                      osc.type = "triangle";
+                      osc.frequency.setValueAtTime(note.f, t);
+                      // légère “pitch drop” pour la sensation arcade
+                      osc.frequency.exponentialRampToValueAtTime(Math.max(120, note.f * 0.9), t + note.d * 0.7);
+                      gain.gain.setValueAtTime(Math.max(0.05, 0.11 - i * 0.015), t);
+                      gain.gain.exponentialRampToValueAtTime(0.001, t + note.d);
+                      osc.connect(gain).connect(audioCtx.destination);
+                      osc.start(t);
+                      osc.stop(t + note.d + 0.02);
+                      t += note.d * 0.85;
+                  });
+
+                  return;
+              }
+              //Fin de fonction playSound (bloc boss_victory_alt
 
       if(type === "autopilot_on") {
               // Jingle de mise en marche de l'autopilote : 3 notes rapides et ascendantes.
@@ -3326,12 +3896,14 @@ function displayLeaderboard() {
       niveau = 1;
       score = 0;
       mult = 1;
+      multX = loadMultX();
+      multMax = 30 + multX;
       displayScore = 0;
       paddleW = paddleBaseW;
       paddleX = (CANVAS_W-paddleW)/2;
       ballSpeed = ballSpeed0;
       wallOffset = 60;
-      brickRows = 8;
+//      brickRows = 7;
       levelsPassed = 0;
 
       // ✅ ÉTAPE 7 : ARRAYS ET COLLECTIONS
@@ -3366,7 +3938,8 @@ function displayLeaderboard() {
       // ✅ ÉTAPE 11 : MISE À JOUR DE L'AFFICHAGE
       elDec.style.display = "none";
       updateHUD();
-      updateMultDisplay(mult);
+      MultTMP = mult + multX
+      updateMultDisplay(MultTMP);
 
       // ✅ ÉTAPE 12 : STATISTIQUES
       bricksHit = 0;
@@ -3519,6 +4092,7 @@ function displayLeaderboard() {
         // ✅ FORMATION DÉFENSIVE RENFORCÉE
         const formations = [
             // Mur de protection principal (plus large)
+            {x: boss.x - 180, y: boss.y + 80},
             {x: boss.x - 120, y: boss.y + 80},
             {x: boss.x - 60, y: boss.y + 80},
             {x: boss.x, y: boss.y + 80},
@@ -3527,6 +4101,7 @@ function displayLeaderboard() {
             {x: boss.x + 180, y: boss.y + 80},
 
             // Deuxième ligne de protection
+            {x: boss.x - 150, y: boss.y + 120},
             {x: boss.x - 90, y: boss.y + 120},
             {x: boss.x - 30, y: boss.y + 120},
             {x: boss.x + 30, y: boss.y + 120},
@@ -3534,6 +4109,8 @@ function displayLeaderboard() {
             {x: boss.x + 150, y: boss.y + 120},
 
             // Troisième ligne (briques spéciales)
+            {x: boss.x - 120, y: boss.y + 160},
+            {x: boss.x - 30, y: boss.y + 160},
             {x: boss.x - 60, y: boss.y + 160},
             {x: boss.x + 30, y: boss.y + 160},
             {x: boss.x + 120, y: boss.y + 160},
@@ -3553,9 +4130,9 @@ function displayLeaderboard() {
 
                 if (isSpecial) {
                     // ✅ PLUS DE MULTIPLICATEURS DANS LES BRIQUES BOSS
-                    let specials = ["💊", "2️⃣", "4️⃣", "🇫🇷", "❤️‍🔥"];
+                    let specials = ["💊", "2️⃣", "4️⃣", "🇫🇷"];
 //                    let specials = ["💊", "2️⃣", "4️⃣", "8️⃣", "🇫🇷", "❤️‍🔥","🍭"];
-                    if (Math.random() < 0.3) specials.push("☠️"); // Quelques skulls
+                    if (Math.random() < 0.2) specials.push("☠️"); // Quelques skulls
                     special = specials[Math.floor(Math.random() * specials.length)];
                 }
 
@@ -3584,7 +4161,7 @@ function displayLeaderboard() {
       bricks = [];
       isBossLevel = false;
       let specials = [];
-      let AutopilotBanner = false
+//      let AutopilotBanner = false
       let nbSpecials = 11;
       while(specials.length < nbSpecials) {
         let idx = Math.floor(Math.random()*brickRows*brickCols);
@@ -3650,9 +4227,23 @@ function displayLeaderboard() {
       baseGameSpeed = Math.min(14, 12 + (niveau - 1) * 0.05);
       ballSpeed = baseGameSpeed;
 
-      let angle = (Math.random()*0.6+0.2)*Math.PI;
-      ballDX = Math.cos(angle)*currentGameSpeed*(Math.random()<0.5?-1:1);
-      ballDY = -Math.abs(Math.sin(angle)*currentGameSpeed);
+//      let angle = (Math.random()*0.6+0.2)*Math.PI;
+//      ballDX = Math.cos(angle)*currentGameSpeed*(Math.random()<0.5?-1:1);
+//      ballDY = -Math.abs(Math.sin(angle)*currentGameSpeed);
+
+      let angle = (Math.random()*0.45 + 0.20) * Math.PI; // 0.20π..0.65π
+      const v = currentGameSpeed || baseGameSpeed || 10;
+      const minSin = 0.12; // évite dy trop faible
+      let sx = Math.cos(angle);
+      let sy = Math.sin(angle);
+      if (Math.abs(sx) < minSin) sx = Math.sign(sx || (Math.random()<0.5?1:-1)) * minSin;
+      if (Math.abs(sx) > 0.97) sx = Math.sign(sx) * 0.97; // anti-rasant
+      const nx = sx * v * (Math.random()<0.5?-1:1);
+      const ny = -Math.abs(Math.sqrt(Math.max(1e-6, v*v - (nx*nx))));
+      ballDX = nx;
+      ballDY = ny;
+      renormalizeBallSpeed(currentGameSpeed, 0.15);
+
       gameStarted = true; // Flag obligatoire
 //      totalBonusPoints = 0;
     }
@@ -3661,8 +4252,7 @@ function displayLeaderboard() {
       elScore.textContent = score.toString().padStart(9, "0");
       elVies.textContent = "VIES:"+vies;
       elNiveau.textContent = "NIVEAU:"+niveau;
-      elMult.textContent = "x" + mult;
-
+      elMult.textContent = "x" + (mult + multX);
 
 
       const elCookies = document.getElementById('cookies');
@@ -3712,7 +4302,8 @@ function displayLeaderboard() {
       }
 
       if ((e.key==="n" || e.key==="N") && !autopilot) {
-//          niveau +=1 ; updateHUD();
+          multX +=1 ; updateHUD();
+          saveMultX(multX);
       }
       if ((e.key==="x" || e.key==="X") && !autopilot) {
 //          mult +=1 ; updateHUD();
@@ -3859,33 +4450,6 @@ function displayLeaderboard() {
     });
     //Fin de fonction wheel_corrected
 
-
-
-
-
-  // 🎯 CALCUL D'INTERCEPTION PARFAIT (100% fiable)
-  function calculatePerfectIntercept() {
-      if (ballDY <= 0) return null;
-
-      let timeToImpact = (paddleY - ball.y) / ballDY;
-      if (timeToImpact <= 0) return null;
-
-      let interceptX = ball.x + ballDX * timeToImpact;
-
-      // Gestion des rebonds sur les murs
-      let bounces = 0;
-      while ((interceptX < 0 || interceptX > CANVAS_W) && bounces < 10) {
-          if (interceptX < 0) {
-              interceptX = Math.abs(interceptX);
-          } else if (interceptX > CANVAS_W) {
-              interceptX = CANVAS_W - (interceptX - CANVAS_W);
-          }
-          bounces++;
-      }
-
-      return (interceptX >= 0 && interceptX <= CANVAS_W) ? interceptX : ball.x;
-  }
-
   // ☠️ ÉVITEMENT INTELLIGENT DES SKULLS
   function findNearestSkull() {
       let nearest = null;
@@ -3927,139 +4491,6 @@ function displayLeaderboard() {
 
       return null;
   }
-
-  // 🎯 VISÉE OPTIMALE DES BRIQUES (angle parfait)
-  function findOptimalBrickShot() {
-      let aliveBricks = bricks.filter(b => b.alive);
-      if (aliveBricks.length === 0) return null;
-
-      let bestShot = null;
-      let bestScore = -1;
-
-      aliveBricks.forEach(brick => {
-          // Calcul de l'angle optimal pour toucher cette brique
-          let brickCenterX = brick.x + brick.w/2;
-          let brickCenterY = brick.y + brick.h/2;
-
-          // Angle direct vers la brique
-          let deltaX = brickCenterX - ball.x;
-          let deltaY = brickCenterY - ball.y;
-
-          if (deltaY >= 0) return; // Brique derrière la balle
-
-          // Calcul de la position raquette nécessaire
-          let angleToTarget = Math.atan2(deltaX, -deltaY);
-          let requiredPaddleOffset = Math.tan(angleToTarget) * (ball.y - paddleY);
-          let requiredPaddleX = ball.x + requiredPaddleOffset;
-
-          // Vérifier la faisabilité
-          if (requiredPaddleX < paddleW/2 || requiredPaddleX > CANVAS_W - paddleW/2) {
-              return; // Position impossible
-          }
-
-          // Score basé sur proximité et facilité
-          let distance = Math.abs(deltaX) + Math.abs(deltaY);
-          let moveDistance = Math.abs(requiredPaddleX - (paddleX + paddleW/2));
-          let score = 1000 - distance - moveDistance * 2;
-
-          // Bonus pour les briques du bas (plus faciles)
-          if (brick.y > wallOffset + brickH * 4) score += 200;
-
-          // Bonus pour briques spéciales
-          if (brick.special && !brick.special.includes("☠️")) score += 300;
-
-          if (score > bestScore) {
-              bestScore = score;
-              bestShot = {
-                  paddleX: requiredPaddleX,
-                  brick: brick,
-                  score: score
-              };
-          }
-      });
-
-      return bestShot;
-  }
-
-  // 🎁 COLLECTE SÉCURISÉE DES POWERUPS
-  function findSafestPowerup() {
-      let safest = null;
-      let bestScore = -1;
-
-      // Analyser tous les powerups ET bonus
-      let allCollectibles = [...powerups, ...bonuses];
-
-      allCollectibles.forEach(item => {
-          // Exclusions absolues
-          if (!item || item.caught || item.type === "skull" || item.type === "boss_projectile") {
-              return;
-          }
-
-          // Vérifier si atteignable
-          if (item.y > 50 && item.y < paddleY + 100) {
-              let timeToCollect = (paddleY - item.y) / (item.speed || 6);
-              let futureX = item.x + (item.dx || 0) * timeToCollect;
-
-              // Contraindre dans les limites
-              futureX = Math.max(paddleW/2, Math.min(CANVAS_W - paddleW/2, futureX));
-
-              let moveDistance = Math.abs(futureX - (paddleX + paddleW/2));
-              let maxReachDistance = timeToCollect * MOVE_SPEED * 0.8; // Marge de sécurité
-
-              if (moveDistance <= maxReachDistance && timeToCollect > 0.5) {
-                  let score = 100;
-
-                  // Priorisation intelligente
-                  if (item.type === "mult8") score = 1000;
-                  else if (item.type === "mult4") score = 800;
-                  else if (item.type === "mult2") score = 600;
-                  else if (item.type === "mult1") score = 500;
-                  else if (item.type === "temps") score = 1200; // PRIORITÉ MAXIMALE
-                  else if (item.type === "huge") score = 700;
-                  else if (item.type === "long") score = 400;
-                  else if (item.points && item.points > 1000) score = 300; // Bonus à points
-                  else if (item.type !== "short") score = 200;
-                  else score = 50; // Short paddle moins prioritaire
-
-                  // Malus pour distance et temps
-                  score -= moveDistance * 0.5;
-                  score -= timeToCollect * 10;
-
-                  if (score > bestScore) {
-                      bestScore = score;
-                      safest = item;
-                  }
-              }
-          }
-      });
-
-      return safest;
-  }
-
-  // 🚀 MOUVEMENT ULTRA-PRÉCIS
-  function movePaddleToTarget(targetX, urgency, dt) {
-      targetX = Math.max(0, Math.min(CANVAS_W - paddleW, targetX));
-
-      let deltaX = targetX - paddleX;
-      let distance = Math.abs(deltaX);
-
-      if (distance > 1) {
-          let direction = deltaX > 0 ? 1 : -1;
-          let speed = MOVE_SPEED * urgency * megaspeed;
-
-          // Mouvement instantané pour urgence maximale
-          if (urgency >= 10) {
-              paddleX = targetX;
-          } else {
-              let maxMove = Math.min(distance, speed * dt);
-              paddleX += direction * maxMove;
-          }
-
-          // Contrainte finale
-          paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX));
-      }
-  }
-
 
 
     // ✅ FONCTION CENTRALE DE GESTION DE LA VITESSE
@@ -4409,6 +4840,52 @@ function forceShadowBlurProfile(profileName) {
 }
 //Fin de fonction forceShadowBlurProfile
 
+function renormalizeBallSpeed(targetSpeed, blend = 0.25) {
+if (!isFinite(targetSpeed) || targetSpeed <= 0) targetSpeed = currentGameSpeed || 10;
+if (!isFinite(blend) || blend < 0) blend = 0.25;
+
+// Filets de sécurité sur les composantes
+if (!isFinite(ballDX)) ballDX = 0;
+if (!isFinite(ballDY)) ballDY = -1;
+
+let v = Math.hypot(ballDX, ballDY);
+if (!isFinite(v) || v < 1e-6) {
+// Recalage d’urgence vertical vers le haut
+ballDX = targetSpeed * 0.2 * (Math.random() < 0.5 ? -1 : 1);
+ballDY = -Math.sqrt(Math.max(1e-6, targetSpeed * targetSpeed - ballDX * ballDX));
+v = Math.hypot(ballDX, ballDY);
+if (!isFinite(v) || v < 1e-6) return; // si malgré tout…
+}
+
+// 1) Recalage doux vers targetSpeed
+const newV = v + (targetSpeed - v) * blend;
+const k = newV / v;
+if (isFinite(k) && k > 0) {
+ballDX *= k;
+ballDY *= k;
+}
+
+// 2) Anti-horizontalité/verticalité
+const v2 = Math.hypot(ballDX, ballDY);
+if (!isFinite(v2) || v2 < 1e-6) return;
+
+const minSin = 0.10;
+const maxSin = 0.95;
+
+// Empêche trajectoire trop verticale
+if (Math.abs(ballDX) < v2 * minSin) {
+const signX = Math.sign(ballDX) || (Math.random() < 0.5 ? 1 : -1);
+ballDX = signX * v2 * minSin;
+ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * ballDX));
+}
+
+// Empêche trajectoire trop rasante
+if (Math.abs(ballDX) > v2 * maxSin) {
+ballDX = Math.sign(ballDX) * v2 * maxSin;
+ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * ballDX));
+}
+} //Fin de fonction renormalizeBallSpeed
+
 
     // === LOGIQUE DE MISE À JOUR DU JEU ===
 
@@ -4587,45 +5064,118 @@ function forceShadowBlurProfile(profileName) {
       ball.x=nextX; ball.y=nextY;
 
       // Collisions murs
-      if(ball.x-ball.r<0) {ball.x=ball.r; ballDX=Math.abs(ballDX); playSound("impact");}
-      if(ball.x+ball.r>CANVAS_W) {ball.x=CANVAS_W-ball.r; ballDX=-Math.abs(ballDX); playSound("impact");}
-      if(ball.y-ball.r<0) {ball.y=ball.r; ballDY=Math.abs(ballDY); playSound("impact");}
-      if(Math.abs(ballDX)<2) ballDX=(Math.random()<0.5?-1:1)*2;
+//      if(ball.x-ball.r<0) {ball.x=ball.r; ballDX=Math.abs(ballDX); playSound("impact");}
+//      if(ball.x+ball.r>CANVAS_W) {ball.x=CANVAS_W-ball.r; ballDX=-Math.abs(ballDX); playSound("impact");}
 
-      // --- Collision raquette (VERSION HAUTE VITESSE SÉCURISÉE) ---
-      if (ballDY > 0) { // La balle doit descendre
-          // ✅ DÉTECTION PRÉDICTIVE pour éviter les traversées
-          let nextBallY = ball.y + ballDY * dt;
-          let nextBallX = ball.x + ballDX * dt;
+  const WALL_FRICTION = 0.96; // 0.92–0.98 (plus petit = plus de friction)
+  if (ball.x - ball.r < 0) {
+    ball.x = ball.r;
+    ballDX = Math.abs(ballDX) * WALL_FRICTION;
+    playSound("impact");
+    renormalizeBallSpeed(currentGameSpeed, 0.08);
+  }
 
-          // Vérification collision avec la position prédite
-          if (nextBallY + ball.r >= paddleY &&
-              ball.y + ball.r <= paddleY + paddleH &&
-              nextBallX + ball.r >= paddleX &&
-              nextBallX - ball.r <= paddleX + paddleW) {
+  if (ball.x + ball.r > CANVAS_W) {
+    ball.x = CANVAS_W - ball.r;
+    ballDX = -Math.abs(ballDX) * WALL_FRICTION;
+    playSound("impact");
+    renormalizeBallSpeed(currentGameSpeed, 0.12);
+  }
 
-              // ✅ REPOSITIONNEMENT SÉCURISÉ avant le rebond
-              ball.y = paddleY - ball.r - 1; // Marge de sécurité
-              ball.x = nextBallX; // Conserve le mouvement horizontal
-
-              // ✅ CALCUL DE L'ANGLE DE REBOND (inchangé - fonctionne bien)
-              let impactPoint = (ball.x - (paddleX + paddleW / 2)) / (paddleW / 2);
-              impactPoint = Math.max(-1, Math.min(1, impactPoint));
-              const maxBounceAngle = 5 * Math.PI / 12;
-              const newAngle = impactPoint * maxBounceAngle;
-
-              // ✅ VITESSE LIMITÉE pour éviter les bugs
-              let speed = Math.sqrt(ballDX * ballDX + ballDY * ballDY);
-              let maxSpeed = autopilot ? (baseGameSpeed * 2) : (baseGameSpeed * 2.5);
-              speed = Math.min(speed, maxSpeed);
-
-              ballDX = speed * Math.sin(newAngle);
-              ballDY = -speed * Math.cos(newAngle);
-
-              playSound("paddle");
-          }
+      if(ball.y-ball.r<0) {ball.y=ball.r; ballDY=Math.abs(ballDY); playSound("impact");
+        renormalizeBallSpeed(currentGameSpeed, 0.08);
       }
 
+
+//    if(Math.abs(ballDX)<2) ballDX=(Math.random()<0.5?-1:1)*2;
+
+      if (Math.abs(ballDX) < 1e-3) {
+        const v = Math.hypot(ballDX, ballDY) || currentGameSpeed || 8;
+        const minSin = 0.10;
+        const signX = (Math.random() < 0.5 ? -1 : 1);
+        ballDX = signX * v * minSin;
+        ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v*v - ballDX*ballDX));
+      }
+
+      // --- Collision raquette (version unifiée & stable) ---
+      if (ballDY > 0) {
+        // Prédiction très courte
+        if (!isFinite(ballDX)) ballDX = 0;
+        if (!isFinite(ballDY)) ballDY = -Math.abs(currentGameSpeed || 10);
+
+        const nextBallY = ball.y + ballDY * dt;
+        const nextBallX = ball.x + ballDX * dt;
+
+        if (!isFinite(nextBallX) || !isFinite(nextBallY)) {
+          // Recalage d’urgence avant toute collision/nudge
+          ballDX = (currentGameSpeed || 10) * 0.2 * (Math.random() < 0.5 ? -1 : 1);
+          ballDY = -Math.abs(currentGameSpeed || 10) * 0.98;
+        }
+
+        const willHitY = (nextBallY + ball.r >= paddleY) && (ball.y + ball.r <= paddleY + paddleH);
+        const willHitX = (nextBallX + ball.r >= paddleX) && (nextBallX - ball.r <= paddleX + paddleW);
+
+        if (AIM.active && ballDY > 0 && performance.now() < AIM.until) {
+        // Garde-fous AIM
+        if (typeof AIM.impactRel !== 'number' || !isFinite(AIM.impactRel)) {
+        // Valeur de repli neutre (vertical) si l’armement n’a pas encore produit un impactRel crédible
+        AIM.impactRel = 0;
+        } else {
+        // Clamp dur
+        AIM.impactRel = Math.max(-1, Math.min(1, AIM.impactRel));
+        }
+        const desiredCenter = Math.max(
+        paddleW/2,
+        Math.min(CANVAS_W - paddleW/2, ball.x - AIM.impactRel * (paddleW/2))
+        );
+        const delta = desiredCenter - (paddleX + paddleW/2);
+        const maxNudge = 220 * dt; // douceur
+        const nudge = Math.max(-maxNudge, Math.min(maxNudge, delta));
+        paddleX = Math.max(0, Math.min(CANVAS_W - paddleW, paddleX + nudge));
+        } //Fin de bloc nudge AIM
+
+        //Fin de fonction update (partie AIM nudge)
+
+
+        if (willHitY && willHitX) {
+          // Repositionnement "avant" la raquette pour éviter le tunneling
+          ball.y = paddleY - ball.r - 0.5;
+          ball.x = Math.max(paddleX + ball.r, Math.min(paddleX + paddleW - ball.r, nextBallX));
+
+          // Impact relatif dans [-1,1] par rapport au centre de la raquette
+
+          const paddleCenter = paddleX + paddleW / 2;
+          let impactRel = (ball.x - paddleCenter) / (paddleW / 2);
+          impactRel = Math.max(-1, Math.min(1, impactRel));
+
+          // Option: léger tilt pour éviter dy quasi-vertical quand impact≈0
+          const aimTilt = 0.0; // peux le passer à 0.05 si tu veux très légèrement biaiser
+
+          // Angle max constant, unifié
+          const maxAngle = 4 * Math.PI / 12; // 60°
+
+          if (Math.abs(impactRel) < 0.05) {
+            impactRel = 0; // centre vraiment vertical, très stable
+          }
+
+          if (!isFinite(ballDX)) ballDX = 0;
+          if (!isFinite(ballDY)) ballDY = -Math.abs(currentGameSpeed || 10);
+          if (!isFinite(impactRel)) impactRel = 0;
+          impactRel = Math.max(-1, Math.min(1, impactRel));
+
+          // Vecteur unifié
+          const rebound = computePaddleBounce(ballDX, ballDY, impactRel, maxAngle, aimTilt);
+
+          // Applique le rebond sans booster arbitraire
+          ballDX = rebound.dx;
+          ballDY = rebound.dy;
+          renormalizeBallSpeed(currentGameSpeed, 0.2);
+
+
+          // Petit son
+          playSound("paddle");
+        }
+      }
 
       // === MISE À JOUR DU BOSS (VERSION STABILISÉE) ===
       if (isBossLevel && boss && boss.alive) {
@@ -4787,19 +5337,17 @@ function forceShadowBlurProfile(profileName) {
 
         if (decrementEffect) {
           // Si le malus est actif, on applique la pénalité.
-          let penalty = 100 * mult;
+          let penalty = 100 * (mult + multX);
           score -= penalty;
+          playSoundScoreMultiplied(1, 1);
           showScoreDecrementAnim(b.x + b.w / 2, b.y + b.h / 2, penalty);
         } else {
+          TmpMult=mult+multX
           // Le gain de points normal...
-          let brickPoints = 100 * mult;
+          let brickPoints = 100 * TmpMult;
           score += brickPoints;
           updateStatsPanel();
-
-          // ✅ NOUVEAU : Son de pièces pour les hauts scores
-          // ✅ SON ADAPTATIF SELON LE MULTIPLICATEUR
-          // ✅ SON ADAPTATIF BASÉ SUR TON IMPACT PARFAIT
-            playSoundScoreMultiplied(10, mult);
+            playSoundScoreMultiplied(10, TmpMult);
             showScoreBonusAnim(b.x + b.w / 2, b.y + b.h / 2, brickPoints);
         }
 
@@ -4944,6 +5492,13 @@ function forceShadowBlurProfile(profileName) {
                 cookies++; // On ajoute un cookie
                 playSound("life2");
           }
+
+          if (b.type === "XultX") {
+              multX++;
+              saveMultX(multX);
+              playSound("life2")
+          }
+
           if (b.type === "cookiex2") {
                 cookies++; // On ajoute un cookie
                 TmpCook = cookies * 2
@@ -4965,9 +5520,9 @@ function forceShadowBlurProfile(profileName) {
                 }
                 bricks.forEach(b => b.alive = false);
                 vies++; // On ajoute une vie
-                score += 20000 * mult
-                //levelComplete = true
-//              playSound("life2");
+                TmpMult=mult+multX
+                playSoundScoreMultiplied(10, TmpMult);
+                score += 20000 * (TmpMult)
                 playSound("boss_death");
           }
 
@@ -4995,10 +5550,11 @@ function forceShadowBlurProfile(profileName) {
           } else {
               // Sinon, on gagne les points normalement (multiplicateur inclus).
 //              playSound("bonus");
-              playSoundScoreMultiplied(12, mult+12);
-              playSoundScoreMultiplied(12, mult+12);
-              let finalPoints = b.points * mult;
-              totalBonusPoints += b.points * mult;
+              TmpMult=mult+multX+5
+              playSoundScoreMultiplied(12, TmpMult);
+              playSoundScoreMultiplied(12, TmpMult);
+              let finalPoints = b.points * (mult + multX);
+              totalBonusPoints += b.points * (mult + multX);
               // ✅ CORRECTION : Ajouter les points immédiatement
               score += finalPoints;
               // Animation visuelle (sans délai pour les points)
@@ -5096,7 +5652,9 @@ function forceShadowBlurProfile(profileName) {
           multTimer = 0;
         }
       }
-      updateMultDisplay(mult);
+
+      MultTMP = mult + multX
+      updateMultDisplay(MultTMP);
 
       particles.forEach(p=>{
         p.x+=p.dx; p.y+=p.dy; p.life--;
@@ -5168,13 +5726,25 @@ function forceShadowBlurProfile(profileName) {
                          bossDefeated &&
                          bricks.every(b => !b.alive) &&
                          bossHP <= 0;
+//                         ballDX = 0;
+//                         ballDY = 0;
       } else {
           // NIVEAU NORMAL : Juste les briques
           levelComplete = bricks.every(b => !b.alive);
       }
 
+      // Arrêt immédiat de la balle si tableau terminé en autopilot
+      if (levelComplete && autopilot) {
+        ballDX = 0;
+        ballDY = 0;
+      }
+
       // ✅ NOUVEAU : Gestion de la transition avec délai
       if (levelComplete && !levelTransition) {
+
+          ballDX = 0;
+          ballDY = 0;
+
           // ✅ 1. DÉMARRER LA TRANSITION
           playSound("coins");
           levelTransition = true;
@@ -5182,11 +5752,16 @@ function forceShadowBlurProfile(profileName) {
 
           // ✅ 2. MESSAGE DE TRANSITION SELON LE TYPE DE NIVEAU
           if (isBossLevel) {
+            ballDX = 0;
+            ballDY = 0;
+            playSound("boss_death");
               levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans 3...`;
-              playSound("boss_death");
           } else {
+            ballDX = 0;
+            ballDY = 0;
+            playSound("victoire_alt");
               levelTransitionMessage = `✅   ❇️NIVEAU ${niveau} TERMINÉ  ✅\n\nProchain niveau dans 3...`;
-              playSound("coins");
+
           }
 
           // ✅ 3. ARRÊTER LA BALLE TEMPORAIREMENT
@@ -5203,30 +5778,85 @@ function forceShadowBlurProfile(profileName) {
 
           // ✅ Mise à jour du message avec compte à rebours
           if (isBossLevel) {
+            ballDX = 0;
+            ballDY = 0;
+            playSound("boss_death");
+
               levelTransitionMessage = `🏆 BOSS VAINCU 🏆\n\nNiveau ${niveau + 1} dans ${secondsLeft}...`;
               // ✅ CORRECTION : Vies supprimées d'ici - elles sont déjà ajoutées ailleurs
           } else {
+            ballDX = 0;
+            ballDY = 0;
+            playSound("victoire_alt");
+
               levelTransitionMessage = `✅  NIVEAU ${niveau} TERMINÉ ✅\n\nProchain niveau dans ${secondsLeft}...`;
           }
 
+
           // ✅ 5. FIN DE LA TRANSITION - PASSAGE AU NIVEAU SUIVANT
           if (elapsed >= levelTransitionDelay) {
-              levelTransition = false;
-              levelTransitionMessage = "";
+          levelTransition = false;
+          levelTransitionMessage = "";
+          // Sauvegarde de l'état boss
+  const wasIsBossLevel = isBossLevel;
 
-              // ✅ 6. SAUVEGARDE DE L'ÉTAT ACTUEL
-              let wasIsBossLevel = isBossLevel;
+  // Progression du niveau et récompenses
+  niveau++;
+  changeGalaxyConfiguration();
+  playSound("victoire_alt");
+  //playSoundScoreMultiplied(12, mult + 12);
+  levelsPassed++;
+  panic = 0;
+  score += 40000 * niveau;
+  vies += 1;
+  cookies += 1;
 
-              // ✅ 7. PROGRESSION DU NIVEAU (CODE EXISTANT)
-              niveau++;
-              clearAllTimersEndLevel();
-              changeGalaxyConfiguration();
-              playSoundScoreMultiplied(12, mult+12);
-              levelsPassed++;
-              panic = 0;
-              score += 40000 * niveau;
-              vies += 1;
-              cookies += 1;
+  // Offsets et progression du mur
+  wallOffset += 3;
+  wallOffsetPlus += 3;
+  if (wallOffsetPlus >= 10) {
+      brickRows = Math.min(12, brickRows + 1);
+      wallOffsetPlus = 0;
+  }
+
+  // Nettoyage spécifique boss (si on vient d'un boss)
+  if (wasIsBossLevel) {
+      timeoutManager.clear('bossInvulnerable');
+      for (let i = 0; i < 50; i++) {
+          timeoutManager.clear(`bossVictory${i}`);
+      }
+      // Reset complet des variables boss
+      isBossLevel = false;
+      boss = null;
+      bossDefeated = false;
+      bossHP = 0;
+      bossInvulnerable = false;
+      bossAttackTimer = 0;
+      bossMovementTimer = 0;
+  }
+
+  // ✅ BARRIÈRE SANITAIRE: tout arrêter AVANT de recréer le niveau
+  clearAllAnimations(); // stop RAF/psy/particles/animations et timeouts individuels listés
+  clearAllTimersEndLevel(); // purge manager + boss + flags effets + UI
+
+  // Création du prochain niveau
+  if (niveau % 5 === 0) {
+      createBoss();
+  } else {
+      createBricks();
+  }
+
+  // Balle et HUD
+  resetBall();
+  updateHUD();
+
+  // Bonus initial éventuel (inchangé)
+  if (Math.random() < 0.60) {
+      spawnBonus();
+  }
+
+  console.log(`🚀 Niveau ${niveau} démarré !`);
+
 
               // ✅ 8. GESTION DES OFFSETS (ORDRE CORRIGÉ)
               wallOffset += 3;
@@ -5296,8 +5926,10 @@ function forceShadowBlurProfile(profileName) {
       if(icon==="1️⃣") type="mult1";  // ✅ CORRIGÉ
       if(icon==="2️⃣") type="mult2";
       if(icon==="4️⃣") type="mult4";
+      if(icon==="6️⃣⃣") type="mult6";
       if(icon==="8️⃣") type="mult8";
       if(icon==="🔟") type="mult10";
+//      if(icon==="🦁⃣") type="XultX";
       if(icon==="❤️‍🔥") type="huge";
       powerups.push({
         x, y, icon, type, color, speed:6+Math.random()*2, caught:false, drop:true
@@ -5312,6 +5944,43 @@ function forceShadowBlurProfile(profileName) {
         x, y, icon:"☠️", speed:7+Math.random()*2, caught:false
       });
     }
+
+    // Résout l'impact relatif à produire sur la raquette pour viser un point cible (tx, ty)
+    // Hypothèses: rebond immédiat depuis la raquette (y = paddleY - ball.r),
+    // trajet balistique simple (ligne droite), pas de murs avant touche cible.
+    // Retourne {impactRel, paddleCenterX} ou null si géométrie impossible.
+    function solveImpactForTarget(ball, targetX, targetY, paddleY, paddleW) {
+      // On veut une direction (angle) telle que depuis (ball.x, paddleY - ball.r)
+      // la ligne atteigne (targetX, targetY). dx, dy proportionnels au vecteur.
+      const startX = ball.x;
+      const startY = paddleY - ball.r;
+
+      const dirX = targetX - startX;
+      const dirY = targetY - startY;
+
+      // Target doit être au-dessus
+      if (dirY >= -1) return null;
+
+      // L'angle vertical "idéal" autour de la normale vers le haut:
+      // newAngle = atan2(dx, -dy) ; exactement ce que fait computePaddleBounce avec rel.
+      const desiredAngle = Math.atan2(dirX, -dirY);
+
+      // Inverse de computePaddleBounce: rel = newAngle / maxBounceAngle
+      const maxAngle = 4 * Math.PI / 12; //Fin de fonction solveImpactForTarget
+      let impactRel = desiredAngle / maxAngle;
+
+      // Si l'angle requis dépasse la capacité de la raquette, on ne peut pas viser directement
+      if (impactRel < -1 || impactRel > 1) {
+        return null;
+      }
+
+      // Convertir impactRel en position de centre de raquette
+      // impactRel = (impactPoint - paddleCenter) / (paddleW/2)
+      // impactPoint ~= ball.x à l'impact (on impose l’impact sur x ball.x)
+      const paddleCenterX = ball.x - impactRel * (paddleW / 2);
+
+      return { impactRel, paddleCenterX };
+    } //Fin de fonction solveImpactForTarget
 
 
     function startDecrement() {
@@ -5376,17 +6045,18 @@ function forceShadowBlurProfile(profileName) {
       // ✅ NOUVEAU : Gestion spécifique du powerup TEMPS
 
         if (p.type === "temps") {
-          multMax = 80;
+          multMax += 5;
           // ✅ AUGMENTATION MASSIVE DU MULTIPLICATEUR
           let oldMult = mult;
           mult = Math.min(mult + 1, multMax); // Ajoute 11, plafonné à multMax
           // ✅ AJOUT DE TEMPS (cumule avec le temps restant)
-          multTimer += 30; // Ajoute toujours 4 minutes
+          multTimer += 45; // Ajoute toujours 4 minutes
           // ✅ LOG DE VÉRIFICATION
           console.log(`🍭 Powerup TEMPS appliqué ! Mult: ${oldMult} → ${mult}, Timer: ${multTimer}s`);
           // ✅ MISE À JOUR IMMÉDIATE DE L'AFFICHAGE
           updateHUD();
-          updateMultDisplay(mult);
+          multiTMP = mult + multX
+          updateMultDisplay(multiTMP);
 
           // ✅ SON SPÉCIAL POUR CE POWERUP PUISSANT
           playSound("bonus");
@@ -5430,8 +6100,6 @@ function forceShadowBlurProfile(profileName) {
               playSound("raquettenormale");
           }, 30000);
       }
-
-
 
       if (p.type && p.type.startsWith("mult")) {
         let val = parseInt(p.type.replace("mult", ""));
@@ -5486,7 +6154,18 @@ function forceShadowBlurProfile(profileName) {
 
 
     function spawnBonus() {
+
       let b = BONUS_ICONS[Math.floor(Math.random()*BONUS_ICONS.length)];
+
+
+      // Rareté multX: seulement 1% de chances d’accepter quand tiré
+      if (b.type === "XultX" && Math.random() > 0.05) {
+        // On relance une fois proprement sur un autre bonus non-multX
+        const others = BONUS_ICONS.filter(x => x.type !== "XultX");
+        b = others[Math.floor(Math.random() * others.length)];
+      }
+      //Fin de filtrage rareté multX
+
       bonuses.push({
         x: Math.random()*(CANVAS_W-120)+60,
         y: wallOffset+30,
@@ -5496,6 +6175,7 @@ function forceShadowBlurProfile(profileName) {
         type: b.type, // <-- LA LIGNE MANQUANTE EST ICI
         speed: 7+Math.random()*2,
         caught: false
+
       });
     }
 
@@ -5555,9 +6235,6 @@ function forceShadowBlurProfile(profileName) {
 
     // === SCORE FINAL, TEMPS, STATS, MEILLEUR SCORE ===
 
-    function getBestScore() {
-      return parseInt(localStorage.getItem("akranoid_best_score") || "0");
-    }
     function setBestScore(val) {
       localStorage.setItem("akranoid_best_score", val);
     }
@@ -6130,6 +6807,12 @@ function forceShadowBlurProfile(profileName) {
         // ✅ NOUVEAU : Application du scale optimal
         applyResponsiveScale();
 
+        // Charger multX depuis le storage (sécurité au démarrage) puis rafraîchir HUD
+        multX = loadMultX();
+        updateHUD();
+        updateMultDisplay(mult + multX);
+        //Fin d’insertion pré-bonusPanel
+
         // ✅ NOUVEAU : Afficher le panneau de bonus au démarrage
         document.getElementById('bonusPanel').style.display = 'flex';
 
@@ -6345,49 +7028,31 @@ function forceShadowBlurProfile(profileName) {
         popup.style.display = 'block';
     }
 
-  </script>
-
-
-  <script>
-  // ✅ OPTIMISATIONS SPÉCIFIQUES NOUVELLE FENÊTRE
-  window.addEventListener('load', function() {
-    // ✅ 1. TITRE DE LA FENÊTRE DYNAMIQUE
-    document.title = "🎮 Brick Blitz Elysium - Niveau " + niveau + " | Score: " + score;
-
-    // ✅ 2. MISE À JOUR DU TITRE EN TEMPS RÉEL
-    const originalUpdateHUD = updateHUD;
-    updateHUD = function() {
-      originalUpdateHUD.call(this);
+    // ✅ OPTIMISATIONS SPÉCIFIQUES NOUVELLE FENÊTRE” jusqu’à la fin du script où on voit aussi une balise “<script> … </script>” recollée par erreur. Supprime tout ce bloc et colle ceci à la place, une seule fois.
+    window.addEventListener('load', function() {
       document.title = `🎮 Brick Blitz Elysium - Niveau ${niveau} | Score: ${score.toLocaleString()}`;
-    };
 
-    // ✅ 3. FERMETURE PROPRE DE LA FENÊTRE
-    window.addEventListener('beforeunload', function(e) {
-      if (gameStarted && !gameOver) {
-        e.preventDefault();
-        e.returnValue = 'Voulez-vous vraiment quitter le jeu en cours ?';
+      if (typeof updateHUD === "function") {
+        const originalUpdateHUD = updateHUD;
+        updateHUD = function() {
+          originalUpdateHUD.call(this);
+          document.title = `🎮 Brick Blitz Elysium - Niveau ${niveau} | Score: ${score.toLocaleString()}`;
+        };
       }
-    });
 
-    // ✅ 4. FOCUS AUTOMATIQUE POUR LES CONTRÔLES
-    window.focus();
+      window.addEventListener('beforeunload', function(e) {
+        try {
+          if (typeof gameStarted !== "undefined" && typeof gameOver !== "undefined" && gameStarted && !gameOver) {
+            e.preventDefault();
+            e.returnValue = 'Voulez-vous vraiment quitter le jeu en cours ?';
+          }
+        } catch (_) {}
+      });
 
-    // ✅ 5. MESSAGE DE BIENVENUE DANS LA CONSOLE
-    console.log(`
-      🎮 BRICK BLITZ ELYSIUM 🎮
-      ========================
-      Contrôles:
-      • Flèches ← → ou Q/D : Déplacer la raquette
-      • P : Pause
-      • S : Son ON/OFF
-      • Z : Debug
-      • M : Bouton magique (avec cookies)
-
-      Bon jeu ! 🚀
-    `);
-  });
+      window.focus();
+    }); //Fin de fonction window.load
 
 
-  </script>
+
 
 </html>
