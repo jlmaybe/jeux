@@ -938,7 +938,6 @@
       ["#0f0", "#0c8"],
       ["#fff", "#aaa"]
     ];
-//    const SPECIAL_ICONS = ["↔️️","🍭","🏴‍☠️","1️⃣","2️⃣","4️⃣","8️⃣","❤️‍🔥"];
     const SPECIAL_ICONS = ["↔️️","🍭","🏴‍☠️","1️⃣","2️⃣","4️⃣","❤️‍🔥","6️⃣"];
 
     const BONUS_ICONS = [
@@ -989,7 +988,7 @@
     let isMouseCaptured = false;
     let perfLastTime = performance.now();
 //    let MOVE_SPEED = 1000;
-    let ballSpeed0 = 12; // IMPORTANT : avant son utilisation
+    let ballSpeed0 = 11; // IMPORTANT : avant son utilisation
     let LancementAutoPilote = 0;
     let brickRows = 7; //et autour de la ligne 700
     let isEndGame = false;
@@ -1202,8 +1201,8 @@ let renderQuality = "low"; // "high", "medium", "low"
 //let performanceFrames = 0;
 //let performanceStart = 0;
 
-let baseGameSpeed = 12;
-let currentGameSpeed = 12;
+let baseGameSpeed = 11;
+let currentGameSpeed = 11;
 //let levelSpeedBonus = 0;
 let brickSpeedBonus = 0;
 let speedIncreasePerBrick = 0.001; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
@@ -2807,7 +2806,7 @@ function unlockPointer() {
 
       // ✅ CALCUL DES TOTAUX POWER-UPS
       const powerupNames = {
-        "long": "🏳️ Raquette longue",
+        "long": "↔️️ Raquette longue",
         "short": "🏴‍☠️ Raquette courte",
         "temps": "🍭‍ Plus de temps",
         "mult1": "1️⃣ Multiplicateur x2",
@@ -2815,7 +2814,6 @@ function unlockPointer() {
         "mult4": "4️⃣ Multiplicateur x4",
         "mult6": "6️⃣⃣ Multiplicateur x8",
         "mult8": "8️⃣ Multiplicateur x8",
-//        "XultX": "🦁⃣ Multiplicateur universel",
         "huge": "❤️‍🔥 Raquette géante",
         "skull": "☠️ Malus"
       };
@@ -2872,9 +2870,6 @@ function unlockPointer() {
         });
       }
 
-//      dangersStatsEl.innerHTML = dangersHtml;
-
-      // === ÉTAT DU JEU ===
       const autopilotStatus = autopilot || false;
       const ballSpeedValue = Math.floor(ballSpeed || 0);
       const multValue = mult || 1;
@@ -2886,7 +2881,7 @@ function unlockPointer() {
         </div>
         <div class="stats-item">
           <span class="stats-item-label">⚡ Vitesse balle:</span>
-          <span class="stats-item-value">${ballSpeedValue}</span>
+          <span class="stats-item-value">${currentGameSpeed}</span>
         </div>
         <div class="stats-item">
           <span class="stats-item-label">🚀 Multiplicateur:</span>
@@ -4131,7 +4126,6 @@ function displayLeaderboard() {
                 if (isSpecial) {
                     // ✅ PLUS DE MULTIPLICATEURS DANS LES BRIQUES BOSS
                     let specials = ["💊", "2️⃣", "4️⃣", "🇫🇷"];
-//                    let specials = ["💊", "2️⃣", "4️⃣", "8️⃣", "🇫🇷", "❤️‍🔥","🍭"];
                     if (Math.random() < 0.2) specials.push("☠️"); // Quelques skulls
                     special = specials[Math.floor(Math.random() * specials.length)];
                 }
@@ -4162,7 +4156,7 @@ function displayLeaderboard() {
       isBossLevel = false;
       let specials = [];
 //      let AutopilotBanner = false
-      let nbSpecials = 11;
+      let nbSpecials = 13;
       while(specials.length < nbSpecials) {
         let idx = Math.floor(Math.random()*brickRows*brickCols);
         if(!specials.includes(idx)) specials.push(idx);
@@ -4220,16 +4214,9 @@ function displayLeaderboard() {
       setTimeout(() => {   }, 500);
       ball = {x:CANVAS_W/2, y:paddleY-30, r:ballR};
       // ✅ CONSERVATION DE LA VITESSE PROGRESSIVE
-
-//      updateBallSpeed(); // Recalcule la vitesse actuelle
-
       // ✅ PROGRESSION TRÈS GRADUELLE par niveau
-      baseGameSpeed = Math.min(14, 12 + (niveau - 1) * 0.05);
+      baseGameSpeed = Math.min(14, ballSpeed0 + ((niveau - 1) * 0.010));
       ballSpeed = baseGameSpeed;
-
-//      let angle = (Math.random()*0.6+0.2)*Math.PI;
-//      ballDX = Math.cos(angle)*currentGameSpeed*(Math.random()<0.5?-1:1);
-//      ballDY = -Math.abs(Math.sin(angle)*currentGameSpeed);
 
       let angle = (Math.random()*0.45 + 0.20) * Math.PI; // 0.20π..0.65π
       const v = currentGameSpeed || baseGameSpeed || 10;
@@ -4509,9 +4496,9 @@ function displayLeaderboard() {
 
         // ✅ LIMITATIONS PLUS STRICTES selon le mode
         if (autopilot) {
-            currentGameSpeed = Math.min(currentGameSpeed, 13 + niveau * 0.05); // Limite autopilote
+            currentGameSpeed = Math.min(currentGameSpeed, 13 + ((niveau-1) * 0.25)); // Limite autopilote
         } else {
-            currentGameSpeed = Math.min(currentGameSpeed, 15 + niveau * 0.15); // Limite normale
+            currentGameSpeed = Math.min(currentGameSpeed, 11 + ((niveau-1) * 0.002)); // Limite normale
         }
 
         return currentGameSpeed;
@@ -4532,7 +4519,7 @@ function displayLeaderboard() {
         ballSpeed = newSpeed;
 
         // ✅ SÉCURITÉ ABSOLUE : Plafond de vitesse global RÉDUIT
-        let absoluteMaxSpeed = Math.min(18, 14 + niveau * 0.08); // Progression très lente + plafond à 18
+        let absoluteMaxSpeed = Math.min(14, ballSpeed0 + ((niveau-1) * 0.15)); // Progression très lente + plafond à 18
         if (ballSpeed > absoluteMaxSpeed) {
             ballSpeed = absoluteMaxSpeed;
             console.log(`Vitesse limitée à ${absoluteMaxSpeed.toFixed(1)} au niveau ${niveau}`);
@@ -5920,7 +5907,7 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
       let x=b.x+b.w/2, y=b.y+b.h/2;
       let icon=b.special, type=null;
       let color="#fff";
-      if(icon==="🏳️") type="long";  // ✅ CORRIGÉ
+      if(icon==="↔️️") type="long";  // ✅ CORRIGÉ
       if(icon==="🏴‍☠️") type="short";
       if(icon==="🍭") type="temps"; // ✅ COHÉRENT maintenant
       if(icon==="1️⃣") type="mult1";  // ✅ CORRIGÉ
@@ -6073,7 +6060,7 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
 
           paddleSizeEffect = "long";
           paddleOriginalSize = paddleBaseW; // ✅ Toujours partir de la base
-          paddleW = Math.min(320, paddleOriginalSize + 70);
+          paddleW = Math.min(180, paddleOriginalSize + 50);
 
           timeoutManager.set('paddleSize', () => {
               paddleW = paddleOriginalSize; // ✅ Retour à la taille de base
@@ -6092,7 +6079,7 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
           playSound("mort");
           paddleSizeEffect = "short";
           paddleOriginalSize = paddleBaseW; // ✅ Toujours partir de la base
-          paddleW = Math.max(50, paddleOriginalSize - 60);
+          paddleW = Math.max(50, paddleOriginalSize - 40);
 
           timeoutManager.set('paddleSize', () => {
               paddleW = paddleOriginalSize; // ✅ Retour à la taille de base
@@ -6133,7 +6120,7 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
           paddleTimerActive = true;
 
           // ✅ CALCUL BASÉ SUR LA TAILLE DE BASE, pas la taille actuelle
-          paddleW = Math.min(CANVAS_W - 40, paddleOriginalSize * 2.5);
+          paddleW = Math.min(CANVAS_W - 40, paddleOriginalSize * 1.5);
 
           paddleHugeTimeout = setTimeout(() => {
               paddleW = paddleOriginalSize; // ✅ Retour à la taille de base
@@ -7030,13 +7017,11 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
 
     // ✅ OPTIMISATIONS SPÉCIFIQUES NOUVELLE FENÊTRE” jusqu’à la fin du script où on voit aussi une balise “<script> … </script>” recollée par erreur. Supprime tout ce bloc et colle ceci à la place, une seule fois.
     window.addEventListener('load', function() {
-      document.title = `🎮 Brick Blitz Elysium - Niveau ${niveau} | Score: ${score.toLocaleString()}`;
 
       if (typeof updateHUD === "function") {
         const originalUpdateHUD = updateHUD;
         updateHUD = function() {
           originalUpdateHUD.call(this);
-          document.title = `🎮 Brick Blitz Elysium - Niveau ${niveau} | Score: ${score.toLocaleString()}`;
         };
       }
 
