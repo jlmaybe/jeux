@@ -841,15 +841,15 @@
         <li><span class="bonus-emoji">🛸 🍉</span> <b>2000 pts Super bonus</li>
         <li><span class="bonus-emoji">🍑</span> <b>5000 pts Méga bonus</li>
         <li><span class="bonus-emoji">💝</span> <b>8000 pts Bonus de score</li>
-        <li><span class="bonus-emoji">🇫🇷</span> <b>10000 pts Méga bonus</li>
+//        <li><span class="bonus-emoji">🇫🇷</span> <b>10000 pts Méga bonus</li>
         <li><span class="bonus-emoji">💊</span> <b>15000 pts Méga bonus</li>
         <h2>POWER-UPS</h2>
         <li><span class="bonus-emoji">️↔️</span> <b>Raquette longue</b> <span class="bonus-emoji">🏴‍☠️</span> <b>Raquette courte</b> <span class="bonus-emoji">❤️‍🔥</span> <b>Raquette géante</b></li>
         <li><span class="bonus-emoji">1️⃣ 2️⃣ 4️⃣ 6️⃣ </span> <b>Multiplicateurs de score pendant 30s</li>
         <li><span class="bonus-emoji">️🦁</span> <b>Multiplicateur à vie</li>
-        <li><span class="bonus-emoji">🍭</span> <b>MultiTimer +60s Multiplicateur, MaxMultiplier dévérouillé</li>
+        <li><span class="bonus-emoji">🍭</span> <b>MultiTimer +60s Multiplicateur, MaxMultiplier +1</li>
         <li><span class="bonus-emoji">🍪</span> <b>Cookies  Bouton autopilot</li>
-        <li><span class="bonus-emoji">🇵🇸</span> <b>Cookies  x2</li>
+//        <li><span class="bonus-emoji">🇵🇸</span> <b>Cookies  x2</li>
         <li><span class="bonus-emoji">🌈</span> <b>Vie      Une vie</li>
         <li><span class="bonus-emoji">🏖️</span> <b>Niveau   Niveau suivant</li>
 
@@ -926,9 +926,9 @@
     // === CONSTANTES GLOBALES ===
 
     // ✅ NOUVEAU : Variable de version du jeu
-    const GAME_VERSION = "🇫🇷 1.20";
+    const GAME_VERSION = "1.20";
     const COPYRIGHT_YEAR = "2025";
-    const AUTHOR_NAME = "🇫🇷 Jean-Luc Faisans";
+    const AUTHOR_NAME = "Jean-Luc Faisans";
 
     const COLORS = ["#0ff", "#f0f", "#ff0", "#0f0", "#fff"];
     const BRICK_GRADIENTS = [
@@ -948,12 +948,12 @@
       {emoji:"🌸", points:500, color:"#f9f"},
       {emoji:"💝", points:8000, color:"#f44"},
       {emoji:"🍉", points:2000, color:"#0ff"},
-      {emoji:"🇫🇷", points:10000, color:"#0ff"},
+//      {emoji:"🇫🇷", points:10000, color:"#0ff"},
       {emoji:"💊", points:15000, color:"#fa8"},
       {emoji:"🐲", points:15000, color:"#f9f"},
       {emoji:"🍇", points:2000, color:"#94f"},
       {emoji:"🍪", points:0, color:"#A67B5B", type:"cookie"},
-      {emoji:"🇵🇸", points:0, color:"#A67B5B", type:"cookiex2"},
+//      {emoji:"🇵🇸", points:0, color:"#A67B5B", type:"cookiex2"},
       {emoji:"🌈", points:0, color:"#A67B5B", type:"vie"},
       {emoji:"🏖", points:0, color:"#A67B5B", type:"niveau"},
       {emoji:"🦁", points:0, color:"#A67B5B", type:"XultX"},
@@ -978,11 +978,11 @@
     let vies = 4, niveau = 1, score = 0, displayScore = 0;
     let mult = 1, multTimer = 0, lastMult = 1;
     let bricks = [], particles = [], powerups = [], bonuses = [], animations = [];
-    let brickCols = 14;
+    let brickCols = 10;
     let wallOffset = 50;
     let multX = 0;
     multX = loadMultX(); //Fin de variable multX
-    let brickW = 61, brickH = 28; brickGap = 2;
+    let brickW = 85, brickH = 30; brickGap = 2;
     let paddleW = 150, paddleH = 18, paddleY = CANVAS_H-60;
     let paddleX = (CANVAS_W-paddleW)/2, paddleSpeed = 18;
     let isMouseCaptured = false;
@@ -1076,7 +1076,7 @@ let galaxyRadius = 400;
 let galaxyParticleCount = 150; // Nombre de pixels lumineux
 let galaxyColorScheme = 2; // Schéma de couleur actuel (0-4)
 let galaxySpacing = 1.5; // Multiplicateur d'espacement (0.7-1.5)
-let galaxyRotationMode = 2; // Mode de rotation (0-2)
+let galaxyRotationMode = 1; // Mode de rotation (0-2)
 let reqX = 0;
 let vv = false;
 let ballDXballDX = 0;
@@ -1126,6 +1126,10 @@ let psyAnimId = null;
 let emailSent = false; // Pour éviter les envois multiples
 let gameSessionId = null; // ID unique de la session de jeu
 let levelComplete = false;
+let virtualPaddleActive = false;    // Active ou non
+let virtualPaddleTimer = 0;         // Durée restante en secondes
+const VIRTUAL_PADDLE_DURATION = 200; // Durée en secondes (ajuste si
+
 
 
 // === SYSTÈME D'APPRENTISSAGE AUTOPILOTE ULTRA-EFFICACE ===
@@ -1228,6 +1232,7 @@ let powerupsCaptured = {
   "mult1": 0,
   "mult2": 0,
   "mult4": 0,
+  "mult6": 0,
   "mult8": 0,
   "huge": 0,
   "skull": 0
@@ -1241,12 +1246,12 @@ let bonusesCaptured = {
   "🌸": 0,   // +500 pts
   "💝": 0,   // +8000 pts
   "🍉": 0,   // +2000 pts
-  "🇫🇷": 0,   // +10000 pts
+//  "🇫🇷": 0,   // +10000 pts
   "💊": 0,   // +15000 pts
   "🐲": 0,   // +15000 pts
   "🍇": 0,   // +2000 pts
   "🍪": 0,   // Cookie(s)
-  "🇵🇸": 0,   // Cookie(x2)
+//  "🇵🇸": 0,   // Cookie(x2)
   "🌈": 0,   // Vie(s)
   "🍌": 0    // +500 pts
 };
@@ -1326,6 +1331,7 @@ let perfFrameCount = 0;
       "mult1": 0,
       "mult2": 0,
       "mult4": 0,
+      "mult6": 0,
       "mult8": 0,
       "huge": 0,
       "skull": 0
@@ -1602,6 +1608,7 @@ let perfFrameCount = 0;
                     switch(item.type) {
                         case "mult8": score = 1200; break;
                         case "mult4": score = 1000; break;
+                        case "mult6": score = 1000; break;
                         case "temps": score = 1500; break; // Priorité absolue
                         case "mult2": score = 800; break;
                         case "mult1": score = 600; break;
@@ -1966,7 +1973,7 @@ let perfFrameCount = 0;
     function isVitalPowerup(item) {
     if (!item) return false;
     // Types critiques (à adapter si tu veux durcir/alléger)
-    return item.type === "temps" || item.type === "mult4" || item.type === "mult8" ||
+    return item.type === "temps" || item.type === "mult4" || item.type === "mult1" ||
     item.type === "vie" || item.type === "niveau" ||
     // Cookie utile si bouton panic envisagé:
     (item.type === "cookie" && cookies === 0);
@@ -2003,6 +2010,7 @@ let perfFrameCount = 0;
           let base = 1000;
           if (item.type === "temps") base += 900;
           else if (item.type === "mult8") base += 700;
+          else if (item.type === "mult6") base += 700;
           else if (item.type === "mult4") base += 550;
           else if (item.type === "vie") base += 500;
           else if (item.type === "niveau") base += 450;
@@ -2763,10 +2771,10 @@ function unlockPointer() {
           case "🛸": case "🍉": case "🍇": points = 2000; break;
           case "🍑": points = 5000; break;
           case "💝": points = 8000; break;
-          case "🇫🇷": points = 10000; break;
+//          case "🇫🇷": points = 10000; break;
           case "💊": case "🐲": points = 15000; break;
           case "🍪": points = 0; break; // Cookies ne donnent pas de points
-          case "🇵🇸": points = 50000; break; // Cookies ne donnent pas de points
+//          case "🇵🇸": points = 50000; break; // Cookies ne donnent pas de points
           case "🌈": points = 0; break; // Vie ne donnent pas de points
         }
 //        totalBonusPoints += bonusesCaptured[emoji] * points;
@@ -2812,7 +2820,7 @@ function unlockPointer() {
         "mult1": "1️⃣ Multiplicateur x2",
         "mult2": "2️⃣ Multiplicateur x3",
         "mult4": "4️⃣ Multiplicateur x4",
-        "mult6": "6️⃣⃣ Multiplicateur x8",
+        "mult6": "6️⃣⃣ Multiplicateur x6",
         "mult8": "8️⃣ Multiplicateur x8",
         "huge": "❤️‍🔥 Raquette géante",
         "skull": "☠️ Malus"
@@ -3130,12 +3138,12 @@ function unlockPointer() {
             if (!b.alive) return;
 
             // Animation d'arrivée
-            if (b.animating && b.animFrame < 36) {
-                let t = b.animFrame / 36;
+            if (b.animating && b.animFrame < 26) {
+                let t = b.animFrame / 26;
                 b.x = CANVAS_W / 2 + (b.finalX - CANVAS_W / 2) * t + Math.cos(b.animAngle + t * 6) * (1 - t) * 60;
                 b.y = CANVAS_H / 2 + (b.finalY - CANVAS_H / 2) * t + Math.sin(b.animAngle + t * 6) * (1 - t) * 60;
                 b.animFrame++;
-                if (b.animFrame >= 36) {
+                if (b.animFrame >= 26) {
                     b.x = b.finalX;
                     b.y = b.finalY;
                     b.animating = false;
@@ -4119,14 +4127,14 @@ function displayLeaderboard() {
 
         formations.forEach((pos, idx) => {
             if (pos.x >= 0 && pos.x + brickW <= CANVAS_W) {
-                let specialChance = 0.4; // 50% de chance d'avoir un special
+                let specialChance = 0.1; // 50% de chance d'avoir un special
                 let isSpecial = Math.random() < specialChance;
                 let special = null;
 
                 if (isSpecial) {
                     // ✅ PLUS DE MULTIPLICATEURS DANS LES BRIQUES BOSS
-                    let specials = ["💊", "2️⃣", "4️⃣", "🇫🇷"];
-                    if (Math.random() < 0.2) specials.push("☠️"); // Quelques skulls
+                    let specials = ["💊", "2️⃣", "4️⃣",];
+                    if (Math.random() < 0.5) specials.push("☠️"); // Quelques skulls
                     special = specials[Math.floor(Math.random() * specials.length)];
                 }
 
@@ -4156,7 +4164,7 @@ function displayLeaderboard() {
       isBossLevel = false;
       let specials = [];
 //      let AutopilotBanner = false
-      let nbSpecials = 13;
+      let nbSpecials = 8;
       while(specials.length < nbSpecials) {
         let idx = Math.floor(Math.random()*brickRows*brickCols);
         if(!specials.includes(idx)) specials.push(idx);
@@ -4277,12 +4285,13 @@ function displayLeaderboard() {
 
     document.addEventListener('keydown',e=>{
 
-      if ((e.key==="m" || e.key==="M") && cookies > 0 && !autopilot) {
-          panic = 1;
-          PanicButon=true;
-          --cookies; updateHUD();
-          playSound("pi");
-      }
+//      if ((e.key==="m" || e.key==="M") && cookies > 0 && !autopilot) {
+//          panic = 1;
+//          PanicButon=true;
+//          --cookies; updateHUD();
+//          playSound("pi");
+//      }
+
       if ((e.key==="*" || e.key==="*") && !autopilot) {
 //          ++vies; updateHUD();
           playSound("pi");
@@ -4300,6 +4309,17 @@ function displayLeaderboard() {
 //          mult -=1 ; updateHUD();
 //          multTimer +=60 ; updateHUD();
       }
+
+
+if ((e.key==="m" || e.key==="M") && cookies > 0) {
+    cookies--;
+    updateHUD();
+    // Active la barre virtuelle
+    virtualPaddleActive = true;
+    virtualPaddleTimer = VIRTUAL_PADDLE_DURATION;
+    playSound("life2"); // Son d'activation
+    console.log("🎯 Barre virtuelle activée pour " + VIRTUAL_PADDLE_DURATION + "s");
+}
 
       // ✅ TOUCHE DEBUG : Z (simple et sans conflit)
       if(e.key==="z" || e.key==="Z") {
@@ -4883,6 +4903,23 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
           updateGalaxy(dt);
       }
 
+// --- Gestion du paddle virtuel ---
+if (virtualPaddleActive) {
+
+//    virtualPaddleTimer -= dt;
+//    if (virtualPaddleTimer <= 0) {
+//        virtualPaddleActive = false;
+//        console.log("⌛ Barre virtuelle désactivée");
+//    } else {
+//        // Collision avec toutes les balles (ici une seule balle)
+        if (ball.y + ball.r >= CANVAS_H - 5) {
+            ball.y = CANVAS_H - ball.r - 5;
+            ballDY = -Math.abs(ballDY); // renvoi vers le haut
+            playSound("paddle");
+        }
+//    }
+}
+
 
       // --- GESTION AUTOPILOTE & BANDEAU (VERSION CORRIGÉE) ---
       let briquesRestantes = bricks.filter(b => b.alive).length;
@@ -4911,30 +4948,6 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
               playSound("powerup");
 
               console.log("🏖️ Powerup de niveau spawné ! Il reste 2 briques.");
-          }
-      }
-
-
-      // 1. Logique du bandeau d'avertissement (SIMPLIFIÉE)
-      if (!autopilot && !isBossLevel &&
-          briquesRestantes > 0 && briquesRestantes <= LancementAutoPilote + countdownRange &&
-          briquesRestantes > LancementAutoPilote) {
-
-          let bricksToActivation = briquesRestantes - LancementAutoPilote;
-          elAutopilotBanner.textContent = `AUTOPILOT DANS ${bricksToActivation}`;
-
-          if (elAutopilotBanner.style.display !== 'block') {
-              playSound("AutopilotBanner");
-              elAutopilotBanner.style.display = 'block';
-          }
-
-          elAutopilotBanner.classList.remove('flash');
-          void elAutopilotBanner.offsetWidth;
-          elAutopilotBanner.classList.add('flash');
-
-      } else {
-          if (elAutopilotBanner.style.display !== 'none') {
-              elAutopilotBanner.style.display = 'none';
           }
       }
 
@@ -4991,7 +5004,16 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
       }
 
       // AFFICHAGE DU STATUS AUTOPILOT (CORRIGÉ)
-      if (autopilot) {
+//      if (autopilot) {
+//        elAutopilotStatus.style.display = 'inline-block';
+//        elAutopilotStatus.classList.add('blinking-effect');
+//       } else {
+//        elAutopilotStatus.style.display = 'none';
+//        elAutopilotStatus.classList.remove('blinking-effect');
+//      }
+
+      // AFFICHAGE DU STATUS AUTOPILOT (CORRIGÉ)
+      if (virtualPaddleActive) {
         elAutopilotStatus.style.display = 'inline-block';
         elAutopilotStatus.classList.add('blinking-effect');
        } else {
@@ -5277,8 +5299,8 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
                   // Récompenses
 
                   score += 20000 * niveau;
-                  cookies += 1;
-                  vies += 1;
+                  //cookies += 1;
+                  // vies += 1;
 
                   // ✅ NOUVEAU : Animation du gain qui monte vers le score
                   showScoreBonusAnim(boss.x + boss.w/2, boss.y + boss.h/2, 20000 * niveau);
@@ -5741,12 +5763,14 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
           if (isBossLevel) {
             ballDX = 0;
             ballDY = 0;
-            playSound("boss_death");
+            playSound("victoire_alt");
+//            playSound("boss_death");
               levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans 3...`;
           } else {
             ballDX = 0;
             ballDY = 0;
             playSound("victoire_alt");
+//            playSound("boss_death");
               levelTransitionMessage = `✅   ❇️NIVEAU ${niveau} TERMINÉ  ✅\n\nProchain niveau dans 3...`;
 
           }
@@ -5767,15 +5791,16 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
           if (isBossLevel) {
             ballDX = 0;
             ballDY = 0;
-            playSound("boss_death");
-
+//            playSound("boss_death");
+            playSound("victoire_alt");
               levelTransitionMessage = `🏆 BOSS VAINCU 🏆\n\nNiveau ${niveau + 1} dans ${secondsLeft}...`;
               // ✅ CORRECTION : Vies supprimées d'ici - elles sont déjà ajoutées ailleurs
           } else {
             ballDX = 0;
             ballDY = 0;
+//            playSound("victoire_alt");
+//            playSound("boss_death");
             playSound("victoire_alt");
-
               levelTransitionMessage = `✅  NIVEAU ${niveau} TERMINÉ ✅\n\nProchain niveau dans ${secondsLeft}...`;
           }
 
@@ -5789,38 +5814,17 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
 
   // Progression du niveau et récompenses
   niveau++;
+  virtualPaddleActive = false;
   changeGalaxyConfiguration();
-  playSound("victoire_alt");
+//  playSound("life2");
+//  playSound("victoire_alt");
   //playSoundScoreMultiplied(12, mult + 12);
   levelsPassed++;
   panic = 0;
   score += 40000 * niveau;
   vies += 1;
-  cookies += 1;
+//  cookies += 1;
 
-  // Offsets et progression du mur
-  wallOffset += 3;
-  wallOffsetPlus += 3;
-  if (wallOffsetPlus >= 10) {
-      brickRows = Math.min(12, brickRows + 1);
-      wallOffsetPlus = 0;
-  }
-
-  // Nettoyage spécifique boss (si on vient d'un boss)
-  if (wasIsBossLevel) {
-      timeoutManager.clear('bossInvulnerable');
-      for (let i = 0; i < 50; i++) {
-          timeoutManager.clear(`bossVictory${i}`);
-      }
-      // Reset complet des variables boss
-      isBossLevel = false;
-      boss = null;
-      bossDefeated = false;
-      bossHP = 0;
-      bossInvulnerable = false;
-      bossAttackTimer = 0;
-      bossMovementTimer = 0;
-  }
 
   // ✅ BARRIÈRE SANITAIRE: tout arrêter AVANT de recréer le niveau
   clearAllAnimations(); // stop RAF/psy/particles/animations et timeouts individuels listés
@@ -5846,10 +5850,10 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
 
 
               // ✅ 8. GESTION DES OFFSETS (ORDRE CORRIGÉ)
-              wallOffset += 3;
-              wallOffsetPlus += 3;
+//              wallOffset += 3;
+              wallOffsetPlus += 2;
 
-              if (wallOffsetPlus >= 10) {
+              if (wallOffsetPlus >= 20) {
                   brickRows = Math.min(12, brickRows + 1);
                   wallOffsetPlus = 0;
               }
@@ -5870,6 +5874,7 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
                   bossInvulnerable = false;
                   bossAttackTimer = 0;
                   bossMovementTimer = 0;
+                  virtualPaddleActive = false;
               }
 
               // Nettoyage général
@@ -5913,7 +5918,7 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
       if(icon==="1️⃣") type="mult1";  // ✅ CORRIGÉ
       if(icon==="2️⃣") type="mult2";
       if(icon==="4️⃣") type="mult4";
-      if(icon==="6️⃣⃣") type="mult6";
+      if(icon==="6️⃣") type="mult6";
       if(icon==="8️⃣") type="mult8";
       if(icon==="🔟") type="mult10";
 //      if(icon==="🦁⃣") type="XultX";
@@ -6032,7 +6037,7 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
       // ✅ NOUVEAU : Gestion spécifique du powerup TEMPS
 
         if (p.type === "temps") {
-          multMax += 5;
+          multMax += 1;
           // ✅ AUGMENTATION MASSIVE DU MULTIPLICATEUR
           let oldMult = mult;
           mult = Math.min(mult + 1, multMax); // Ajoute 11, plafonné à multMax
@@ -6518,7 +6523,8 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
 
     function render() {
 
-        ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
+      let fontSize = 50;
+      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
 
         // ✅ RENDU CONDITIONNEL DE LA GALAXIE
         if (galaxyEnabled) {
@@ -6526,7 +6532,16 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
         }
         // ✅ RENDU OPTIMISÉ DES BRIQUES (SEUL SYSTÈME ACTIF)
 
-        let fontSize = 50;
+        // --- Dessin du paddle virtuel ---
+        if (virtualPaddleActive) {
+            ctx.save();
+            ctx.fillStyle = "rgba(0,255,255,0.5)"; // Couleur cyan translucide
+            ctx.shadowColor = "#0ff";
+            setOptimizedShadowBlur(ctx, 40, "virtualPaddle");
+            ctx.fillRect(0, CANVAS_H - 10, CANVAS_W, 10); // Ligne sur toute la largeur
+            ctx.restore();
+        }
+
 
         renderBricksOptimized();
 
@@ -6598,6 +6613,8 @@ ballDY = Math.sign(ballDY || -1) * Math.sqrt(Math.max(1e-6, v2 * v2 - ballDX * b
 
         // === RENDU DU BOSS ===
         if (isBossLevel && boss && boss.alive) {
+
+            virtualPaddleActive = false;
             ctx.save();
 
             if (boss.entrancePhase) {
