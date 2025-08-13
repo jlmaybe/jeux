@@ -954,7 +954,7 @@
       {emoji:"🍇", points:2000, color:"#94f"},
       {emoji:"🍪", points:0, color:"#A67B5B", type:"cookie"},
 //      {emoji:"🇵🇸", points:0, color:"#A67B5B", type:"cookiex2"},
-      {emoji:"🌈", points:0, color:"#A67B5B", type:"vie"},
+//      {emoji:"🌈", points:0, color:"#A67B5B", type:"vie"},
       {emoji:"🏖", points:0, color:"#A67B5B", type:"niveau"},
       {emoji:"🦁", points:0, color:"#A67B5B", type:"XultX"},
       {emoji:"🍌", points:500, color:"#ff4"},
@@ -1209,9 +1209,9 @@ let baseGameSpeed = 11;
 let currentGameSpeed = 11;
 //let levelSpeedBonus = 0;
 let brickSpeedBonus = 0;
-let speedIncreasePerBrick = 0.001; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
-let speedIncreasePerLevel = 0.025;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
-let autopilotSpeedMultiplier = 1.04; // ✅ RÉDUIT de 1.15 à 1.08 (seulement 8% plus rapide)
+let speedIncreasePerBrick = 0.0006; // ✅ RÉDUIT de 0.02 à 0.008 (60% plus lent)
+let speedIncreasePerLevel = 0.002;   // ✅ RÉDUIT de 1.2 à 0.6 (50% plus lent)
+let autopilotSpeedMultiplier = 1.03; // ✅ RÉDUIT de 1.15 à 1.08 (seulement 8% plus rapide)
 
 // === VARIABLES DE TRANSITION DE NIVEAU ===
 let levelTransition = false;
@@ -1615,7 +1615,7 @@ let perfFrameCount = 0;
                         case "huge": score = 700; break;
                         case "long": score = 500; break;
                         case "cookie": case "cookiex2": score = 400; break;
-                        case "vie": case "niveau": score = 900; break;
+//                        case "vie": case "niveau": score = 900; break;
                         case "XultX": case "XultX": score =1500; break;
 
                         default:
@@ -4077,11 +4077,11 @@ function displayLeaderboard() {
             speed: 8 + niveau * 0.5,
             direction: 1,
             lastAttack: 0,
-            attackCooldown: Math.max(1500, 2500 - niveau * 40),
+            attackCooldown: Math.max(1500, 2500 - niveau * 50),
             alive: true,
             hitFlash: 0,
             entrancePhase: true,
-            entranceY: -100
+            entranceY: -200
         };
 
         // Créer quelques briques protectrices
@@ -4225,9 +4225,13 @@ function displayLeaderboard() {
       // ✅ PROGRESSION TRÈS GRADUELLE par niveau
       baseGameSpeed = Math.min(14, ballSpeed0 + ((niveau - 1) * 0.010));
       ballSpeed = baseGameSpeed;
+      updateBallSpeed();
 
       let angle = (Math.random()*0.45 + 0.20) * Math.PI; // 0.20π..0.65π
-      const v = currentGameSpeed || baseGameSpeed || 10;
+
+//      const v = currentGameSpeed || baseGameSpeed || 10;
+        const v = currentGameSpeed;
+
       const minSin = 0.12; // évite dy trop faible
       let sx = Math.cos(angle);
       let sy = Math.sin(angle);
@@ -5338,12 +5342,6 @@ if (virtualPaddleActive) {
               learnFromResult(false, b);
           }
 
-
-          bricksHit++; // Incrémentation ici
-          // playSound("impact");
-          // --- Collision briques (vérification de l'appel) ---
-          // Collision briques (vers ligne 1000)
-
         if (decrementEffect) {
           // Si le malus est actif, on applique la pénalité.
           let penalty = 100 * (mult + multX);
@@ -5516,10 +5514,12 @@ if (virtualPaddleActive) {
                 playSound("life2");
                 playSound("life2");
           }
-          if (b.type === "vie") {
-                vies++; // On ajoute une vie
-                playSound("life2");
-          }
+
+//          if (b.type === "vie") {
+//                vies++; // On ajoute une vie
+//                playSound("life2");
+//          }
+
           if (b.type === "niveau") {
               if (isBossLevel && boss) {
                   boss.alive = false;
@@ -5710,6 +5710,7 @@ if (virtualPaddleActive) {
         }
 
         vies--; mult = 1; multTimer = 0;
+        bricksHit = 0;
 
         playSound("life");
 
