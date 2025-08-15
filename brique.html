@@ -4302,11 +4302,12 @@ function displayLeaderboard() {
 
       if ((e.key==="n" || e.key==="N") && !autopilot) {
 //        multX +=1 ; updateHUD();
-          saveMultX(multX);
+          niveau+=1 ; updateHUD();
+//          saveMultX(multX);
       }
       if ((e.key==="x" || e.key==="X") && !autopilot) {
 //          mult +=1 ; updateHUD();
-//          multTimer +=60 ; updateHUD();
+          multTimer +=60 ; updateHUD();
       }
       if ((e.key==="w" || e.key==="W") && !autopilot) {
 //          mult -=1 ; updateHUD();
@@ -6296,20 +6297,21 @@ if (virtualPaddleActive) {
             }
         } else if (bossPhase === 2) {
             // Phase 2 : Attaques plus variées
-            if (attackType < 0.4) {
+            if (attackType < 0.8) {
                 bossFireProjectile();
-            } else if (attackType < 0.7) {
+            } else if (attackType < 0.6) {
                 bossSpawnEnemyBricks();
             } else {
                 bossFireSpread();
             }
         } else {
             // Phase 3 : Attaques dévastatrices
-            if (attackType < 0.3) {
+            if (attackType < 0.9) {
                 bossFireProjectile();
-            } else if (attackType < 0.5) {
-                bossFireSpread();
+                bossFireProjectile();
             } else if (attackType < 0.8) {
+                bossFireSpread();
+            } else if (attackType < 0.7) {
                 bossRainAttack();
             } else {
                 bossSpawnSkulls();
