@@ -4076,7 +4076,7 @@ function displayLeaderboard() {
             speed: 8 + niveau * 0.5,
             direction: 1,
             lastAttack: 0,
-            attackCooldown: Math.max(1500, 2500 - niveau * 50),
+            attackCooldown: Math.max(1500, 2500 - niveau * 70),
             alive: true,
             hitFlash: 0,
             entrancePhase: true,
@@ -4301,12 +4301,12 @@ function displayLeaderboard() {
       }
 
       if ((e.key==="n" || e.key==="N") && !autopilot) {
-          multX +=1 ; updateHUD();
+//        multX +=1 ; updateHUD();
           saveMultX(multX);
       }
       if ((e.key==="x" || e.key==="X") && !autopilot) {
 //          mult +=1 ; updateHUD();
-          multTimer +=60 ; updateHUD();
+//          multTimer +=60 ; updateHUD();
       }
       if ((e.key==="w" || e.key==="W") && !autopilot) {
 //          mult -=1 ; updateHUD();
