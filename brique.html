@@ -484,11 +484,11 @@
       position: fixed;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
+      transform: translate(-60%, -60%);
 
       /* ✅ DIMENSIONS FIXES DE RÉFÉRENCE (comme les autres panneaux) */
-      width: 900px;
-      height: 700px;
+      width: 550px;
+      height: 800px;
 
       display: none; /* Caché par défaut */
       align-items: center;
@@ -509,7 +509,7 @@
 
     #endPanel .score-final {
       color:#FFD700;
-      font-size: clamp(1.8em, 3vw, 2.2em); /* ✅ RÉDUIT ET RESPONSIVE */
+      font-size: clamp(1.8em, 3vw, 2em); /* ✅ RÉDUIT ET RESPONSIVE */
       text-shadow:0 0 25px #ff0,0 0 50px #f0f; /* ✅ RÉDUIT */
       margin-bottom: clamp(14px, 2.5vw, 18px); /* ✅ RESPONSIVE */
       text-align:center;
@@ -550,6 +550,7 @@
 
     /* ✅ NOUVEAU : Ajustements pour le leaderboard dans endPanel */
     #leaderboardSection {
+
       max-height: clamp(350px, 60vh, 450px) !important; /* ✅ HAUTEUR RESPONSIVE */
       overflow: hidden !important; /* ✅ COHÉRENT avec les autres panneaux */
       margin-top: clamp(15px, 3vw, 20px); /* ✅ MARGE RESPONSIVE */
@@ -871,7 +872,7 @@
       <!-- ✅ NOUVEAU : Formulaire de saisie du nom -->
       <div id="playerNameSection" style="display: none;">
         <div style="color: #fff; font-size: 1.2em; margin: 20px 0; text-align: center;">
-          🏆 NOUVEAU RECORD ! 🏆
+          🏆   NOUVEAU RECORD  🏆
         </div>
         <div style="color: #FFD700; font-size: 1em; margin-bottom: 15px; text-align: center;">
           Entrez votre nom :
@@ -6430,22 +6431,18 @@ if (virtualPaddleActive) {
         // Animation psychédélique
         // ✅ NOUVEAU : Application du scale avant affichage
         applyEndPanelScale();
-        document.getElementById('TITRE').innerHTML = "--- GAME OVER ---<br><br>";
+        document.getElementById('TITRE').innerHTML = "- GAME OVER -<br><br>";
         const finalScoreEl = document.getElementById('finalScore');
         finalScoreEl.textContent = "SCORE : " + score.toLocaleString();
         finalScoreEl.classList.add('flashy-score');
 
-        // Statistiques du jeu
-        document.getElementById('bricksHit').textContent = "Briques touchées : " + bricksHit;
-        document.getElementById('levelsPassed').textContent = "Tableaux passés : " + levelsPassed;
         let min = Math.floor(elapsedTime/60), sec = elapsedTime%60;
-        document.getElementById('timePlayed').textContent = "Temps de jeu : " + min + "m " + sec + "s";
+//        document.getElementById('timePlayed').textContent = "Temps de jeu : " + min + "m " + sec + "s";
 
         let details = Object.entries(powerupsCaptured)
             .map(([k, v]) => v > 0 ? k + " : " + v : null)
             .filter(Boolean)
             .join("<br>");
-        document.getElementById('powerupDetails').innerHTML = "Power-ups capturés :<br><br>" + (details || "Aucun");
 
         // ✅ NOUVEAU : Gestion des records
         let playerNameSection = document.getElementById('playerNameSection');
