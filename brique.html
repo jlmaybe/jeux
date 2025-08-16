@@ -5528,7 +5528,7 @@ if (virtualPaddleActive) {
 
                 }
                 bricks.forEach(b => b.alive = false);
-                vies++; // On ajoute une vie
+//                vies++; // On ajoute une vie
                 TmpMult=mult+multX
                 playSoundScoreMultiplied(10, TmpMult);
                 score += 20000 * (TmpMult)
@@ -5767,6 +5767,7 @@ if (virtualPaddleActive) {
             playSound("victoire_alt");
 //            playSound("boss_death");
               levelTransitionMessage = `🏆 BOSS VAINCU ! 🏆\n\nNiveau ${niveau + 1} dans 3...`;
+              vies+=1
           } else {
             ballDX = 0;
             ballDY = 0;
@@ -5823,7 +5824,7 @@ if (virtualPaddleActive) {
   levelsPassed++;
   panic = 0;
   score += 40000 * niveau;
-  vies += 1;
+//  vies += 1;
 //  cookies += 1;
 
 
